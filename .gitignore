@@ -1,0 +1,24 @@
+# Environment variables (SENSITIVE - never commit)
+.env
+
+# Uploaded files (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Database dumps
+database/*.sql
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Laragon
+.laragon/
