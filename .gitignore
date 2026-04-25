@@ -25,3 +25,6 @@ desktop.ini
 
 # Sisyphus (if used for local development)
 .sisyphus/
+
+
+_old/
