@@ -27,9 +27,43 @@ class CustomerController extends BaseController
 
     public function dashboard()
     {
+        $user_id = $this->auth->id();
+
+        // Stats
+        $total_transaksi = $this->transaksiModel->countByUser($user_id);
+        $total_success = $this->transaksiModel->countByUser($user_id, 'success');
+        $total_pending = $this->transaksiModel->countByUser($user_id, 'pending');
+        $total_spent = $this->transaksiModel->getTotalSpentByUser($user_id);
+        $total_download = $this->transaksiModel->countDownloadable($user_id);
+
+        // Recent transactions (last 5)
+        $recent_transactions = $this->transaksiModel->getByUser($user_id, null, 5, 0);
+
+        // Downloadable products (last 4)
+        $downloadable_items = $this->transaksiModel->getDownloadable($user_id, 4, 0);
+
+        // Latest products (recommendations - newest 4)
+        $latest_products = $this->produkModel->search('', 4, 0);
+
+        // Pre-fetch purchased product IDs for recommendation badges
+        $purchased_items = $this->db->fetchAll(
+            "SELECT DISTINCT produk_id FROM transaksi WHERE user_id = ? AND status IN ('pending', 'success')",
+            [$user_id]
+        );
+        $purchased_produk_ids = array_column($purchased_items, 'produk_id');
+
         $this->view('customer/dashboard', [
             'active_page' => 'dashboard',
-            'page_title' => 'Dashboard'
+            'page_title' => 'Dashboard',
+            'total_transaksi' => $total_transaksi,
+            'total_success' => $total_success,
+            'total_pending' => $total_pending,
+            'total_spent' => $total_spent,
+            'total_download' => $total_download,
+            'recent_transactions' => $recent_transactions,
+            'downloadable_items' => $downloadable_items,
+            'latest_products' => $latest_products,
+            'purchased_produk_ids' => $purchased_produk_ids,
         ], 'customer');
     }
 
@@ -126,14 +160,14 @@ class CustomerController extends BaseController
         // Pagination
         $count_sql = "SELECT COUNT(*) as c FROM transaksi WHERE user_id = ?";
         $count_params = [$user_id];
-        if ($status !== '' && in_array($status, ['pending', 'success'])) {
+        if ($status !== '' && in_array($status, ['pending', 'success', 'cancelled'])) {
             $count_sql .= " AND status = ?";
             $count_params[] = $status;
         }
         $paging = paginate($this->db, $count_sql, $count_params, 10);
 
         // Get transactions
-        $filter_status = ($status !== '' && in_array($status, ['pending', 'success'])) ? $status : null;
+        $filter_status = ($status !== '' && in_array($status, ['pending', 'success', 'cancelled'])) ? $status : null;
         $transactions = $this->transaksiModel->getByUser($user_id, $filter_status, $paging['limit'], $paging['offset']);
 
         // Group transactions by order_ref

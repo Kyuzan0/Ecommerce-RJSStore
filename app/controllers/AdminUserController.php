@@ -80,6 +80,8 @@ class AdminUserController extends BaseController
             $this->handleUpdate();
         } elseif ($action === 'hapus_user') {
             $this->handleHapus();
+        } elseif ($action === 'hapus_bulk') {
+            $this->handleHapusBulk();
         }
 
         $this->redirect('/admin-user');
@@ -145,5 +147,24 @@ class AdminUserController extends BaseController
         } else {
             flash('error', 'Tidak bisa menghapus akun sendiri.');
         }
+    }
+
+    private function handleHapusBulk()
+    {
+        $ids = $_POST['user_ids'] ?? [];
+        if (empty($ids)) {
+            flash('error', 'Tidak ada pengguna yang dipilih.');
+            return;
+        }
+
+        $deleted = 0;
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id <= 0 || $id == $this->auth->id()) continue;
+            $this->userModel->delete($id);
+            $deleted++;
+        }
+
+        flash('success', $deleted . ' pengguna berhasil dihapus.');
     }
 }

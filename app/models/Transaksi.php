@@ -142,12 +142,12 @@ class Transaksi extends BaseModel
     public function getDownloadable(int $userId, int $limit = 20, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            "SELECT p.id AS produk_id, p.nama_produk, p.file_upload, p.tipe_produk, p.deskripsi
+            "SELECT p.id AS produk_id, p.nama_produk, p.harga, p.file_upload, p.tipe_produk, p.deskripsi, MAX(t.tanggal) AS tanggal
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              WHERE t.user_id = ? AND t.status = 'success'
              GROUP BY p.id
-             ORDER BY MAX(t.tanggal) DESC
+             ORDER BY tanggal DESC
              LIMIT {$limit} OFFSET {$offset}",
             [$userId]
         );
@@ -160,6 +160,21 @@ class Transaksi extends BaseModel
     {
         $row = $this->db->fetchOne(
             "SELECT COUNT(DISTINCT p.id) AS total
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE t.user_id = ? AND t.status = 'success'",
+            [$userId]
+        );
+        return $row ? (int) $row['total'] : 0;
+    }
+
+    /**
+     * Get total amount spent by a user (successful transactions only).
+     */
+    public function getTotalSpentByUser(int $userId): int
+    {
+        $row = $this->db->fetchOne(
+            "SELECT COALESCE(SUM(p.harga), 0) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              WHERE t.user_id = ? AND t.status = 'success'",
@@ -285,5 +300,390 @@ class Transaksi extends BaseModel
             'total_sold'    => $totalSold ? (int) $totalSold['total'] : 0,
             'total_revenue' => $totalRevenue ? (int) ($totalRevenue['total'] ?? 0) : 0,
         ];
+    }
+
+    // ============================================================
+    // LAPORAN (Report) Methods
+    // ============================================================
+
+    /**
+     * Get filtered stats for laporan page.
+     */
+    public function getFilteredStats(?string $startDate, ?string $endDate): array
+    {
+        $where = "t.status = 'success'";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        $main = $this->db->fetchOne(
+            "SELECT COUNT(t.id) AS jml, COALESCE(SUM(p.harga), 0) AS total
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}",
+            $params
+        );
+
+        $avgDaily = $this->db->fetchOne(
+            "SELECT COALESCE(AVG(daily_total), 0) AS avg_daily FROM (
+                SELECT SUM(p.harga) AS daily_total
+                FROM transaksi t
+                JOIN produk p ON t.produk_id = p.id
+                WHERE {$where}
+                GROUP BY DATE(t.tanggal)
+            ) AS sub",
+            $params
+        );
+
+        $pending = $this->db->fetchOne(
+            "SELECT COUNT(*) AS total FROM transaksi WHERE status = 'pending'"
+            . ($startDate ? " AND tanggal >= ?" : "")
+            . ($endDate ? " AND tanggal <= ?" : ""),
+            array_filter([$startDate, $endDate])
+        );
+
+        $topProduct = $this->db->fetchOne(
+            "SELECT p.nama_produk, COUNT(t.id) AS jml
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             GROUP BY p.id, p.nama_produk
+             ORDER BY jml DESC
+             LIMIT 1",
+            $params
+        );
+
+        // Growth % — compare current period vs previous period of same length
+        $growth = null;
+        if ($startDate && $endDate) {
+            $start = new \DateTime($startDate);
+            $end = new \DateTime($endDate);
+            $days = (int) $start->diff($end)->days;
+
+            $prevEnd = (clone $start)->modify('-1 day')->format('Y-m-d');
+            $prevStart = (clone $start)->modify('-' . ($days + 1) . ' days')->format('Y-m-d');
+
+            $current = (int) ($main['total'] ?? 0);
+
+            $prev = $this->db->fetchOne(
+                "SELECT COALESCE(SUM(p.harga), 0) AS total
+                 FROM transaksi t
+                 JOIN produk p ON t.produk_id = p.id
+                 WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?",
+                [$prevStart, $prevEnd]
+            );
+            $prevTotal = (int) ($prev['total'] ?? 0);
+
+            if ($prevTotal > 0) {
+                $growth = round((($current - $prevTotal) / $prevTotal) * 100, 1);
+            } elseif ($current > 0) {
+                $growth = 100.0;
+            } else {
+                $growth = 0.0;
+            }
+        }
+
+        return [
+            'total_item'       => (int) ($main['jml'] ?? 0),
+            'total_pendapatan' => (int) ($main['total'] ?? 0),
+            'avg_daily'        => (int) ($avgDaily['avg_daily'] ?? 0),
+            'pending_count'    => (int) ($pending['total'] ?? 0),
+            'top_product'      => $topProduct['nama_produk'] ?? '-',
+            'top_product_qty'  => (int) ($topProduct['jml'] ?? 0),
+            'growth'           => $growth,
+        ];
+    }
+
+    /**
+     * Get daily revenue with optional date filter.
+     */
+    public function getFilteredDailyRevenue(?string $startDate, ?string $endDate): array
+    {
+        $where = "t.status = 'success'";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT DATE(t.tanggal) AS tanggal, SUM(p.harga) AS pendapatan
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             GROUP BY DATE(t.tanggal)
+             ORDER BY tanggal ASC",
+            $params
+        );
+    }
+
+    /**
+     * Get monthly revenue with optional date filter.
+     */
+    public function getFilteredMonthlyRevenue(?string $startDate, ?string $endDate): array
+    {
+        $where = "t.status = 'success'";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(p.harga) AS pendapatan
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             GROUP BY bulan
+             ORDER BY bulan ASC",
+            $params
+        );
+    }
+
+    /**
+     * Get previous period revenue for comparison chart.
+     */
+    public function getPreviousPeriodRevenue(string $startDate, string $endDate, string $groupBy = 'daily'): array
+    {
+        $start = new \DateTime($startDate);
+        $end = new \DateTime($endDate);
+        $days = (int) $start->diff($end)->days;
+
+        $prevEnd = (clone $start)->modify('-1 day')->format('Y-m-d');
+        $prevStart = (clone $start)->modify('-' . ($days + 1) . ' days')->format('Y-m-d');
+
+        if ($groupBy === 'monthly') {
+            return $this->db->fetchAll(
+                "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(p.harga) AS pendapatan
+                 FROM transaksi t
+                 JOIN produk p ON t.produk_id = p.id
+                 WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?
+                 GROUP BY bulan
+                 ORDER BY bulan ASC",
+                [$prevStart, $prevEnd]
+            );
+        }
+
+        return $this->db->fetchAll(
+            "SELECT DATE(t.tanggal) AS tanggal, SUM(p.harga) AS pendapatan
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?
+             GROUP BY DATE(t.tanggal)
+             ORDER BY tanggal ASC",
+            [$prevStart, $prevEnd]
+        );
+    }
+
+    /**
+     * Get top products by sales count.
+     */
+    public function getTopProducts(?string $startDate, ?string $endDate, int $limit = 10): array
+    {
+        $where = "t.status = 'success'";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT p.id, p.nama_produk, p.harga, p.tipe_produk, COUNT(t.id) AS jml_terjual, SUM(p.harga) AS total_pendapatan
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             GROUP BY p.id, p.nama_produk, p.harga, p.tipe_produk
+             ORDER BY jml_terjual DESC
+             LIMIT {$limit}",
+            $params
+        );
+    }
+
+    /**
+     * Get breakdown by product type (tipe_produk).
+     */
+    public function getProductTypeBreakdown(?string $startDate, ?string $endDate): array
+    {
+        $where = "t.status = 'success'";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT p.tipe_produk, COUNT(t.id) AS jml, SUM(p.harga) AS total
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             GROUP BY p.tipe_produk
+             ORDER BY total DESC",
+            $params
+        );
+    }
+
+    /**
+     * Get status breakdown (success/pending/failed).
+     */
+    public function getStatusBreakdown(?string $startDate, ?string $endDate): array
+    {
+        $where = "1=1";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND tanggal <= ?";
+            $params[] = $endDate;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT status, COUNT(*) AS jml
+             FROM transaksi
+             WHERE {$where}
+             GROUP BY status
+             ORDER BY jml DESC",
+            $params
+        );
+    }
+
+    /**
+     * Get filtered transaction list for detail table.
+     */
+    public function getLaporanList(?string $startDate, ?string $endDate, ?string $search, ?string $status, int $limit = 15, int $offset = 0): array
+    {
+        $where = "1=1";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+        if ($search) {
+            $like = '%' . $search . '%';
+            $where .= " AND (u.name LIKE ? OR p.nama_produk LIKE ? OR t.order_ref LIKE ?)";
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+        if ($status) {
+            $where .= " AND t.status = ?";
+            $params[] = $status;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT t.id, t.tanggal, t.status, t.order_ref, u.name AS nama_user, p.nama_produk, p.harga, p.tipe_produk
+             FROM transaksi t
+             JOIN users u ON t.user_id = u.id
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             ORDER BY t.tanggal DESC, t.id DESC
+             LIMIT {$limit} OFFSET {$offset}",
+            $params
+        );
+    }
+
+    /**
+     * Count filtered transaction list.
+     */
+    public function countLaporanList(?string $startDate, ?string $endDate, ?string $search, ?string $status): int
+    {
+        $where = "1=1";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+        if ($search) {
+            $like = '%' . $search . '%';
+            $where .= " AND (u.name LIKE ? OR p.nama_produk LIKE ? OR t.order_ref LIKE ?)";
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+        if ($status) {
+            $where .= " AND t.status = ?";
+            $params[] = $status;
+        }
+
+        $row = $this->db->fetchOne(
+            "SELECT COUNT(*) AS total
+             FROM transaksi t
+             JOIN users u ON t.user_id = u.id
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}",
+            $params
+        );
+        return $row ? (int) $row['total'] : 0;
+    }
+
+    /**
+     * Get all transactions for CSV export.
+     */
+    public function getExportData(?string $startDate, ?string $endDate, ?string $status): array
+    {
+        $where = "1=1";
+        $params = [];
+
+        if ($startDate) {
+            $where .= " AND t.tanggal >= ?";
+            $params[] = $startDate;
+        }
+        if ($endDate) {
+            $where .= " AND t.tanggal <= ?";
+            $params[] = $endDate;
+        }
+        if ($status) {
+            $where .= " AND t.status = ?";
+            $params[] = $status;
+        }
+
+        return $this->db->fetchAll(
+            "SELECT t.id, t.order_ref, t.tanggal, t.status, u.name AS nama_user, u.email, p.nama_produk, p.harga, p.tipe_produk
+             FROM transaksi t
+             JOIN users u ON t.user_id = u.id
+             JOIN produk p ON t.produk_id = p.id
+             WHERE {$where}
+             ORDER BY t.tanggal DESC, t.id DESC",
+            $params
+        );
     }
 }

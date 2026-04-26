@@ -90,6 +90,8 @@ class AdminTransaksiController extends BaseController
 
         if ($action === 'update_status') {
             $this->handleUpdateStatus();
+        } elseif ($action === 'hapus_bulk') {
+            $this->handleHapusBulk();
         }
 
         $this->redirect('/admin-transaksi');
@@ -108,5 +110,24 @@ class AdminTransaksiController extends BaseController
 
         $this->transaksiModel->updateStatusById($id, $new_status);
         flash('success', 'Status transaksi berhasil diperbarui.');
+    }
+
+    private function handleHapusBulk()
+    {
+        $ids = $_POST['transaksi_ids'] ?? [];
+        if (empty($ids)) {
+            flash('error', 'Tidak ada transaksi yang dipilih.');
+            return;
+        }
+
+        $deleted = 0;
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id <= 0) continue;
+            $this->transaksiModel->delete($id);
+            $deleted++;
+        }
+
+        flash('success', $deleted . ' transaksi berhasil dihapus.');
     }
 }

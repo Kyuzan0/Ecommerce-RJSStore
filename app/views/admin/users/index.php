@@ -102,10 +102,31 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
     </div>
 </div>
 
+<!-- Bulk Delete Toast -->
+<div id="bulk-action-bar" class="fixed bottom-6 left-1/2 z-50 hidden" style="transform:translateX(-50%) translateY(20px); opacity:0; transition:transform 0.3s cubic-bezier(0.21,1.02,0.73,1), opacity 0.2s">
+    <div class="flex items-center gap-4 px-5 py-3 rounded-2xl shadow-lg border border-gray-200 bg-white">
+        <span class="text-sm font-semibold text-gray-700"><span id="selected-count">0</span> pengguna dipilih</span>
+        <div class="w-px h-5 bg-gray-200"></div>
+        <button type="button" onclick="deselectAll()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer">Batal Pilih</button>
+        <button type="button" onclick="bulkDelete()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition cursor-pointer hover:opacity-90" style="background:#C62828">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Hapus Terpilih
+        </button>
+    </div>
+</div>
+
+<form id="bulk-delete-form" method="POST" class="hidden">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="hapus_bulk">
+    <div id="bulk-delete-ids"></div>
+</form>
+
 <div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
+                <th class="px-3 py-3 text-center w-10"><input type="checkbox" id="select-all" class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600"></th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">No</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengguna</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
@@ -115,10 +136,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
         </thead>
         <tbody class="divide-y divide-gray-50">
             <?php if (count($users) == 0): ?>
-            <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
+            <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
             <?php endif;
-            foreach($users as $r){ ?>
+            foreach($users as $i => $r){ ?>
             <tr class="hover:bg-gray-50 transition">
+                <td class="px-3 py-3 text-center">
+                    <?php if($r['id'] != $this->auth->id()): ?>
+                    <input type="checkbox" name="user_ids[]" value="<?= $r['id'] ?>" class="row-checkbox w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600">
+                    <?php endif; ?>
+                </td>
+                <td class="px-5 py-3 text-center text-sm text-gray-500 font-medium"><?= $paging['offset'] + $i + 1 ?></td>
                 <td class="px-5 py-4">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:<?= $r['role']=='admin' ? '#1565C0' : '#42B549' ?>">
@@ -196,4 +223,64 @@ document.addEventListener('keydown', function(e) {
         closeModal('edit');
     }
 });
+
+// Bulk selection
+var selectAll = document.getElementById('select-all');
+var rowCheckboxes = document.querySelectorAll('.row-checkbox');
+var bulkBar = document.getElementById('bulk-action-bar');
+var selectedCountEl = document.getElementById('selected-count');
+
+function updateBulkBar() {
+    var checked = document.querySelectorAll('.row-checkbox:checked');
+    var count = checked.length;
+    selectedCountEl.textContent = count;
+    if (count > 0) {
+        bulkBar.classList.remove('hidden');
+        requestAnimationFrame(function() {
+            bulkBar.style.opacity = '1';
+            bulkBar.style.transform = 'translateX(-50%) translateY(0)';
+        });
+    } else {
+        bulkBar.style.opacity = '0';
+        bulkBar.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(function() { bulkBar.classList.add('hidden'); }, 250);
+    }
+    selectAll.checked = rowCheckboxes.length > 0 && count === rowCheckboxes.length;
+    selectAll.indeterminate = count > 0 && count < rowCheckboxes.length;
+}
+
+if (selectAll) {
+    selectAll.addEventListener('change', function() {
+        rowCheckboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+        updateBulkBar();
+    });
+}
+rowCheckboxes.forEach(function(cb) {
+    cb.addEventListener('change', updateBulkBar);
+});
+
+function deselectAll() {
+    selectAll.checked = false;
+    selectAll.indeterminate = false;
+    rowCheckboxes.forEach(function(cb) { cb.checked = false; });
+    updateBulkBar();
+}
+
+function bulkDelete() {
+    var checked = document.querySelectorAll('.row-checkbox:checked');
+    var count = checked.length;
+    if (count === 0) return;
+    if (!confirm('Hapus ' + count + ' pengguna yang dipilih? Tindakan ini tidak dapat dibatalkan.')) return;
+
+    var container = document.getElementById('bulk-delete-ids');
+    container.innerHTML = '';
+    checked.forEach(function(cb) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'user_ids[]';
+        input.value = cb.value;
+        container.appendChild(input);
+    });
+    document.getElementById('bulk-delete-form').submit();
+}
 </script>

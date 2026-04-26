@@ -25,6 +25,10 @@
            class="px-4 py-2 <?= $current_status === 'success' ? 'border-b-2 border-green-600 text-green-600 font-semibold' : 'text-gray-600 hover:text-green-600' ?>">
             Success
         </a>
+        <a href="<?= url('/customer/pembelian?status=cancelled') ?>" 
+           class="px-4 py-2 <?= $current_status === 'cancelled' ? 'border-b-2 border-red-600 text-red-600 font-semibold' : 'text-gray-600 hover:text-red-600' ?>">
+            Cancelled
+        </a>
     </div>
 </div>
 

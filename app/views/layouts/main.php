@@ -62,7 +62,7 @@
                             Settings Profile
                         </a>
                         <div class="border-t border-gray-100 my-1"></div>
-                        <a href="<?= url('/auth/logout') ?>" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                        <a href="javascript:void(0)" onclick="openLogoutModal()" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/></svg>
                             Keluar
                         </a>
@@ -90,5 +90,6 @@
 </footer>
 
 <?php include BASE_PATH . '/app/views/partials/toast.php'; ?>
+<?php include BASE_PATH . '/app/views/partials/logout_modal.php'; ?>
 </body>
 </html>

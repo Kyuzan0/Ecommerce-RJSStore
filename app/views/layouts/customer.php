@@ -60,7 +60,7 @@
                         Settings Profile
                     </a>
                     <div class="border-t border-gray-100 my-1"></div>
-                    <a href="<?= url('/auth/logout') ?>" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                    <a href="javascript:void(0)" onclick="openLogoutModal()" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/></svg>
                         Keluar
                     </a>
@@ -83,7 +83,7 @@
             <a href="<?= url('/customer/profile') ?>" class="sidebar-link <?= ($active_page ?? '') === 'profile' ? 'active' : '' ?>"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>Profile</a>
         </nav>
         <div class="px-1 mt-4 pt-4 border-t border-gray-100">
-            <a href="<?= url('/auth/logout') ?>" onclick="return confirm('Keluar dari akun?')" class="sidebar-link text-red-500 hover:bg-red-50">
+            <a href="javascript:void(0)" onclick="openLogoutModal()" class="sidebar-link text-red-500 hover:bg-red-50">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 Keluar
             </a>
@@ -97,5 +97,6 @@
 </div>
 
 <?php include BASE_PATH . '/app/views/partials/toast.php'; ?>
+<?php include BASE_PATH . '/app/views/partials/logout_modal.php'; ?>
 </body>
 </html>

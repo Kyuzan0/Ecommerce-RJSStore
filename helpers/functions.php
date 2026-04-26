@@ -157,8 +157,11 @@ function e(?string $value): string
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-function format_tanggal(string $date): string
+function format_tanggal(?string $date): string
 {
+    if ($date === null || $date === '') {
+        return '-';
+    }
     $bulan = [
         1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'

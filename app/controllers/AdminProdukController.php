@@ -87,6 +87,8 @@ class AdminProdukController extends BaseController
             $this->handleUpdate();
         } elseif ($action === 'hapus') {
             $this->handleHapus();
+        } elseif ($action === 'hapus_bulk') {
+            $this->handleHapusBulk();
         }
 
         $this->redirect('/admin-produk');
@@ -169,5 +171,29 @@ class AdminProdukController extends BaseController
         }
         $this->produkModel->delete($id);
         flash('success', 'Produk berhasil dihapus.');
+    }
+
+    private function handleHapusBulk()
+    {
+        $ids = $_POST['produk_ids'] ?? [];
+        if (empty($ids)) {
+            flash('error', 'Tidak ada produk yang dipilih.');
+            return;
+        }
+
+        $deleted = 0;
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id <= 0) continue;
+
+            $data_file = $this->db->fetchOne("SELECT file_upload FROM produk WHERE id = ?", [$id]);
+            if ($data_file && file_exists(BASE_PATH . '/public/uploads/' . $data_file['file_upload'])) {
+                unlink(BASE_PATH . '/public/uploads/' . $data_file['file_upload']);
+            }
+            $this->produkModel->delete($id);
+            $deleted++;
+        }
+
+        flash('success', $deleted . ' produk berhasil dihapus.');
     }
 }
