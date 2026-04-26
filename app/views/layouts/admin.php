@@ -67,7 +67,7 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col p-6 overflow-y-auto">
+    <main class="flex-1 flex flex-col px-6 py-4 overflow-y-auto">
         <?= flash_render() ?>
         <?= $content ?>
     </main>

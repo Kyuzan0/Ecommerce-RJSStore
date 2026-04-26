@@ -62,73 +62,70 @@ $status_tabs = [
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="font-bold text-gray-800">Daftar Transaksi</h3>
-    </div>
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-100">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pembeli</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produk</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Penilaian</th>
-                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-50">
-            <?php if (count($rows) == 0): ?>
-            <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada transaksi ditemukan.</td></tr>
-            <?php endif;
-            foreach($rows as $r) { ?>
-            <tr class="hover:bg-gray-50 transition">
-                <td class="px-6 py-4 text-gray-500"><?= format_tanggal($r['tanggal']); ?></td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#42B549">
-                            <?= strtoupper(substr(e($r['name']),0,1)) ?>
+<div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pembeli</th>
+                    <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produk</th>
+                    <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Penilaian</th>
+                    <th class="px-5 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                <?php if (count($rows) == 0): ?>
+                <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada transaksi ditemukan.</td></tr>
+                <?php endif;
+                foreach($rows as $r) { ?>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-5 py-3 text-gray-500"><?= format_tanggal($r['tanggal']); ?></td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:#42B549">
+                                <?= strtoupper(substr(e($r['name']),0,1)) ?>
+                            </div>
+                            <span class="font-medium text-gray-800"><?= e($r['name']); ?></span>
                         </div>
-                        <span class="font-medium text-gray-800"><?= e($r['name']); ?></span>
-                    </div>
-                </td>
-                <td class="px-6 py-4 font-semibold text-gray-800"><?= e($r['nama_produk']); ?></td>
-                <td class="px-6 py-4">
-                    <?php
-                    $status = strtolower($r['status']);
-                    if($status == 'success') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#E8F5E9; color:#2E7D32">BERHASIL</span>';
-                    elseif($status == 'pending') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#FFF8E1; color:#F57F17">PENDING</span>';
-                    elseif($status == 'cancelled') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#FFEBEE; color:#C62828">DIBATALKAN</span>';
-                    else echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">' . e(strtoupper($r['status'])) . '</span>';
-                    ?>
-                </td>
-                <td class="px-6 py-4">
-                    <?php if($r['rating'] > 0): ?>
-                        <div class="flex items-center gap-1 mb-1">
-                            <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            <span class="text-xs font-bold text-gray-700"><?= (int)$r['rating'] ?>/5</span>
-                        </div>
-                        <?php if(!empty($r['ulasan'])): ?>
-                            <p class="text-xs text-gray-500 italic max-w-xs truncate" title="<?= e($r['ulasan']) ?>">"<?= e($r['ulasan']) ?>"</p>
+                    </td>
+                    <td class="px-5 py-3 font-semibold text-gray-800"><?= e($r['nama_produk']); ?></td>
+                    <td class="px-5 py-3">
+                        <?php
+                        $status = strtolower($r['status']);
+                        if($status == 'success') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#E8F5E9; color:#2E7D32">BERHASIL</span>';
+                        elseif($status == 'pending') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#FFF8E1; color:#F57F17">PENDING</span>';
+                        elseif($status == 'cancelled') echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#FFEBEE; color:#C62828">DIBATALKAN</span>';
+                        else echo '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">' . e(strtoupper($r['status'])) . '</span>';
+                        ?>
+                    </td>
+                    <td class="px-5 py-3">
+                        <?php if($r['rating'] > 0): ?>
+                            <div class="flex items-center gap-1 mb-1">
+                                <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <span class="text-xs font-bold text-gray-700"><?= (int)$r['rating'] ?>/5</span>
+                            </div>
+                            <?php if(!empty($r['ulasan'])): ?>
+                                <p class="text-xs text-gray-500 italic max-w-xs truncate" title="<?= e($r['ulasan']) ?>">"<?= e($r['ulasan']) ?>"</p>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span class="text-xs text-gray-400">-</span>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <span class="text-xs text-gray-400">-</span>
-                    <?php endif; ?>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name'] . ' - ' . $r['nama_produk']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(strtolower($r['status'])), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
-                    <form method="POST" class="inline" onsubmit="return confirm('Hapus transaksi ini?')">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="action" value="hapus">
-                        <input type="hidden" name="transaksi_id" value="<?= $r['id'] ?>">
-                        <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer" style="background:#FFEBEE; color:#C62828">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            <?php } ?>
-        </tbody>
-    </table>
-    <?= pagination_render($paging) ?>
+                    </td>
+                    <td class="px-3 py-3 text-center">
+                        <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name'] . ' - ' . $r['nama_produk']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(strtolower($r['status'])), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
+                        <form method="POST" class="inline" onsubmit="return confirm('Hapus transaksi ini?')">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="action" value="hapus">
+                            <input type="hidden" name="transaksi_id" value="<?= $r['id'] ?>">
+                            <button type="submit" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer" style="background:#FFEBEE; color:#C62828">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+        <?= pagination_render($paging) ?>
 </div>
 
 <script>

@@ -40,7 +40,7 @@ class AdminProdukController extends BaseController
             $where = " WHERE " . implode(" AND ", $where_clauses);
         }
 
-        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM produk" . $where, $params, 10);
+        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM produk" . $where, $params, 15);
         $products = $this->db->fetchAll("SELECT * FROM produk" . $where . " ORDER BY id DESC LIMIT ? OFFSET ?", array_merge($params, [$paging['limit'], $paging['offset']]));
 
         // Get rating for each product

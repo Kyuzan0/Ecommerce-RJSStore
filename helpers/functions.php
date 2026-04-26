@@ -205,39 +205,43 @@ function pagination_render(array $paging): string
     unset($query_params['page']);
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
 
-    $html = '<div class="flex items-center justify-center gap-1 mt-6">';
+    $link_cls = 'px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm active:scale-95 transition-all duration-150 cursor-pointer';
+    $active_cls = 'px-3 py-2 rounded-lg text-sm font-bold text-white shadow-sm';
+
+    $html = '<div class="border-t border-gray-100 pt-4 pb-1 mt-auto"><div class="flex items-center justify-center gap-1">';
 
     if ($page > 1) {
-        $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition">&laquo;</a>';
+        $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="' . $link_cls . '">&laquo;</a>';
     }
 
     $start = max(1, $page - 3);
     $end   = min($total_pages, $page + 3);
 
     if ($start > 1) {
-        $html .= '<a href="' . $base . 'page=1" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition">1</a>';
+        $html .= '<a href="' . $base . 'page=1" class="' . $link_cls . '">1</a>';
         if ($start > 2) $html .= '<span class="px-2 py-2 text-gray-400 text-sm">...</span>';
     }
 
     for ($i = $start; $i <= $end; $i++) {
         if ($i == $page) {
-            $html .= '<span class="px-3 py-2 rounded-lg text-sm font-bold text-white" style="background:#42B549">' . $i . '</span>';
+            $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
         } else {
-            $html .= '<a href="' . $base . 'page=' . $i . '" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition">' . $i . '</a>';
+            $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
         }
     }
 
     if ($end < $total_pages) {
         if ($end < $total_pages - 1) $html .= '<span class="px-2 py-2 text-gray-400 text-sm">...</span>';
-        $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition">' . $total_pages . '</a>';
+        $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="' . $link_cls . '">' . $total_pages . '</a>';
     }
 
     if ($page < $total_pages) {
-        $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition">&raquo;</a>';
+        $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="' . $link_cls . '">&raquo;</a>';
     }
 
     $html .= '</div>';
-    $html .= '<p class="text-center text-xs text-gray-400 mt-2">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
+    $html .= '<p class="text-center text-xs text-gray-400 mt-2 pb-4">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
+    $html .= '</div>';
 
     return $html;
 }
