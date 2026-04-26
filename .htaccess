@@ -1,8 +1,14 @@
 RewriteEngine On
 
-# If the request is for an existing file in public/, serve it directly
+# Already in public/? Don't rewrite again (prevent loop)
+RewriteRule ^public/ - [L]
+
+# If the request maps to a real file inside public/, serve it directly
+# (handles CSS, JS, images, uploads, etc.)
 RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
 RewriteRule ^(.*)$ public/$1 [L]
 
-# Everything else goes to public/index.php
-RewriteRule ^(.*)$ public/index.php [QSA,L]
+# Everything else goes through the front controller
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

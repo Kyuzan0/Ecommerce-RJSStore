@@ -4,7 +4,12 @@
  */
 
 // Define base path (project root)
-define('BASE_PATH', dirname(__DIR__));
+// __DIR__ always resolves to this file's physical directory (public/),
+// so dirname(__DIR__) is always the project root — even when loaded
+// via require from a bridge index.php in the document root.
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+}
 
 // Load helpers
 require_once BASE_PATH . '/helpers/functions.php';

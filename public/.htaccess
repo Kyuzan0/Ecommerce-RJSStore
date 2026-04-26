@@ -2,4 +2,6 @@ RewriteEngine On
 
 # Serve existing files directly (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
+
+# Route everything else through the front controller
 RewriteRule ^(.*)$ index.php [QSA,L]

@@ -29,9 +29,12 @@ class Router
         // Strip query string
         $uri = parse_url($uri, PHP_URL_PATH);
 
-        // Strip base path (e.g. /ecommerce/public)
+        // Strip base path so routes are relative to the app root.
+        // On shared hosting with a bridge index.php, SCRIPT_NAME may be
+        // "/index.php" (basePath "/") or "/public/index.php" (basePath
+        // "/public"). Only strip when the URI actually starts with it.
         $basePath = dirname($_SERVER['SCRIPT_NAME']);
-        if ($basePath !== '/' && $basePath !== '\\') {
+        if ($basePath !== '/' && $basePath !== '\\' && str_starts_with($uri, $basePath)) {
             $uri = substr($uri, strlen($basePath));
         }
 
