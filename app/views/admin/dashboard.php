@@ -55,13 +55,7 @@
                     <span class="block text-xs text-gray-500">Upload produk baru</span>
                 </div>
             </a>
-            <a href="<?= url('/admin-transaksi') ?>" class="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition">
-                <div class="w-10 h-10 rounded-lg flex shrink-0 items-center justify-center" style="background:#E3F2FD"><svg class="w-5 h-5" style="color:#1976D2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
-                <div class="flex-1">
-                    <span class="block text-sm font-bold text-gray-800">Lihat Transaksi</span>
-                    <span class="block text-xs text-gray-500">Cek orderan masuk</span>
-                </div>
-            </a>
+
             <a href="<?= url('/admin-user') ?>" class="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:border-purple-300 hover:bg-purple-50 transition">
                 <div class="w-10 h-10 rounded-lg flex shrink-0 items-center justify-center" style="background:#F3E5F5"><svg class="w-5 h-5" style="color:#7B1FA2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
                 <div class="flex-1">

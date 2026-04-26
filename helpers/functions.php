@@ -207,36 +207,94 @@ function pagination_render(array $paging): string
 
     $link_cls = 'px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm active:scale-95 transition-all duration-150 cursor-pointer';
     $active_cls = 'px-3 py-2 rounded-lg text-sm font-bold text-white shadow-sm';
+    $disabled_cls = 'px-3 py-2 rounded-lg text-sm font-medium text-gray-300 cursor-default';
+    $dots_cls = 'px-2 py-2 text-gray-400 text-sm';
 
     $html = '<div class="border-t border-gray-100 pt-4 pb-1 mt-auto"><div class="flex items-center justify-center gap-1">';
 
+    // Prev arrow — always rendered for consistent width
     if ($page > 1) {
         $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="' . $link_cls . '">&laquo;</a>';
+    } else {
+        $html .= '<span class="' . $disabled_cls . '">&laquo;</span>';
     }
 
-    $start = max(1, $page - 3);
-    $end   = min($total_pages, $page + 3);
+    // Fixed-width sliding window: always show exactly $max_visible page slots
+    // Slots: [1] [...] [a] [b] [c] [d] [e] [...] [last]
+    // The middle window is always 5 buttons; total slots = 9 (including 1, last, 2 ellipsis)
+    $max_visible = 5;
 
-    if ($start > 1) {
-        $html .= '<a href="' . $base . 'page=1" class="' . $link_cls . '">1</a>';
-        if ($start > 2) $html .= '<span class="px-2 py-2 text-gray-400 text-sm">...</span>';
-    }
+    if ($total_pages <= $max_visible + 4) {
+        // Few pages — show all, no ellipsis needed
+        for ($i = 1; $i <= $total_pages; $i++) {
+            if ($i == $page) {
+                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
+            } else {
+                $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
+            }
+        }
+    } else {
+        // Calculate the middle window boundaries
+        $half = (int) floor($max_visible / 2);
+        $win_start = $page - $half;
+        $win_end   = $page + $half;
 
-    for ($i = $start; $i <= $end; $i++) {
-        if ($i == $page) {
-            $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
-        } else {
-            $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
+        // Clamp window to valid range
+        if ($win_start < 1) {
+            $win_start = 1;
+            $win_end   = $max_visible;
+        }
+        if ($win_end > $total_pages) {
+            $win_end   = $total_pages;
+            $win_start = $total_pages - $max_visible + 1;
+        }
+
+        $show_left_dots  = ($win_start > 2);
+        $show_right_dots = ($win_end < $total_pages - 1);
+
+        // First page
+        if ($win_start > 1) {
+            if (1 == $page) {
+                $html .= '<span class="' . $active_cls . '" style="background:#42B549">1</span>';
+            } else {
+                $html .= '<a href="' . $base . 'page=1" class="' . $link_cls . '">1</a>';
+            }
+        }
+
+        // Left ellipsis
+        if ($show_left_dots) {
+            $html .= '<span class="' . $dots_cls . '">...</span>';
+        }
+
+        // Middle window
+        for ($i = $win_start; $i <= $win_end; $i++) {
+            if ($i == $page) {
+                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
+            } else {
+                $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
+            }
+        }
+
+        // Right ellipsis
+        if ($show_right_dots) {
+            $html .= '<span class="' . $dots_cls . '">...</span>';
+        }
+
+        // Last page
+        if ($win_end < $total_pages) {
+            if ($total_pages == $page) {
+                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $total_pages . '</span>';
+            } else {
+                $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="' . $link_cls . '">' . $total_pages . '</a>';
+            }
         }
     }
 
-    if ($end < $total_pages) {
-        if ($end < $total_pages - 1) $html .= '<span class="px-2 py-2 text-gray-400 text-sm">...</span>';
-        $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="' . $link_cls . '">' . $total_pages . '</a>';
-    }
-
+    // Next arrow — always rendered for consistent width
     if ($page < $total_pages) {
         $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="' . $link_cls . '">&raquo;</a>';
+    } else {
+        $html .= '<span class="' . $disabled_cls . '">&raquo;</span>';
     }
 
     $html .= '</div>';
@@ -285,6 +343,31 @@ function tipe_produk_config(string $tipe): array
 function tipe_produk_badge(string $tipe): string
 {
     $cfg = tipe_produk_config($tipe);
+    return '<span class="text-xs font-bold px-2 py-1 rounded-lg" style="color:' . $cfg['color'] . '; background:' . $cfg['bg'] . '">' . e($cfg['label']) . '</span>';
+}
+
+// ============================================================
+// TRANSACTION STATUS HELPERS
+// ============================================================
+
+function status_transaksi_list(): array
+{
+    return [
+        'pending'   => ['label' => 'Pending',   'color' => '#E65100', 'bg' => '#FFF3E0'],
+        'success'   => ['label' => 'Success',   'color' => '#2E7D32', 'bg' => '#E8F5E9'],
+        'cancelled' => ['label' => 'Cancelled', 'color' => '#C62828', 'bg' => '#FFEBEE'],
+    ];
+}
+
+function status_transaksi_config(string $status): array
+{
+    $list = status_transaksi_list();
+    return $list[$status] ?? ['label' => ucfirst($status), 'color' => '#374151', 'bg' => '#F3F4F6'];
+}
+
+function status_transaksi_badge(string $status): string
+{
+    $cfg = status_transaksi_config($status);
     return '<span class="text-xs font-bold px-2 py-1 rounded-lg" style="color:' . $cfg['color'] . '; background:' . $cfg['bg'] . '">' . e($cfg['label']) . '</span>';
 }
 

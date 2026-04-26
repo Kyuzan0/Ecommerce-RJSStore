@@ -1,4 +1,4 @@
-<div class="flex items-center gap-4 mb-3">
+<div class="flex items-center gap-4 mb-2">
     <form method="GET" action="" class="relative flex-1">
         <?php if (isset($_GET['role']) && $_GET['role'] !== ''): ?><input type="hidden" name="role" value="<?= e($_GET['role']) ?>"><?php endif; ?>
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -19,7 +19,7 @@
 <?php
 $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 ?>
-<div class="flex items-center gap-2 mb-5 flex-wrap">
+<div class="flex items-center gap-2 mb-3 flex-wrap">
     <a href="<?= url('/admin-user') . '?' . ltrim($q_param, '&') ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === '' ? 'ring-2 ring-offset-1 ring-gray-300' : 'hover:opacity-80' ?>" style="color:#374151; background:#E5E7EB">Semua <span class="ml-1 opacity-70"><?= $total_users ?></span></a>
     <a href="<?= url('/admin-user') . '?role=admin' . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === 'admin' ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:#1565C0; background:#E3F2FD; <?= $current_role === 'admin' ? 'ring-color:#1565C0' : '' ?>">Admin <span class="ml-1 opacity-70"><?= $role_counts['admin'] ?? 0 ?></span></a>
     <a href="<?= url('/admin-user') . '?role=customer' . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === 'customer' ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:#2E7D32; background:#E8F5E9; <?= $current_role === 'customer' ? 'ring-color:#2E7D32' : '' ?>">Customer <span class="ml-1 opacity-70"><?= $role_counts['customer'] ?? 0 ?></span></a>
@@ -102,19 +102,20 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-gray-100 flex-grow flex flex-col overflow-hidden" style="min-height: calc(100vh - 12rem);">
+<div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
-                <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengguna</th>
-                <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th class="px-5 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                <th class="px-5 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengguna</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Transaksi</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
             <?php if (count($users) == 0): ?>
-            <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
+            <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
             <?php endif;
             foreach($users as $r){ ?>
             <tr class="hover:bg-gray-50 transition">
@@ -136,7 +137,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 </td>
                 <td class="px-5 py-4">
                     <span class="text-sm font-semibold text-gray-700"><?= (int) $r['jumlah_transaksi'] ?></span>
-                    <span class="text-xs text-gray-400">transaksi</span>
+                    <span class="text-xs text-gray-400 ml-1">transaksi</span>
                 </td>
                 <td class="px-5 py-4 text-center">
                     <?php if($r['id'] != $this->auth->id()){ ?>
@@ -156,8 +157,8 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
             <?php } ?>
         </tbody>
     </table>
-    </div>
-<?= pagination_render($paging) ?>
+    <?= pagination_render($paging) ?>
+</div>
 
 <script>
 function openModal(type) {

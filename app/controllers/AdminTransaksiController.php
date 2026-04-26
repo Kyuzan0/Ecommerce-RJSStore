@@ -21,52 +21,65 @@ class AdminTransaksiController extends BaseController
         }
 
         $search = $_GET['q'] ?? '';
-        $filter_status = strtolower($_GET['status'] ?? '');
-        $where_clauses = [];
-        $params = [];
+        $filter_status = $_GET['status'] ?? '';
 
-        if ($filter_status !== '' && in_array($filter_status, ['pending', 'success', 'cancelled'])) {
-            $where_clauses[] = "LOWER(t.status) = ?";
-            $params[] = $filter_status;
-        }
-        if ($search !== '') {
-            $where_clauses[] = "(u.name LIKE ? OR p.nama_produk LIKE ?)";
-            $params[] = "%$search%";
-            $params[] = "%$search%";
+        // Validate status filter
+        $valid_statuses = array_keys(status_transaksi_list());
+        if ($filter_status !== '' && !in_array($filter_status, $valid_statuses)) {
+            $filter_status = '';
         }
 
-        $where = "";
-        $join = " JOIN users u ON t.user_id = u.id JOIN produk p ON t.produk_id = p.id";
-        if (!empty($where_clauses)) {
-            $where = " WHERE " . implode(" AND ", $where_clauses);
-        }
-
-        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM transaksi t" . $join . $where, $params, 10);
-        $rows = $this->db->fetchAll(
-            "SELECT t.*, u.name, p.nama_produk FROM transaksi t" . $join . $where . " ORDER BY t.tanggal DESC, t.id DESC LIMIT ? OFFSET ?",
-            array_merge($params, [$paging['limit'], $paging['offset']])
+        // Count for pagination
+        $total = $this->transaksiModel->countAdminList(
+            $search !== '' ? $search : null,
+            $filter_status !== '' ? $filter_status : null
         );
 
-        // Get status counts
-        $status_counts = [];
-        $rows_status = $this->db->fetchAll("SELECT LOWER(status) as status, COUNT(*) as total FROM transaksi GROUP BY LOWER(status)", []);
-        foreach ($rows_status as $rs) {
-            $status_counts[$rs['status']] = (int) $rs['total'];
-        }
-        $total_transaksi = array_sum($status_counts);
+        $per_page = 10;
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $total_pages = max(1, (int) ceil($total / $per_page));
+        $page = min($page, $total_pages);
+        $offset = ($page - 1) * $per_page;
 
-        $extra_css = 'input[type=text],input[type=email],input[type=password],input[type=number],textarea,input[type=file],select { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; transition:border 0.15s; } input:focus,textarea:focus,select:focus { border-color:#42B549; box-shadow:0 0 0 3px rgba(66,181,73,0.12); }';
+        $paging = [
+            'page'        => $page,
+            'per_page'    => $per_page,
+            'total'       => $total,
+            'total_pages' => $total_pages,
+            'offset'      => $offset,
+            'limit'       => $per_page,
+        ];
+
+        // Fetch transactions
+        $transactions = $this->transaksiModel->getAdminList(
+            $search !== '' ? $search : null,
+            $filter_status !== '' ? $filter_status : null,
+            $per_page,
+            $offset
+        );
+
+        // Status counts for filter tabs
+        $status_counts = [];
+        foreach ($valid_statuses as $s) {
+            $status_counts[$s] = $this->transaksiModel->countAdminList(
+                $search !== '' ? $search : null,
+                $s
+            );
+        }
+        $total_transaksi = $this->transaksiModel->countAdminList(
+            $search !== '' ? $search : null,
+            null
+        );
 
         $this->view('admin/transaksi/index', [
-            'rows' => $rows,
-            'paging' => $paging,
-            'status_counts' => $status_counts,
+            'transactions'    => $transactions,
+            'paging'          => $paging,
+            'status_counts'   => $status_counts,
             'total_transaksi' => $total_transaksi,
-            'current_status' => $filter_status,
-            'search' => $search,
-            'active_page' => 'transaksi',
-            'page_title' => 'Kelola Transaksi',
-            'extra_css' => $extra_css
+            'current_status'  => $filter_status,
+            'search'          => $search,
+            'active_page'     => 'transaksi',
+            'page_title'      => 'Kelola Transaksi',
         ], 'admin');
     }
 
@@ -77,8 +90,6 @@ class AdminTransaksiController extends BaseController
 
         if ($action === 'update_status') {
             $this->handleUpdateStatus();
-        } elseif ($action === 'hapus') {
-            $this->handleHapus();
         }
 
         $this->redirect('/admin-transaksi');
@@ -87,17 +98,15 @@ class AdminTransaksiController extends BaseController
     private function handleUpdateStatus()
     {
         $id = (int) ($_POST['transaksi_id'] ?? 0);
-        $status = trim($_POST['status'] ?? '');
-        if ($status !== '' && in_array($status, ['pending', 'success', 'cancelled'])) {
-            $this->transaksiModel->updateStatusById($id, $status);
-            flash('success', 'Status transaksi berhasil diupdate!');
-        }
-    }
+        $new_status = $_POST['new_status'] ?? '';
 
-    private function handleHapus()
-    {
-        $id = (int) ($_POST['transaksi_id'] ?? 0);
-        $this->transaksiModel->delete($id);
-        flash('success', 'Transaksi berhasil dihapus.');
+        $valid_statuses = array_keys(status_transaksi_list());
+        if ($id <= 0 || !in_array($new_status, $valid_statuses)) {
+            flash('error', 'Data tidak valid.');
+            return;
+        }
+
+        $this->transaksiModel->updateStatusById($id, $new_status);
+        flash('success', 'Status transaksi berhasil diperbarui.');
     }
 }
