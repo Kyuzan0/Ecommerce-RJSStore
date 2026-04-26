@@ -118,11 +118,12 @@ ecommerce/
 │   └── views/
 │       ├── admin/                  # dashboard, profile, produk/, transaksi/, laporan/, users/
 │       ├── auth/                   # login, register
+│       ├── cart/                    # (empty — cart menggunakan AJAX via partials)
 │       ├── checkout/               # index
 │       ├── customer/               # bayar, dashboard, download, keranjang, pembelian, produk, profile, rating
 │       ├── home/                   # index
 │       ├── layouts/                # admin, checkout, customer, main
-│       └── partials/               # cart_dropdown, pagination, toast
+│       └── partials/               # cart_dropdown, logout_modal, pagination, toast
 ├── config/
 │   ├── app.php                     # App name, base URL, Midtrans keys (dari env())
 │   └── database.php                # Database config (dari env())
@@ -132,7 +133,9 @@ ecommerce/
 │   ├── migrate_keranjang.php       # Migrasi: buat tabel keranjang
 │   ├── migrate_order_ref.php       # Migrasi: tambah kolom order_ref
 │   ├── migrate_tipe_produk.php     # Migrasi: tambah kolom tipe_produk
-│   └── seed_dummy_data.php         # Seeder data dummy
+│   ├── seed_dummy_data.php         # Seeder data dummy
+│   ├── seed_dummy.php              # Seeder data dummy (alternatif)
+│   └── clear_dummy.php             # Hapus data dummy
 ├── helpers/
 │   ├── functions.php               # Helper functions (env, url, csrf, flash, format, pagination)
 │   └── validation.php              # Validasi input (required, email, min_length, numeric, file, dll.)
@@ -165,6 +168,8 @@ ecommerce/
    ```
    Edit `.env` dengan konfigurasi database dan Midtrans key:
    ```env
+   APP_URL=http://ecommerce.test
+
    DB_HOST=localhost
    DB_USER=root
    DB_PASS=
@@ -192,6 +197,10 @@ ecommerce/
 5. (Opsional) Jalankan seeder untuk data dummy:
    ```
    http://ecommerce.test/database/seed_dummy_data.php
+   ```
+   Untuk menghapus data dummy:
+   ```
+   http://ecommerce.test/database/clear_dummy.php
    ```
 
 6. Pastikan document root mengarah ke folder `public/`:
