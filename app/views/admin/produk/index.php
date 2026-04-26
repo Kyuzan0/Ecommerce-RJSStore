@@ -125,21 +125,21 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <?php endif;
                 foreach($products as $r){ ?>
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-5 py-3">
+                    <td class="px-5 py-3"> <!-- ini untuk mengatur baris di tabel -->
                         <p class="font-semibold text-gray-800 text-sm"><?= e($r['nama_produk']); ?></p>
                         <p class="text-xs text-gray-500 max-w-xs truncate"><?= e($r['deskripsi']); ?></p>
                     </td>
-                    <td class="px-5 py-3"><?= tipe_produk_badge($r['tipe_produk'] ?? 'Lainnya') ?></td>
-                    <td class="px-5 py-3 font-bold" style="color:#42B549"><?= rupiah($r['harga']); ?></td>
-                    <td class="px-5 py-3">
+                    <td class="px-5 py-4"><?= tipe_produk_badge($r['tipe_produk'] ?? 'Lainnya') ?></td>
+                    <td class="px-5 py-4 font-bold" style="color:#42B549"><?= rupiah($r['harga']); ?></td>
+                    <td class="px-5 py-4">
                         <div class="flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                             <span class="text-xs font-semibold text-gray-700"><?= $r['avg_rating']; ?></span>
                             <span class="text-xs text-gray-400">(<?= $r['total_rating'] ?>)</span>
                         </div>
                     </td>
-                    <td class="px-5 py-3"><a href="<?= url('/uploads/' . e($r['file_upload'])); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a></td>
-                    <td class="px-5 py-3 text-center">
+                    <td class="px-5 py-4"><a href="<?= url('/uploads/' . e($r['file_upload'])); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a></td>
+                    <td class="px-5 py-4 text-center">
                         <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['nama_produk']), ENT_QUOTES) ?>, <?= (int)$r['harga'] ?>, <?= htmlspecialchars(json_encode($r['tipe_produk'] ?? 'Lainnya'), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['deskripsi']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
                             <?= csrf_field() ?>

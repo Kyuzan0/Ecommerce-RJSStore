@@ -40,7 +40,7 @@ class AdminUserController extends BaseController
             $where = " WHERE " . implode(" AND ", $where_clauses);
         }
 
-        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM users u" . $where, $params, 15);
+        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM users u" . $where, $params, 10);
         $users = $this->db->fetchAll(
             "SELECT u.*, (SELECT COUNT(*) FROM transaksi WHERE user_id = u.id) as jumlah_transaksi FROM users u" . $where . " ORDER BY u.role ASC, u.name ASC LIMIT ? OFFSET ?",
             array_merge($params, [$paging['limit'], $paging['offset']])

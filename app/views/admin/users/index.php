@@ -102,7 +102,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
+<div class="bg-white rounded-2xl border border-gray-100 flex-grow flex flex-col overflow-hidden" style="min-height: calc(100vh - 12rem);">
     <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
@@ -118,7 +118,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
             <?php endif;
             foreach($users as $r){ ?>
             <tr class="hover:bg-gray-50 transition">
-                <td class="px-5 py-3">
+                <td class="px-5 py-4">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:<?= $r['role']=='admin' ? '#1565C0' : '#42B549' ?>">
                             <?= strtoupper(substr(e($r['name']),0,1)) ?>
@@ -126,19 +126,19 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <span class="font-semibold text-gray-800"><?= e($r['name']); ?></span>
                     </div>
                 </td>
-                <td class="px-5 py-3 text-gray-500"><?= e($r['email']); ?></td>
-                <td class="px-5 py-3">
+                <td class="px-5 py-4 text-gray-500"><?= e($r['email']); ?></td>
+                <td class="px-5 py-4">
                     <?php if($r['role']=='admin'): ?>
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#E3F2FD; color:#1565C0">ADMIN</span>
                     <?php else: ?>
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#E8F5E9; color:#2E7D32">CUSTOMER</span>
                     <?php endif; ?>
                 </td>
-                <td class="px-5 py-3">
+                <td class="px-5 py-4">
                     <span class="text-sm font-semibold text-gray-700"><?= (int) $r['jumlah_transaksi'] ?></span>
                     <span class="text-xs text-gray-400">transaksi</span>
                 </td>
-                <td class="px-5 py-3 text-center">
+                <td class="px-5 py-4 text-center">
                     <?php if($r['id'] != $this->auth->id()){ ?>
                         <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['email']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['role']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus user ini?')">

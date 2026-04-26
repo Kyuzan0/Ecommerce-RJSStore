@@ -20,7 +20,7 @@ $status_tabs = [
     'cancelled' => ['label' => 'Dibatalkan', 'color' => '#C62828', 'bg' => '#FFEBEE'],
 ];
 ?>
-<div class="flex items-center gap-2 mb-5 flex-wrap">
+<div class="flex items-center gap-2 mb-3 flex-wrap">
     <a href="<?= url('/admin-transaksi') . '?' . ltrim($q_param, '&') ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_status === '' ? 'ring-2 ring-offset-1 ring-gray-300' : 'hover:opacity-80' ?>" style="color:#374151; background:#E5E7EB">Semua <span class="ml-1 opacity-70"><?= $total_transaksi ?></span></a>
     <?php foreach ($status_tabs as $key => $cfg): $count = $status_counts[$key] ?? 0; ?>
     <a href="<?= url('/admin-transaksi') . '?status=' . $key . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_status === $key ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:<?= $cfg['color'] ?>; background:<?= $cfg['bg'] ?>; <?= $current_status === $key ? 'ring-color:'.$cfg['color'] : '' ?>"><?= $cfg['label'] ?> <span class="ml-1 opacity-70"><?= $count ?></span></a>
@@ -62,7 +62,7 @@ $status_tabs = [
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
+<div class="bg-white rounded-2xl border border-gray-100 flex-grow flex flex-col overflow-hidden" style="min-height: calc(100vh - 12rem);">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>

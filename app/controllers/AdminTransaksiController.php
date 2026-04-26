@@ -41,7 +41,7 @@ class AdminTransaksiController extends BaseController
             $where = " WHERE " . implode(" AND ", $where_clauses);
         }
 
-        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM transaksi t" . $join . $where, $params, 15);
+        $paging = paginate($this->db, "SELECT COUNT(*) as c FROM transaksi t" . $join . $where, $params, 10);
         $rows = $this->db->fetchAll(
             "SELECT t.*, u.name, p.nama_produk FROM transaksi t" . $join . $where . " ORDER BY t.tanggal DESC, t.id DESC LIMIT ? OFFSET ?",
             array_merge($params, [$paging['limit'], $paging['offset']])
