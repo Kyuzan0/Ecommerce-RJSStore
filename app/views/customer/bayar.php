@@ -44,7 +44,7 @@
     </div>
 </div>
 
-<script src="<?= e($snap_url) ?>/snap.js" data-client-key="<?= e($client_key) ?>"></script>
+<script src="<?= e($snap_url) ?>" data-client-key="<?= e($client_key) ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const snapToken = '<?= e($snap_token) ?>';

@@ -117,8 +117,14 @@ class CheckoutController extends BaseController
         } elseif ($transactionStatus === 'pending') {
             $status = 'pending';
         } else {
-            $this->json(['status' => 'ok', 'message' => 'No update needed']);
-            return;
+            // Fallback: if status_code is 200, treat as success
+            $statusCode = $data['status_code'] ?? '';
+            if ($statusCode === '200') {
+                $status = 'success';
+            } else {
+                $this->json(['status' => 'ok', 'message' => 'No update needed']);
+                return;
+            }
         }
 
         // Update by order_ref or legacy single ID

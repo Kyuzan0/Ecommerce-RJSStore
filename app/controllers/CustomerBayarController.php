@@ -27,9 +27,10 @@ class CustomerBayarController extends BaseController
 
         // Get pending items
         if (!empty($order_ref) && strpos($order_ref, 'ORD-') === 0) {
-            $items = $this->transaksiModel->getPendingByRef($user_id, $order_ref);
+            $items = $this->transaksiModel->getPendingByRef($order_ref, $user_id);
         } elseif ($transaksi_id > 0) {
-            $items = $this->transaksiModel->getPendingById($user_id, $transaksi_id);
+            $single = $this->transaksiModel->getPendingById($transaksi_id, $user_id);
+            $items = $single ? [$single] : [];
         } else {
             flash('error', 'Data pembayaran tidak valid');
             $this->redirect('/customer/pembelian');
@@ -83,9 +84,15 @@ class CustomerBayarController extends BaseController
         ];
 
         // Call Midtrans Snap API
-        $snap_url = config('midtrans_snap_url');
-        $server_key = config('midtrans_server_key');
-        $client_key = config('midtrans_client_key');
+        $isProduction = env('MIDTRANS_IS_PRODUCTION', 'false') === 'true';
+        $snap_url = $isProduction
+            ? 'https://app.midtrans.com/snap/v1'
+            : 'https://app.sandbox.midtrans.com/snap/v1';
+        $snap_js_url = $isProduction
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+        $server_key = env('MIDTRANS_SERVER_KEY');
+        $client_key = env('MIDTRANS_CLIENT_KEY');
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $snap_url . '/transactions');
@@ -121,7 +128,7 @@ class CustomerBayarController extends BaseController
             'items' => $items,
             'total' => $total,
             'snap_token' => $snap_token,
-            'snap_url' => $snap_url,
+            'snap_url' => $snap_js_url,
             'client_key' => $client_key
         ], 'checkout');
     }

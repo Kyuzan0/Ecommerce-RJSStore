@@ -114,7 +114,7 @@ class Transaksi extends BaseModel
     public function getPendingByRef(string $orderRef, int $userId): array
     {
         return $this->db->fetchAll(
-            "SELECT t.id, t.order_ref, p.nama_produk, p.harga
+            "SELECT t.id, t.order_ref, t.produk_id, p.nama_produk, p.harga, p.tipe_produk
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              WHERE t.order_ref = ? AND t.user_id = ? AND t.status = 'pending'",
