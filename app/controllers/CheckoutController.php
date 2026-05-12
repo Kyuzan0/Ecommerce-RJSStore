@@ -83,58 +83,46 @@ class CheckoutController extends BaseController
             'snap_token'   => $snapToken,
             'snap_url'     => $snapUrl,
             'client_key'   => env('MIDTRANS_CLIENT_KEY'),
+            'order_ref'    => $orderRef,
         ], 'checkout');
     }
 
     /**
-     * Handle payment callback from frontend (onSuccess).
-     * Updates transaction status to 'success' immediately.
+     * Handle payment success callback from frontend.
+     * Called via GET redirect after Midtrans Snap onSuccess.
+     * Directly marks the transaction as 'success'.
      */
     public function callback(): void
     {
-        $this->requirePost();
-
-        $raw = file_get_contents('php://input');
-        $data = json_decode($raw, true);
-
-        if (!$data) {
-            $this->json(['status' => 'error', 'message' => 'Invalid payload'], 400);
-            return;
-        }
-
         $userId = $this->auth->id();
-        $orderRef = $data['order_id'] ?? '';
-        $transactionStatus = $data['transaction_status'] ?? '';
+        $orderRef = $_GET['order_id'] ?? '';
 
-        if (empty($orderRef)) {
-            $this->json(['status' => 'error', 'message' => 'Missing order_id'], 400);
-            return;
-        }
-
-        // Only update to success if Midtrans reports settlement/capture
-        if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-            $status = 'success';
-        } elseif ($transactionStatus === 'pending') {
-            $status = 'pending';
-        } else {
-            // Fallback: if status_code is 200, treat as success
-            $statusCode = $data['status_code'] ?? '';
-            if ($statusCode === '200') {
-                $status = 'success';
+        if (!empty($orderRef)) {
+            // Update status to success
+            if (strpos($orderRef, 'ORD-') === 0) {
+                // Verify this order belongs to the current user before updating
+                $items = $this->db->fetchAll(
+                    "SELECT id FROM transaksi WHERE order_ref = ? AND user_id = ? AND status = 'pending'",
+                    [$orderRef, $userId]
+                );
+                if (!empty($items)) {
+                    $this->transaksiModel->updateStatusByRef($orderRef, 'success');
+                }
             } else {
-                $this->json(['status' => 'ok', 'message' => 'No update needed']);
-                return;
+                // Legacy single transaction ID
+                $txId = (int)$orderRef;
+                $item = $this->db->fetchOne(
+                    "SELECT id FROM transaksi WHERE id = ? AND user_id = ? AND status = 'pending'",
+                    [$txId, $userId]
+                );
+                if ($item) {
+                    $this->transaksiModel->updateStatusById($txId, 'success');
+                }
             }
         }
 
-        // Update by order_ref or legacy single ID
-        if (strpos($orderRef, 'ORD-') === 0) {
-            $this->transaksiModel->updateStatusByRef($orderRef, $status);
-        } else {
-            $this->transaksiModel->updateStatusById((int)$orderRef, $status);
-        }
-
-        $this->json(['status' => 'ok', 'new_status' => $status]);
+        flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
+        $this->redirect('/customer/pembelian');
     }
 
     /**

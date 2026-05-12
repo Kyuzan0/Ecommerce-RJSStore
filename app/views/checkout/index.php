@@ -28,13 +28,8 @@
         function triggerSnap() {
             window.snap.pay('<?= e($snap_token) ?>', {
                 onSuccess: function(result){
-                    fetch('<?= url("/customer/checkout/callback") ?>', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(result)
-                    }).finally(function(){
-                        window.location.href = '<?= url("/customer/pembelian") ?>';
-                    });
+                    var orderId = result.order_id || '<?= e($order_ref) ?>';
+                    window.location.href = '<?= url("/customer/checkout/callback") ?>?order_id=' + encodeURIComponent(orderId);
                 },
                 onPending: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>'; },
                 onError: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>?msg=error'; },

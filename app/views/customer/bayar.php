@@ -48,22 +48,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const snapToken = '<?= e($snap_token) ?>';
-    const callbackUrl = '<?= url("/customer/checkout/callback") ?>';
-    const successUrl = '<?= url("/customer/pembelian") ?>';
+    const callbackBase = '<?= url("/customer/checkout/callback") ?>';
+    const pembelianUrl = '<?= url("/customer/pembelian") ?>';
     const errorUrl = '<?= url("/customer/pembelian?msg=error") ?>';
 
     function handleSuccess(result) {
-        fetch(callbackUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(result)
-        }).finally(function(){
-            window.location.href = successUrl;
-        });
+        var orderId = result.order_id || '';
+        window.location.href = callbackBase + '?order_id=' + encodeURIComponent(orderId);
     }
 
     function handlePending(result) {
-        window.location.href = successUrl;
+        window.location.href = pembelianUrl;
     }
 
     function handleError(result) {

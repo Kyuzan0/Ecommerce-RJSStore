@@ -47,7 +47,7 @@ $router->get('api/product-detail/:id', 'HomeController', 'productDetail');
 // Customer checkout uses dedicated CheckoutController
 $router->get('customer/checkout', 'CheckoutController', 'index');
 $router->post('customer/checkout', 'CheckoutController', 'index');
-$router->post('customer/checkout/callback', 'CheckoutController', 'callback');
+$router->get('customer/checkout/callback', 'CheckoutController', 'callback');
 
 // Customer routes (bayar and rating use separate controllers)
 $router->get('customer/bayar', 'CustomerBayarController', 'index');
