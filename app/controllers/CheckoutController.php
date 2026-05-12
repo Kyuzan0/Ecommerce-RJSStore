@@ -87,6 +87,51 @@ class CheckoutController extends BaseController
     }
 
     /**
+     * Handle payment callback from frontend (onSuccess).
+     * Updates transaction status to 'success' immediately.
+     */
+    public function callback(): void
+    {
+        $this->requirePost();
+
+        $raw = file_get_contents('php://input');
+        $data = json_decode($raw, true);
+
+        if (!$data) {
+            $this->json(['status' => 'error', 'message' => 'Invalid payload'], 400);
+            return;
+        }
+
+        $userId = $this->auth->id();
+        $orderRef = $data['order_id'] ?? '';
+        $transactionStatus = $data['transaction_status'] ?? '';
+
+        if (empty($orderRef)) {
+            $this->json(['status' => 'error', 'message' => 'Missing order_id'], 400);
+            return;
+        }
+
+        // Only update to success if Midtrans reports settlement/capture
+        if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
+            $status = 'success';
+        } elseif ($transactionStatus === 'pending') {
+            $status = 'pending';
+        } else {
+            $this->json(['status' => 'ok', 'message' => 'No update needed']);
+            return;
+        }
+
+        // Update by order_ref or legacy single ID
+        if (strpos($orderRef, 'ORD-') === 0) {
+            $this->transaksiModel->updateStatusByRef($orderRef, $status);
+        } else {
+            $this->transaksiModel->updateStatusById((int)$orderRef, $status);
+        }
+
+        $this->json(['status' => 'ok', 'new_status' => $status]);
+    }
+
+    /**
      * Get Midtrans Snap token via API.
      */
     private function getMidtransToken(string $orderRef, int $totalHarga, array $cartItems, string $email): ?string

@@ -99,7 +99,7 @@ class CustomerRatingController extends BaseController
         }
 
         // Update rating
-        $this->transaksiModel->setRating($transaksi_id, $rating, $ulasan);
+        $this->transaksiModel->setRating($transaksi_id, $user_id, $rating, $ulasan);
 
         flash('success', 'Terima kasih atas rating Anda!');
         $this->redirect('/customer/pembelian');

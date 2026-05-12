@@ -48,21 +48,33 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const snapToken = '<?= e($snap_token) ?>';
-    
+    const callbackUrl = '<?= url("/customer/checkout/callback") ?>';
+    const successUrl = '<?= url("/customer/pembelian") ?>';
+    const errorUrl = '<?= url("/customer/pembelian?msg=error") ?>';
+
+    function handleSuccess(result) {
+        fetch(callbackUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(result)
+        }).finally(function(){
+            window.location.href = successUrl;
+        });
+    }
+
+    function handlePending(result) {
+        window.location.href = successUrl;
+    }
+
+    function handleError(result) {
+        window.location.href = errorUrl;
+    }
+
     // Auto-trigger payment on page load
     snap.pay(snapToken, {
-        onSuccess: function(result) {
-            console.log('Payment success:', result);
-            window.location.href = '<?= url('/customer/pembelian') ?>';
-        },
-        onPending: function(result) {
-            console.log('Payment pending:', result);
-            window.location.href = '<?= url('/customer/pembelian') ?>';
-        },
-        onError: function(result) {
-            console.error('Payment error:', result);
-            window.location.href = '<?= url('/customer/pembelian?msg=error') ?>';
-        },
+        onSuccess: handleSuccess,
+        onPending: handlePending,
+        onError: handleError,
         onClose: function() {
             console.log('Payment popup closed');
         }
@@ -71,15 +83,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Also bind to button click
     document.getElementById('pay-button').addEventListener('click', function() {
         snap.pay(snapToken, {
-            onSuccess: function(result) {
-                window.location.href = '<?= url('/customer/pembelian') ?>';
-            },
-            onPending: function(result) {
-                window.location.href = '<?= url('/customer/pembelian') ?>';
-            },
-            onError: function(result) {
-                window.location.href = '<?= url('/customer/pembelian?msg=error') ?>';
-            },
+            onSuccess: handleSuccess,
+            onPending: handlePending,
+            onError: handleError,
             onClose: function() {
                 console.log('Payment popup closed');
             }

@@ -27,7 +27,15 @@
     <script type="text/javascript">
         function triggerSnap() {
             window.snap.pay('<?= e($snap_token) ?>', {
-                onSuccess: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>'; },
+                onSuccess: function(result){
+                    fetch('<?= url("/customer/checkout/callback") ?>', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(result)
+                    }).finally(function(){
+                        window.location.href = '<?= url("/customer/pembelian") ?>';
+                    });
+                },
                 onPending: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>'; },
                 onError: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>?msg=error'; },
                 onClose: function(){ window.location.href = '<?= url("/customer/pembelian") ?>'; }
