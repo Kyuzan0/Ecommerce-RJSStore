@@ -5,14 +5,23 @@ class Keranjang extends BaseModel
     protected string $table = 'keranjang';
 
     /**
-     * Get cart items for a user (with product details).
+     * Get cart items for a user (with product + variant details).
+     * Price and account come from the variant when present, else the product.
      */
     public function getByUser(int $userId): array
     {
         return $this->db->fetchAll(
-            "SELECT k.produk_id, p.nama_produk, p.harga, p.deskripsi, p.tipe_produk
+            "SELECT k.produk_id,
+                    k.varian_id,
+                    p.nama_produk,
+                    COALESCE(v.harga, p.harga) AS harga,
+                    p.deskripsi,
+                    p.tipe_produk,
+                    v.durasi,
+                    v.paket
              FROM keranjang k
              JOIN produk p ON k.produk_id = p.id
+             LEFT JOIN produk_varian v ON k.varian_id = v.id
              WHERE k.user_id = ?
              ORDER BY k.created_at DESC",
             [$userId]
@@ -20,23 +29,29 @@ class Keranjang extends BaseModel
     }
 
     /**
-     * Add item to cart.
+     * Add item to cart (variant-aware).
      */
-    public function addItem(int $userId, int $produkId): bool
+    public function addItem(int $userId, int $produkId, ?int $varianId = null): bool
     {
         return $this->db->execute(
-            "INSERT INTO keranjang (user_id, produk_id) VALUES (?, ?)",
-            [$userId, $produkId]
+            "INSERT INTO keranjang (user_id, produk_id, varian_id) VALUES (?, ?, ?)",
+            [$userId, $produkId, $varianId]
         );
     }
 
     /**
-     * Remove item from cart.
+     * Remove item from cart. When variant given, removes that specific variant row.
      */
-    public function removeItem(int $userId, int $produkId): bool
+    public function removeItem(int $userId, int $produkId, ?int $varianId = null): bool
     {
+        if ($varianId !== null) {
+            return $this->db->execute(
+                "DELETE FROM keranjang WHERE user_id = ? AND produk_id = ? AND varian_id = ?",
+                [$userId, $produkId, $varianId]
+            );
+        }
         return $this->db->execute(
-            "DELETE FROM keranjang WHERE user_id = ? AND produk_id = ?",
+            "DELETE FROM keranjang WHERE user_id = ? AND produk_id = ? AND varian_id IS NULL",
             [$userId, $produkId]
         );
     }
@@ -53,14 +68,21 @@ class Keranjang extends BaseModel
     }
 
     /**
-     * Check if product is in user's cart.
+     * Check if product/variant is in user's cart.
      */
-    public function isInCart(int $userId, int $produkId): bool
+    public function isInCart(int $userId, int $produkId, ?int $varianId = null): bool
     {
-        $row = $this->db->fetchOne(
-            "SELECT id FROM keranjang WHERE user_id = ? AND produk_id = ?",
-            [$userId, $produkId]
-        );
+        if ($varianId !== null) {
+            $row = $this->db->fetchOne(
+                "SELECT id FROM keranjang WHERE user_id = ? AND produk_id = ? AND varian_id = ?",
+                [$userId, $produkId, $varianId]
+            );
+        } else {
+            $row = $this->db->fetchOne(
+                "SELECT id FROM keranjang WHERE user_id = ? AND produk_id = ? AND varian_id IS NULL",
+                [$userId, $produkId]
+            );
+        }
         return $row !== null;
     }
 
@@ -78,15 +100,19 @@ class Keranjang extends BaseModel
 
     /**
      * Merge guest session cart into DB cart.
+     * Guest cart items may carry an optional 'varian_id'.
      */
     public function mergeGuestCart(int $userId, array $guestCart): int
     {
         $mergedCount = 0;
         foreach ($guestCart as $cartItem) {
             $produkId = (int) $cartItem['produk_id'];
+            $varianId = isset($cartItem['varian_id']) && $cartItem['varian_id'] !== null
+                ? (int) $cartItem['varian_id']
+                : null;
 
             // Skip if already in DB cart
-            if ($this->isInCart($userId, $produkId)) continue;
+            if ($this->isInCart($userId, $produkId, $varianId)) continue;
 
             // Skip if already purchased
             $purchased = $this->db->fetchOne(
@@ -99,7 +125,16 @@ class Keranjang extends BaseModel
             $produk = $this->db->fetchOne("SELECT id FROM produk WHERE id = ?", [$produkId]);
             if (!$produk) continue;
 
-            $this->addItem($userId, $produkId);
+            // If a variant is given, verify it belongs to the product
+            if ($varianId !== null) {
+                $variant = $this->db->fetchOne(
+                    "SELECT id FROM produk_varian WHERE id = ? AND produk_id = ?",
+                    [$varianId, $produkId]
+                );
+                if (!$variant) continue;
+            }
+
+            $this->addItem($userId, $produkId, $varianId);
             $mergedCount++;
         }
         return $mergedCount;

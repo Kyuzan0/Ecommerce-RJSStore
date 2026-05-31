@@ -61,11 +61,19 @@ class CustomerBayarController extends BaseController
         
         $item_details = [];
         foreach ($items as $item) {
+            $name = $item['nama_produk'];
+            if (!empty($item['durasi'])) {
+                $name .= ' (' . $item['durasi'];
+                if (!empty($item['paket'])) {
+                    $name .= ' ' . $item['paket'];
+                }
+                $name .= ')';
+            }
             $item_details[] = [
                 'id' => $item['produk_id'],
                 'price' => (int)$item['harga'],
                 'quantity' => 1,
-                'name' => substr($item['nama_produk'], 0, 50)
+                'name' => substr($name, 0, 50)
             ];
         }
 

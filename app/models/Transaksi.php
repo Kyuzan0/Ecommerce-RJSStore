@@ -14,9 +14,12 @@ class Transaksi extends BaseModel
         try {
             $tanggal = date('Y-m-d H:i:s');
             foreach ($cartItems as $item) {
+                $varianId = isset($item['varian_id']) && $item['varian_id'] !== null
+                    ? (int) $item['varian_id']
+                    : null;
                 $this->db->execute(
-                    "INSERT INTO transaksi (user_id, produk_id, tanggal, status, order_ref) VALUES (?, ?, ?, 'pending', ?)",
-                    [$userId, (int) $item['produk_id'], $tanggal, $orderRef]
+                    "INSERT INTO transaksi (user_id, produk_id, varian_id, tanggal, status, order_ref) VALUES (?, ?, ?, ?, 'pending', ?)",
+                    [$userId, (int) $item['produk_id'], $varianId, $tanggal, $orderRef]
                 );
             }
             $this->db->commit();
@@ -33,9 +36,10 @@ class Transaksi extends BaseModel
     public function getByOrderRef(string $orderRef, int $userId): array
     {
         return $this->db->fetchAll(
-            "SELECT t.*, p.nama_produk, p.harga
+            "SELECT t.*, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, v.durasi, v.paket
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.order_ref = ? AND t.user_id = ?",
             [$orderRef, $userId]
         );
@@ -46,9 +50,10 @@ class Transaksi extends BaseModel
      */
     public function getByUser(int $userId, ?string $status = null, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT t.*, p.nama_produk, p.harga, p.file_upload, p.tipe_produk
+        $sql = "SELECT t.*, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, p.file_upload, p.tipe_produk, v.durasi, v.paket
                 FROM transaksi t
                 JOIN produk p ON t.produk_id = p.id
+                LEFT JOIN produk_varian v ON t.varian_id = v.id
                 WHERE t.user_id = ?";
         $params = [$userId];
 
@@ -114,9 +119,10 @@ class Transaksi extends BaseModel
     public function getPendingByRef(string $orderRef, int $userId): array
     {
         return $this->db->fetchAll(
-            "SELECT t.id, t.order_ref, t.produk_id, p.nama_produk, p.harga, p.tipe_produk
+            "SELECT t.id, t.order_ref, t.produk_id, t.varian_id, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, p.tipe_produk, v.durasi, v.paket
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.order_ref = ? AND t.user_id = ? AND t.status = 'pending'",
             [$orderRef, $userId]
         );
@@ -128,9 +134,10 @@ class Transaksi extends BaseModel
     public function getPendingById(int $id, int $userId): ?array
     {
         return $this->db->fetchOne(
-            "SELECT t.*, p.nama_produk, p.harga
+            "SELECT t.*, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, v.durasi, v.paket
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.id = ? AND t.user_id = ? AND t.status = 'pending'",
             [$id, $userId]
         );
@@ -142,11 +149,22 @@ class Transaksi extends BaseModel
     public function getDownloadable(int $userId, int $limit = 20, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            "SELECT p.id AS produk_id, p.nama_produk, p.harga, p.file_upload, p.tipe_produk, p.account_info, p.deskripsi, MAX(t.tanggal) AS tanggal
+            "SELECT p.id AS produk_id,
+                    t.varian_id,
+                    p.nama_produk,
+                    COALESCE(v.harga, p.harga) AS harga,
+                    p.file_upload,
+                    p.tipe_produk,
+                    COALESCE(v.account_info, p.account_info) AS account_info,
+                    p.deskripsi,
+                    v.durasi,
+                    v.paket,
+                    MAX(t.tanggal) AS tanggal
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.user_id = ? AND t.status = 'success'
-             GROUP BY p.id
+             GROUP BY p.id, t.varian_id
              ORDER BY tanggal DESC
              LIMIT {$limit} OFFSET {$offset}",
             [$userId]
@@ -159,7 +177,7 @@ class Transaksi extends BaseModel
     public function countDownloadable(int $userId): int
     {
         $row = $this->db->fetchOne(
-            "SELECT COUNT(DISTINCT p.id) AS total
+            "SELECT COUNT(DISTINCT CONCAT(p.id, '-', COALESCE(t.varian_id, 0))) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              WHERE t.user_id = ? AND t.status = 'success'",
@@ -174,9 +192,10 @@ class Transaksi extends BaseModel
     public function getTotalSpentByUser(int $userId): int
     {
         $row = $this->db->fetchOne(
-            "SELECT COALESCE(SUM(p.harga), 0) AS total
+            "SELECT COALESCE(SUM(COALESCE(v.harga, p.harga)), 0) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.user_id = ? AND t.status = 'success'",
             [$userId]
         );
@@ -200,10 +219,11 @@ class Transaksi extends BaseModel
      */
     public function getAdminList(?string $search = null, ?string $status = null, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT t.*, u.name AS nama_user, p.nama_produk, p.harga
+        $sql = "SELECT t.*, u.name AS nama_user, p.nama_produk, COALESCE(v.harga, p.harga) AS harga
                 FROM transaksi t
                 JOIN users u ON t.user_id = u.id
                 JOIN produk p ON t.produk_id = p.id
+                LEFT JOIN produk_varian v ON t.varian_id = v.id
                 WHERE 1=1";
         $params = [];
 
@@ -257,9 +277,10 @@ class Transaksi extends BaseModel
     public function getDailyRevenue(int $days = 7): array
     {
         return $this->db->fetchAll(
-            "SELECT DATE(t.tanggal) AS tanggal, SUM(p.harga) AS total
+            "SELECT DATE(t.tanggal) AS tanggal, SUM(COALESCE(v.harga, p.harga)) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.status = 'success' AND t.tanggal >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
              GROUP BY DATE(t.tanggal)
              ORDER BY tanggal ASC",
@@ -273,9 +294,10 @@ class Transaksi extends BaseModel
     public function getMonthlyRevenue(): array
     {
         return $this->db->fetchAll(
-            "SELECT MONTH(t.tanggal) AS bulan, SUM(p.harga) AS total
+            "SELECT MONTH(t.tanggal) AS bulan, SUM(COALESCE(v.harga, p.harga)) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.status = 'success' AND YEAR(t.tanggal) = YEAR(CURDATE())
              GROUP BY MONTH(t.tanggal)
              ORDER BY bulan ASC"
@@ -291,9 +313,10 @@ class Transaksi extends BaseModel
             "SELECT COUNT(*) AS total FROM transaksi WHERE status = 'success'"
         );
         $totalRevenue = $this->db->fetchOne(
-            "SELECT SUM(p.harga) AS total
+            "SELECT SUM(COALESCE(v.harga, p.harga)) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.status = 'success'"
         );
         return [
@@ -324,18 +347,20 @@ class Transaksi extends BaseModel
         }
 
         $main = $this->db->fetchOne(
-            "SELECT COUNT(t.id) AS jml, COALESCE(SUM(p.harga), 0) AS total
+            "SELECT COUNT(t.id) AS jml, COALESCE(SUM(COALESCE(v.harga, p.harga)), 0) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}",
             $params
         );
 
         $avgDaily = $this->db->fetchOne(
             "SELECT COALESCE(AVG(daily_total), 0) AS avg_daily FROM (
-                SELECT SUM(p.harga) AS daily_total
+                SELECT SUM(COALESCE(v.harga, p.harga)) AS daily_total
                 FROM transaksi t
                 JOIN produk p ON t.produk_id = p.id
+                LEFT JOIN produk_varian v ON t.varian_id = v.id
                 WHERE {$where}
                 GROUP BY DATE(t.tanggal)
             ) AS sub",
@@ -373,9 +398,10 @@ class Transaksi extends BaseModel
             $current = (int) ($main['total'] ?? 0);
 
             $prev = $this->db->fetchOne(
-                "SELECT COALESCE(SUM(p.harga), 0) AS total
+                "SELECT COALESCE(SUM(COALESCE(v.harga, p.harga)), 0) AS total
                  FROM transaksi t
                  JOIN produk p ON t.produk_id = p.id
+                 LEFT JOIN produk_varian v ON t.varian_id = v.id
                  WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?",
                 [$prevStart, $prevEnd]
             );
@@ -419,9 +445,10 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT DATE(t.tanggal) AS tanggal, SUM(p.harga) AS pendapatan
+            "SELECT DATE(t.tanggal) AS tanggal, SUM(COALESCE(v.harga, p.harga)) AS pendapatan
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              GROUP BY DATE(t.tanggal)
              ORDER BY tanggal ASC",
@@ -447,9 +474,10 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(p.harga) AS pendapatan
+            "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(COALESCE(v.harga, p.harga)) AS pendapatan
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              GROUP BY bulan
              ORDER BY bulan ASC",
@@ -471,9 +499,10 @@ class Transaksi extends BaseModel
 
         if ($groupBy === 'monthly') {
             return $this->db->fetchAll(
-                "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(p.harga) AS pendapatan
+                "SELECT DATE_FORMAT(t.tanggal, '%Y-%m') AS bulan, SUM(COALESCE(v.harga, p.harga)) AS pendapatan
                  FROM transaksi t
                  JOIN produk p ON t.produk_id = p.id
+                 LEFT JOIN produk_varian v ON t.varian_id = v.id
                  WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?
                  GROUP BY bulan
                  ORDER BY bulan ASC",
@@ -482,9 +511,10 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT DATE(t.tanggal) AS tanggal, SUM(p.harga) AS pendapatan
+            "SELECT DATE(t.tanggal) AS tanggal, SUM(COALESCE(v.harga, p.harga)) AS pendapatan
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE t.status = 'success' AND t.tanggal >= ? AND t.tanggal <= ?
              GROUP BY DATE(t.tanggal)
              ORDER BY tanggal ASC",
@@ -510,9 +540,10 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT p.id, p.nama_produk, p.harga, p.tipe_produk, COUNT(t.id) AS jml_terjual, SUM(p.harga) AS total_pendapatan
+            "SELECT p.id, p.nama_produk, p.harga, p.tipe_produk, COUNT(t.id) AS jml_terjual, SUM(COALESCE(v.harga, p.harga)) AS total_pendapatan
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              GROUP BY p.id, p.nama_produk, p.harga, p.tipe_produk
              ORDER BY jml_terjual DESC
@@ -539,9 +570,10 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT p.tipe_produk, COUNT(t.id) AS jml, SUM(p.harga) AS total
+            "SELECT p.tipe_produk, COUNT(t.id) AS jml, SUM(COALESCE(v.harga, p.harga)) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              GROUP BY p.tipe_produk
              ORDER BY total DESC",
@@ -605,10 +637,11 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT t.id, t.tanggal, t.status, t.order_ref, u.name AS nama_user, p.nama_produk, p.harga, p.tipe_produk
+            "SELECT t.id, t.tanggal, t.status, t.order_ref, u.name AS nama_user, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, p.tipe_produk, v.durasi, v.paket
              FROM transaksi t
              JOIN users u ON t.user_id = u.id
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              ORDER BY t.tanggal DESC, t.id DESC
              LIMIT {$limit} OFFSET {$offset}",
@@ -677,10 +710,11 @@ class Transaksi extends BaseModel
         }
 
         return $this->db->fetchAll(
-            "SELECT t.id, t.order_ref, t.tanggal, t.status, u.name AS nama_user, u.email, p.nama_produk, p.harga, p.tipe_produk
+            "SELECT t.id, t.order_ref, t.tanggal, t.status, u.name AS nama_user, u.email, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, p.tipe_produk, v.durasi, v.paket
              FROM transaksi t
              JOIN users u ON t.user_id = u.id
              JOIN produk p ON t.produk_id = p.id
+             LEFT JOIN produk_varian v ON t.varian_id = v.id
              WHERE {$where}
              ORDER BY t.tanggal DESC, t.id DESC",
             $params

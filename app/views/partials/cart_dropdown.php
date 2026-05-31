@@ -113,16 +113,21 @@ $initial_cart_count = $initial_cart_count ?? 0;
 
         let html = '';
         cart.items.forEach(function(item) {
+            var varianId = item.varian_id ? item.varian_id : '';
             html += '<div class="px-4 py-3 flex items-start gap-3 border-b border-gray-50 hover:bg-gray-50 transition" data-produk-id="' + item.produk_id + '">';
             html += '  <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#E8F5E9">';
             html += '    <svg class="w-5 h-5" style="color:#42B549" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>';
             html += '  </div>';
             html += '  <div class="flex-1 min-w-0">';
             html += '    <p class="text-sm font-semibold text-gray-800 truncate">' + escapeHtml(item.nama_produk) + '</p>';
-            html += '    <p class="text-xs text-gray-400 mt-0.5">' + escapeHtml(item.tipe_produk || 'Lainnya') + '</p>';
+            if (item.varian_label) {
+                html += '    <p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(item.varian_label) + '</p>';
+            } else {
+                html += '    <p class="text-xs text-gray-400 mt-0.5">' + escapeHtml(item.tipe_produk || 'Lainnya') + '</p>';
+            }
             html += '    <p class="text-sm font-bold mt-1" style="color:#42B549">' + item.harga_formatted + '</p>';
             html += '  </div>';
-            html += '  <button onclick="window._cartRemove(' + item.produk_id + ')" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition flex-shrink-0" title="Hapus">';
+            html += '  <button onclick="window._cartRemove(' + item.produk_id + ', \'' + varianId + '\')" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition flex-shrink-0" title="Hapus">';
             html += '    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
             html += '  </button>';
             html += '</div>';
@@ -170,10 +175,13 @@ $initial_cart_count = $initial_cart_count ?? 0;
             });
     };
 
-    window._cartRemove = function(produkId) {
+    window._cartRemove = function(produkId, varianId) {
         const formData = new FormData();
         formData.append('action', 'remove');
         formData.append('produk_id', produkId);
+        if (varianId) {
+            formData.append('varian_id', varianId);
+        }
 
         fetch(CART_API_REMOVE, { method: 'POST', body: formData })
             .then(r => r.json())

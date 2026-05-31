@@ -1,16 +1,19 @@
 <?php
 require_once __DIR__ . '/../core/BaseController.php';
 require_once __DIR__ . '/../models/Produk.php';
+require_once __DIR__ . '/../models/ProdukVarian.php';
 
 class AdminProdukController extends BaseController
 {
     private $produkModel;
+    private $varianModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->requireAuth('admin');
         $this->produkModel = new Produk();
+        $this->varianModel = new ProdukVarian();
     }
 
     public function index()
@@ -43,7 +46,7 @@ class AdminProdukController extends BaseController
         $paging = paginate($this->db, "SELECT COUNT(*) as c FROM produk" . $where, $params, 10);
         $products = $this->db->fetchAll("SELECT * FROM produk" . $where . " ORDER BY id DESC LIMIT ? OFFSET ?", array_merge($params, [$paging['limit'], $paging['offset']]));
 
-        // Get rating for each product
+        // Get rating and variants for each product
         foreach ($products as &$product) {
             $rating_data = $this->db->fetchOne(
                 "SELECT ROUND(AVG(rating),1) as avg_rating, COUNT(rating) as total_rating FROM transaksi WHERE produk_id = ? AND rating IS NOT NULL",
@@ -51,7 +54,9 @@ class AdminProdukController extends BaseController
             );
             $product['avg_rating'] = $rating_data['avg_rating'] ?? '0.0';
             $product['total_rating'] = $rating_data['total_rating'] ?? 0;
+            $product['varian'] = $this->varianModel->getByProduk((int) $product['id']);
         }
+        unset($product);
 
         // Get tipe counts
         $tipe_counts = [];
@@ -137,23 +142,24 @@ class AdminProdukController extends BaseController
         $tipe = $_POST['tipe_produk'] ?? 'Lainnya';
         if (!array_key_exists($tipe, tipe_produk_list())) $tipe = 'Lainnya';
 
-        // Account-type products store credentials instead of a file
+        // Account-type products store variants (durasi + paket + harga + credentials)
         if ($tipe === 'Akun') {
-            $account_email = trim($_POST['account_email'] ?? '');
-            $account_password = trim($_POST['account_password'] ?? '');
-            if ($account_email === '' || $account_password === '') {
-                flash('error', 'Email dan password akun wajib diisi untuk produk tipe Akun.');
+            $variants = $this->parseVariants();
+            if (empty($variants)) {
+                flash('error', 'Minimal satu varian akun (durasi, harga, email, password) wajib diisi.');
                 return;
             }
-            $account_info = "Email: {$account_email}\nPassword: {$account_password}";
-            $this->produkModel->create([
+            // Product-level price = cheapest variant (for catalog display)
+            $minHarga = min(array_column($variants, 'harga'));
+            $newId = $this->produkModel->create([
                 'nama_produk' => $nama,
-                'harga' => $harga,
+                'harga' => $minHarga,
                 'deskripsi' => $deskripsi,
                 'tipe_produk' => $tipe,
                 'file_upload' => null,
-                'account_info' => $account_info,
+                'account_info' => null,
             ]);
+            $this->varianModel->replaceForProduk((int) $newId, $variants);
             flash('success', 'Produk akun berhasil ditambahkan!');
             return;
         }
@@ -196,25 +202,28 @@ class AdminProdukController extends BaseController
         $tipe = $_POST['tipe_produk'] ?? 'Lainnya';
         if (!array_key_exists($tipe, tipe_produk_list())) $tipe = 'Lainnya';
 
-        // Account-type products: update credentials, no file required
+        // Account-type products: update variants, no file required
         if ($tipe === 'Akun') {
-            $account_email = trim($_POST['account_email'] ?? '');
-            $account_password = trim($_POST['account_password'] ?? '');
-            if ($account_email === '' || $account_password === '') {
-                flash('error', 'Email dan password akun wajib diisi untuk produk tipe Akun.');
+            $variants = $this->parseVariants();
+            if (empty($variants)) {
+                flash('error', 'Minimal satu varian akun (durasi, harga, email, password) wajib diisi.');
                 return;
             }
-            $account_info = "Email: {$account_email}\nPassword: {$account_password}";
+            $minHarga = min(array_column($variants, 'harga'));
             $this->produkModel->update($id, [
                 'nama_produk' => $nama,
-                'harga' => $harga,
+                'harga' => $minHarga,
                 'deskripsi' => $deskripsi,
                 'tipe_produk' => $tipe,
-                'account_info' => $account_info,
+                'account_info' => null,
             ]);
+            $this->varianModel->replaceForProduk($id, $variants);
             flash('success', 'Produk akun berhasil diupdate!');
             return;
         }
+
+        // Non-account product: clear any leftover variants
+        $this->varianModel->replaceForProduk($id, []);
 
         $file_name = $_FILES['file_upload']['name'] ?? '';
 
@@ -255,6 +264,47 @@ class AdminProdukController extends BaseController
             ]);
         }
         flash('success', 'Produk berhasil diupdate!');
+    }
+
+    /**
+     * Parse variant rows from POST into a clean array.
+     * Expects parallel arrays: durasi[], paket[], harga[], account_email[], account_password[].
+     * Returns rows with non-empty durasi + email + password.
+     */
+    private function parseVariants(): array
+    {
+        $durasiArr = $_POST['varian_durasi'] ?? [];
+        $paketArr = $_POST['varian_paket'] ?? [];
+        $hargaArr = $_POST['varian_harga'] ?? [];
+        $emailArr = $_POST['varian_email'] ?? [];
+        $passArr = $_POST['varian_password'] ?? [];
+
+        if (!is_array($durasiArr)) {
+            return [];
+        }
+
+        $variants = [];
+        foreach ($durasiArr as $i => $durasi) {
+            $durasi = trim((string) $durasi);
+            $paket = trim((string) ($paketArr[$i] ?? ''));
+            $harga = (int) preg_replace('/\D/', '', (string) ($hargaArr[$i] ?? '0'));
+            $email = trim((string) ($emailArr[$i] ?? ''));
+            $pass = trim((string) ($passArr[$i] ?? ''));
+
+            // Skip incomplete rows
+            if ($durasi === '' || $email === '' || $pass === '') {
+                continue;
+            }
+
+            $variants[] = [
+                'durasi'       => $durasi,
+                'paket'        => $paket !== '' ? $paket : null,
+                'harga'        => $harga,
+                'account_info' => "Email: {$email}\nPassword: {$pass}",
+            ];
+        }
+
+        return $variants;
     }
 
     /**

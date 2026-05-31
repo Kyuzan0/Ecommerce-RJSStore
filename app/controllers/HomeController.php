@@ -108,6 +108,27 @@ class HomeController extends BaseController
         $reviews  = $this->produkModel->getReviews($produkId);
         $tipe_cfg = tipe_produk_config($produk['tipe_produk'] ?? 'Lainnya');
 
+        // Load variants for Akun products
+        $variantList = [];
+        if (($produk['tipe_produk'] ?? '') === 'Akun') {
+            require_once BASE_PATH . '/app/models/ProdukVarian.php';
+            $varianModel = new ProdukVarian();
+            foreach ($varianModel->getByProduk($produkId) as $v) {
+                $label = $v['durasi'];
+                if (!empty($v['paket'])) {
+                    $label .= ' - ' . $v['paket'];
+                }
+                $variantList[] = [
+                    'id'              => (int) $v['id'],
+                    'label'           => $label,
+                    'durasi'          => $v['durasi'],
+                    'paket'           => $v['paket'],
+                    'harga'           => (int) $v['harga'],
+                    'harga_formatted' => rupiah($v['harga']),
+                ];
+            }
+        }
+
         $reviewList = [];
         foreach ($reviews as $r) {
             $reviewList[] = [
@@ -134,6 +155,7 @@ class HomeController extends BaseController
                 'avg_rating'    => round((float) $produk['avg_rating'], 1),
                 'total_reviews' => (int) $produk['total_reviews'],
             ],
+            'variants' => $variantList,
             'reviews' => $reviewList,
         ]);
     }

@@ -161,11 +161,19 @@ class CheckoutController extends BaseController
     {
         $midtransItems = [];
         foreach ($cartItems as $item) {
+            $name = $item['nama_produk'];
+            if (!empty($item['durasi'])) {
+                $name .= ' (' . $item['durasi'];
+                if (!empty($item['paket'])) {
+                    $name .= ' ' . $item['paket'];
+                }
+                $name .= ')';
+            }
             $midtransItems[] = [
                 'id'       => (string) $item['produk_id'],
                 'price'    => (int) $item['harga'],
                 'quantity' => 1,
-                'name'     => substr($item['nama_produk'], 0, 50),
+                'name'     => substr($name, 0, 50),
             ];
         }
 

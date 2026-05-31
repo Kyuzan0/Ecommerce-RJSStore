@@ -11,7 +11,7 @@
         </a>
         <?php endif; ?>
     </form>
-    <button onclick="openModal('tambah'); toggleAkunFields('tambah');" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition shrink-0" style="background:#42B549">
+    <button onclick="openTambahModal()" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition shrink-0" style="background:#42B549">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         Tambah Produk
     </button>
@@ -56,16 +56,13 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </div>
                     <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
                 </div>
-                <div id="tambah-akun-wrap" class="hidden grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Email / Username Akun</label>
-                        <input type="text" name="account_email" id="tambah-account-email" placeholder="akun@email.com">
+                <div id="tambah-akun-wrap" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
+                        <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Password Akun</label>
-                        <input type="text" name="account_password" id="tambah-account-password" placeholder="password akun">
-                    </div>
-                    <p class="col-span-2 text-xs text-gray-400 -mt-2">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                    <div id="tambah-varian-list" class="space-y-3"></div>
+                    <p class="text-xs text-gray-400 mt-2">Contoh: Durasi "1 Bulan", Paket "Individual". Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -108,16 +105,13 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </div>
                     <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
                 </div>
-                <div id="edit-akun-wrap" class="hidden grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Email / Username Akun</label>
-                        <input type="text" name="account_email" id="edit-account-email" placeholder="akun@email.com">
+                <div id="edit-akun-wrap" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
+                        <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Password Akun</label>
-                        <input type="text" name="account_password" id="edit-account-password" placeholder="password akun">
-                    </div>
-                    <p class="col-span-2 text-xs text-gray-400 -mt-2">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                    <div id="edit-varian-list" class="space-y-3"></div>
+                    <p class="text-xs text-gray-400 mt-2">Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -193,7 +187,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <?php endif; ?>
                     </td>
                     <td class="px-5 py-4 text-center">
-                        <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['nama_produk']), ENT_QUOTES) ?>, <?= (int)$r['harga'] ?>, <?= htmlspecialchars(json_encode($r['tipe_produk'] ?? 'Lainnya'), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['deskripsi']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['account_info'] ?? ''), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
+                        <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
                             <?= csrf_field() ?>
                             <input type="hidden" name="action" value="hapus">
@@ -229,6 +223,15 @@ function openModal(type) {
         c.style.opacity = '1';
     });
 }
+function openTambahModal() {
+    // Reset the add form to a clean state
+    var form = document.querySelector('#modal-tambah form');
+    if (form) form.reset();
+    document.getElementById('tambah-harga-raw').value = '0';
+    document.getElementById('tambah-varian-list').innerHTML = '';
+    openModal('tambah');
+    toggleAkunFields('tambah');
+}
 function closeModal(type) {
     var modal = document.getElementById('modal-' + type);
     var c = modal.querySelector('.modal-content');
@@ -239,34 +242,73 @@ function closeModal(type) {
         document.body.style.overflow = '';
     }, 200);
 }
-function openEdit(id, nama, harga, tipe, deskripsi, accountInfo) {
+function openEdit(id, nama, harga, tipe, deskripsi, variants) {
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-nama').value = nama;
     document.getElementById('edit-harga-raw').value = harga;
     document.getElementById('edit-harga-display').value = formatHargaValue(harga);
     document.getElementById('edit-tipe').value = tipe;
     document.getElementById('edit-deskripsi').value = deskripsi;
+    document.getElementById('edit-title').textContent = nama;
 
-    // Parse "Email: ...\nPassword: ..." back into the two fields
-    var email = '', pass = '';
-    if (accountInfo) {
-        var lines = String(accountInfo).split(/\r?\n/);
-        lines.forEach(function(line) {
-            var m = line.match(/^\s*Email\s*:\s*(.*)$/i);
-            if (m) { email = m[1].trim(); return; }
-            var p = line.match(/^\s*Password\s*:\s*(.*)$/i);
-            if (p) { pass = p[1].trim(); }
+    // Populate variant rows
+    var list = document.getElementById('edit-varian-list');
+    list.innerHTML = '';
+    if (Array.isArray(variants) && variants.length > 0) {
+        variants.forEach(function(v) {
+            var creds = parseAccountInfo(v.account_info || '');
+            addVarianRow('edit', {
+                durasi: v.durasi || '',
+                paket: v.paket || '',
+                harga: v.harga || 0,
+                email: creds.email,
+                password: creds.password
+            });
         });
     }
-    document.getElementById('edit-account-email').value = email;
-    document.getElementById('edit-account-password').value = pass;
 
-    document.getElementById('edit-title').textContent = nama;
     toggleAkunFields('edit');
     openModal('edit');
 }
 
-// Toggle between file upload and account credentials based on product type
+// Parse "Email: x\nPassword: y" into {email, password}
+function parseAccountInfo(text) {
+    var email = '', password = '';
+    String(text).split(/\r?\n/).forEach(function(line) {
+        var m = line.match(/^\s*Email\s*:\s*(.*)$/i);
+        if (m) { email = m[1].trim(); return; }
+        var p = line.match(/^\s*Password\s*:\s*(.*)$/i);
+        if (p) { password = p[1].trim(); }
+    });
+    return { email: email, password: password };
+}
+
+// Build one variant editor row
+function addVarianRow(prefix, data) {
+    data = data || {};
+    var list = document.getElementById(prefix + '-varian-list');
+    var row = document.createElement('div');
+    row.className = 'varian-row border border-gray-200 rounded-xl p-3 grid grid-cols-2 gap-3 relative';
+    row.innerHTML =
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Durasi</label>' +
+        '<input type="text" name="varian_durasi[]" placeholder="1 Bulan" value="' + escapeAttr(data.durasi) + '"></div>' +
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Paket (opsional)</label>' +
+        '<input type="text" name="varian_paket[]" placeholder="Individual / Family" value="' + escapeAttr(data.paket) + '"></div>' +
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Harga (Rp)</label>' +
+        '<input type="text" name="varian_harga[]" placeholder="0" value="' + (data.harga ? Number(data.harga).toLocaleString('id-ID') : '') + '" oninput="this.value=this.value.replace(/\\D/g,\'\')===\'\'?\'\':Number(this.value.replace(/\\D/g,\'\')).toLocaleString(\'id-ID\')"></div>' +
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Email / Username</label>' +
+        '<input type="text" name="varian_email[]" placeholder="akun@email.com" value="' + escapeAttr(data.email) + '"></div>' +
+        '<div class="col-span-2"><label class="block text-[11px] font-semibold text-gray-400 mb-1">Password</label>' +
+        '<input type="text" name="varian_password[]" placeholder="password akun" value="' + escapeAttr(data.password) + '"></div>' +
+        '<button type="button" onclick="this.closest(\'.varian-row\').remove()" class="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600" title="Hapus varian">&times;</button>';
+    list.appendChild(row);
+}
+
+function escapeAttr(val) {
+    return String(val == null ? '' : val).replace(/"/g, '&quot;');
+}
+
+// Toggle between file upload and account variants based on product type
 function toggleAkunFields(prefix) {
     var tipe = document.getElementById(prefix + '-tipe').value;
     var akunWrap = document.getElementById(prefix + '-akun-wrap');
@@ -276,6 +318,11 @@ function toggleAkunFields(prefix) {
     if (isAkun) {
         akunWrap.classList.remove('hidden');
         fileWrap.classList.add('hidden');
+        // Ensure at least one variant row exists
+        var list = document.getElementById(prefix + '-varian-list');
+        if (list && list.children.length === 0) {
+            addVarianRow(prefix);
+        }
     } else {
         akunWrap.classList.add('hidden');
         fileWrap.classList.remove('hidden');

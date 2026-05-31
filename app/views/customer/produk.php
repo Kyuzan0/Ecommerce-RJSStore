@@ -98,6 +98,11 @@
                     <button disabled class="w-full bg-orange-400 text-white py-2 px-4 rounded-lg cursor-not-allowed">
                         Di Keranjang
                     </button>
+                <?php elseif (($product['tipe_produk'] ?? '') === 'Akun'): ?>
+                    <a href="<?= url('/?search=' . urlencode($product['nama_produk'])) ?>"
+                       class="block text-center w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">
+                        Pilih Varian
+                    </a>
                 <?php else: ?>
                     <button onclick="addToCart(<?= $product['id'] ?>)" 
                             class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">

@@ -43,14 +43,20 @@
             <!-- Product Info -->
             <div class="p-4">
                 <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2"><?= e($item['nama_produk']) ?></h3>
+                <?php if (!empty($item['durasi'])): ?>
+                    <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-lg mb-2" style="background:#E8F5E9; color:#2E7D32"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></span>
+                <?php endif; ?>
                 <p class="text-sm text-gray-500 mb-4">
                     Dibeli: <?= format_tanggal($item['tanggal']) ?>
                 </p>
 
+                <?php
+                $uid = (int)$item['produk_id'] . '_' . (int)($item['varian_id'] ?? 0);
+                ?>
                 <?php if (($item['tipe_produk'] ?? '') === 'Akun' && !empty($item['account_info'])): ?>
                     <!-- Account Credentials -->
                     <button type="button"
-                            onclick="toggleAkun(<?= (int)$item['produk_id'] ?>)"
+                            onclick="toggleAkun('<?= $uid ?>')"
                             class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-semibold transition-colors">
                         <div class="flex items-center justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,12 +65,12 @@
                             Lihat Akun
                         </div>
                     </button>
-                    <div id="akun-<?= (int)$item['produk_id'] ?>" class="hidden mt-3">
+                    <div id="akun-<?= $uid ?>" class="hidden mt-3">
                         <div class="bg-gray-900 rounded-lg p-3 relative">
-                            <pre id="akun-text-<?= (int)$item['produk_id'] ?>" class="text-xs text-green-300 whitespace-pre-wrap break-words font-mono leading-relaxed"><?= e($item['account_info']) ?></pre>
+                            <pre id="akun-text-<?= $uid ?>" class="text-xs text-green-300 whitespace-pre-wrap break-words font-mono leading-relaxed"><?= e($item['account_info']) ?></pre>
                         </div>
                         <button type="button"
-                                onclick="copyAkun(<?= (int)$item['produk_id'] ?>)"
+                                onclick="copyAkun('<?= $uid ?>')"
                                 class="mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm py-2 rounded-lg font-medium transition-colors">
                             Salin Informasi Akun
                         </button>

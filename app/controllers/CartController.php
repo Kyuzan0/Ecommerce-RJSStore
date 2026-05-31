@@ -51,6 +51,9 @@ class CartController extends BaseController
     public function apiAdd(): void
     {
         $produkId = (int) ($this->getInput('produk_id', 0));
+        $varianId = (int) ($this->getInput('varian_id', 0));
+        $varianId = $varianId > 0 ? $varianId : null;
+
         if ($produkId <= 0) {
             $this->json(['success' => false, 'message' => 'Produk tidak valid.']);
             return;
@@ -66,6 +69,34 @@ class CartController extends BaseController
             return;
         }
 
+        // Account products require a variant selection
+        if ($produk['tipe_produk'] === 'Akun') {
+            $hasVariants = $this->db->fetchOne(
+                "SELECT COUNT(*) AS c FROM produk_varian WHERE produk_id = ?",
+                [$produkId]
+            );
+            if ($hasVariants && (int) $hasVariants['c'] > 0) {
+                if ($varianId === null) {
+                    $this->json(['success' => false, 'message' => 'Silakan pilih varian terlebih dahulu.']);
+                    return;
+                }
+                // Verify variant belongs to product
+                $variant = $this->db->fetchOne(
+                    "SELECT id FROM produk_varian WHERE id = ? AND produk_id = ?",
+                    [$varianId, $produkId]
+                );
+                if (!$variant) {
+                    $this->json(['success' => false, 'message' => 'Varian tidak valid.']);
+                    return;
+                }
+            } else {
+                $varianId = null;
+            }
+        } else {
+            // Non-account products never carry a variant
+            $varianId = null;
+        }
+
         if ($this->isLoggedIn()) {
             $userId = $this->userId();
 
@@ -76,22 +107,23 @@ class CartController extends BaseController
                 return;
             }
 
-            // Check if already in cart
-            if ($this->keranjangModel->isInCart($userId, $produkId)) {
+            // Check if already in cart (same variant)
+            if ($this->keranjangModel->isInCart($userId, $produkId, $varianId)) {
                 $this->json(['success' => false, 'message' => 'Produk sudah ada di keranjang.']);
                 return;
             }
 
-            $this->keranjangModel->addItem($userId, $produkId);
+            $this->keranjangModel->addItem($userId, $produkId, $varianId);
         } else {
             // Guest: add to session cart
             foreach ($_SESSION['cart'] as $item) {
-                if ((int) $item['produk_id'] === $produkId) {
+                $itemVarian = isset($item['varian_id']) ? (int) $item['varian_id'] : null;
+                if ((int) $item['produk_id'] === $produkId && $itemVarian === $varianId) {
                     $this->json(['success' => false, 'message' => 'Produk sudah ada di keranjang.']);
                     return;
                 }
             }
-            $_SESSION['cart'][] = ['produk_id' => $produkId];
+            $_SESSION['cart'][] = ['produk_id' => $produkId, 'varian_id' => $varianId];
         }
 
         $cartData = $this->getCartData();
@@ -108,16 +140,20 @@ class CartController extends BaseController
     public function apiRemove(): void
     {
         $produkId = (int) ($this->getInput('produk_id', 0));
+        $varianId = (int) ($this->getInput('varian_id', 0));
+        $varianId = $varianId > 0 ? $varianId : null;
+
         if ($produkId <= 0) {
             $this->json(['success' => false, 'message' => 'Produk tidak valid.']);
             return;
         }
 
         if ($this->isLoggedIn()) {
-            $this->keranjangModel->removeItem($this->userId(), $produkId);
+            $this->keranjangModel->removeItem($this->userId(), $produkId, $varianId);
         } else {
-            $_SESSION['cart'] = array_values(array_filter($_SESSION['cart'], function ($item) use ($produkId) {
-                return (int) $item['produk_id'] !== $produkId;
+            $_SESSION['cart'] = array_values(array_filter($_SESSION['cart'], function ($item) use ($produkId, $varianId) {
+                $itemVarian = isset($item['varian_id']) ? (int) $item['varian_id'] : null;
+                return !((int) $item['produk_id'] === $produkId && $itemVarian === $varianId);
             }));
         }
 
@@ -170,33 +206,67 @@ class CartController extends BaseController
         if ($this->isLoggedIn()) {
             $rows = $this->keranjangModel->getByUser($this->userId());
             foreach ($rows as $row) {
+                $varianLabel = '';
+                if (!empty($row['durasi'])) {
+                    $varianLabel = $row['durasi'];
+                    if (!empty($row['paket'])) {
+                        $varianLabel .= ' - ' . $row['paket'];
+                    }
+                }
                 $items[] = [
                     'produk_id'       => (int) $row['produk_id'],
+                    'varian_id'       => isset($row['varian_id']) ? (int) $row['varian_id'] : null,
+                    'varian_label'    => $varianLabel,
                     'nama_produk'     => $row['nama_produk'],
                     'harga'           => (int) $row['harga'],
                     'harga_formatted' => rupiah($row['harga']),
-                    'deskripsi'       => mb_substr($row['deskripsi'], 0, 60),
+                    'deskripsi'       => mb_substr($row['deskripsi'] ?? '', 0, 60),
                     'tipe_produk'     => $row['tipe_produk'] ?? 'Lainnya',
                 ];
                 $total += (int) $row['harga'];
             }
         } else {
             foreach ($_SESSION['cart'] as $cartItem) {
+                $produkId = (int) $cartItem['produk_id'];
+                $varianId = isset($cartItem['varian_id']) && $cartItem['varian_id'] !== null
+                    ? (int) $cartItem['varian_id']
+                    : null;
+
                 $produk = $this->db->fetchOne(
                     "SELECT id, nama_produk, harga, deskripsi, tipe_produk FROM produk WHERE id = ?",
-                    [(int) $cartItem['produk_id']]
+                    [$produkId]
                 );
-                if ($produk) {
-                    $items[] = [
-                        'produk_id'       => (int) $produk['id'],
-                        'nama_produk'     => $produk['nama_produk'],
-                        'harga'           => (int) $produk['harga'],
-                        'harga_formatted' => rupiah($produk['harga']),
-                        'deskripsi'       => mb_substr($produk['deskripsi'], 0, 60),
-                        'tipe_produk'     => $produk['tipe_produk'] ?? 'Lainnya',
-                    ];
-                    $total += (int) $produk['harga'];
+                if (!$produk) {
+                    continue;
                 }
+
+                $harga = (int) $produk['harga'];
+                $varianLabel = '';
+                if ($varianId !== null) {
+                    $variant = $this->db->fetchOne(
+                        "SELECT durasi, paket, harga FROM produk_varian WHERE id = ? AND produk_id = ?",
+                        [$varianId, $produkId]
+                    );
+                    if ($variant) {
+                        $harga = (int) $variant['harga'];
+                        $varianLabel = $variant['durasi'];
+                        if (!empty($variant['paket'])) {
+                            $varianLabel .= ' - ' . $variant['paket'];
+                        }
+                    }
+                }
+
+                $items[] = [
+                    'produk_id'       => (int) $produk['id'],
+                    'varian_id'       => $varianId,
+                    'varian_label'    => $varianLabel,
+                    'nama_produk'     => $produk['nama_produk'],
+                    'harga'           => $harga,
+                    'harga_formatted' => rupiah($harga),
+                    'deskripsi'       => mb_substr($produk['deskripsi'] ?? '', 0, 60),
+                    'tipe_produk'     => $produk['tipe_produk'] ?? 'Lainnya',
+                ];
+                $total += $harga;
             }
         }
 

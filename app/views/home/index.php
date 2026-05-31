@@ -103,7 +103,11 @@
                     <span class="text-xs text-gray-400">(<?= $total_ulasan; ?> Ulasan)</span>
                 </div>
                 
-                <p class="font-bold text-lg mb-3" style="color:#42B549"><?= rupiah($row['harga']); ?></p>
+                <?php if (($row['tipe_produk'] ?? '') === 'Akun'): ?>
+                    <p class="font-bold text-lg mb-3" style="color:#42B549"><span class="text-xs font-normal text-gray-400">Mulai </span><?= rupiah($row['harga']); ?></p>
+                <?php else: ?>
+                    <p class="font-bold text-lg mb-3" style="color:#42B549"><?= rupiah($row['harga']); ?></p>
+                <?php endif; ?>
                 
                 <?php if ($purchased): ?>
                     <span class="block text-center text-gray-400 py-2.5 rounded-xl text-sm font-medium bg-gray-100 cursor-not-allowed">
@@ -114,6 +118,11 @@
                        onclick="document.getElementById('cartDropdown').classList.remove('hidden'); event.stopPropagation();"
                        class="w-full text-center text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition cursor-pointer cart-added" style="background:#FF9800">
                         Di Keranjang ✓
+                    </button>
+                <?php elseif (($row['tipe_produk'] ?? '') === 'Akun'): ?>
+                    <button onclick="openProductModal(<?= $pid ?>); event.stopPropagation();"
+                       class="w-full text-center text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition cursor-pointer" style="background:#42B549">
+                        Pilih Varian
                     </button>
                 <?php else: ?>
                     <button data-cart-produk="<?= $pid ?>"
@@ -173,6 +182,11 @@
                         <h2 id="mp-title" class="font-extrabold text-2xl md:text-[2rem] text-gray-900 mb-3 leading-tight text-left"></h2>
                         <p id="mp-price" class="font-black text-3xl md:text-4xl mb-6" style="color:#42B549"></p>
 
+                        <div id="mp-variants" class="hidden mb-6">
+                            <h4 class="text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-3">Pilih Varian</h4>
+                            <div id="mp-variant-options" class="flex flex-wrap gap-2"></div>
+                        </div>
+
                         <div class="rounded-[1.75rem] bg-white/78 backdrop-blur-md border border-white/70 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.28)] p-5 md:p-6 mb-6">
                             <h4 class="text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-3">Informasi Produk</h4>
                             <p id="mp-desc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
@@ -211,6 +225,10 @@
 var PRODUCT_DETAIL_API = '<?= url("/api/product-detail") ?>';
 var CART_API_URL = '<?= url("/api/cart") ?>';
 var PRODUCT_MODAL_LOADING_HTML = '<svg class="animate-spin h-10 w-10 text-green-500 mb-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><p class="text-sm text-gray-500 font-medium animate-pulse">Memuat detail produk...</p>';
+
+// Holds variants + selection for the product currently open in the modal
+var MP_VARIANTS = [];
+var MP_SELECTED_VARIANT = null;
 
 function escapeHtml(unsafe) {
     return (unsafe || '').toString()
@@ -339,6 +357,45 @@ function renderModalProduct(product) {
     renderModalCTA(product.id, getProductCartState(product.id), false);
 }
 
+// Render the variant selector (only for Akun products with variants)
+function renderVariants(product, variants) {
+    var wrap = document.getElementById('mp-variants');
+    var optionsEl = document.getElementById('mp-variant-options');
+    MP_VARIANTS = variants || [];
+    MP_SELECTED_VARIANT = null;
+
+    if (!MP_VARIANTS.length) {
+        wrap.classList.add('hidden');
+        optionsEl.innerHTML = '';
+        return;
+    }
+
+    wrap.classList.remove('hidden');
+    optionsEl.innerHTML = '';
+    MP_VARIANTS.forEach(function(v) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mp-variant-btn px-4 py-2 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-green-400 transition';
+        btn.setAttribute('data-variant-id', v.id);
+        btn.innerHTML = escapeHtml(v.label) + ' <span class="block text-xs font-bold" style="color:#42B549">' + escapeHtml(v.harga_formatted) + '</span>';
+        btn.onclick = function() { selectVariant(product.id, v); };
+        optionsEl.appendChild(btn);
+    });
+}
+
+function selectVariant(productId, variant) {
+    MP_SELECTED_VARIANT = variant;
+    // Highlight selected
+    document.querySelectorAll('.mp-variant-btn').forEach(function(b) {
+        var isSel = parseInt(b.getAttribute('data-variant-id'), 10) === variant.id;
+        b.style.borderColor = isSel ? '#42B549' : '';
+        b.style.background = isSel ? '#E8F5E9' : '';
+        b.classList.toggle('border-green-500', isSel);
+    });
+    // Update displayed price
+    document.getElementById('mp-price').textContent = variant.harga_formatted;
+}
+
 function resetProductModalState() {
     document.getElementById('mp-content').classList.add('hidden');
     var loading = document.getElementById('mp-loading');
@@ -380,6 +437,7 @@ function openProductModal(productId, event) {
             }
 
             renderModalProduct(data.product);
+            renderVariants(data.product, data.variants || []);
             renderModalReviews(data.reviews || []);
 
             document.getElementById('mp-loading').classList.add('hidden');
@@ -391,11 +449,22 @@ function openProductModal(productId, event) {
 }
 
 function handleModalCartAdd(productId) {
+    // If product has variants, one must be selected
+    if (MP_VARIANTS.length > 0 && !MP_SELECTED_VARIANT) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('warning', 'Silakan pilih varian terlebih dahulu.');
+        }
+        return;
+    }
+
     renderModalCTA(productId, 'default', true);
 
     var formData = new FormData();
     formData.append('action', 'add');
     formData.append('produk_id', productId);
+    if (MP_SELECTED_VARIANT) {
+        formData.append('varian_id', MP_SELECTED_VARIANT.id);
+    }
 
     fetch(CART_API_URL + '/add', { method: 'POST', body: formData })
         .then(function(r) { return r.json(); })

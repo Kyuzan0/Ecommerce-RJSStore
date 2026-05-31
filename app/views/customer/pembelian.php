@@ -86,6 +86,9 @@
                     <!-- Product Info -->
                     <div class="flex-1">
                         <h4 class="font-semibold text-gray-800"><?= e($item['nama_produk']) ?></h4>
+                        <?php if (!empty($item['durasi'])): ?>
+                            <p class="text-xs text-gray-500"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></p>
+                        <?php endif; ?>
                         <p class="text-sm text-gray-600"><?= rupiah($item['harga']) ?></p>
                         
                         <!-- Rating Display -->

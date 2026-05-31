@@ -46,7 +46,11 @@
                 <!-- Product Info -->
                 <div class="flex-1">
                     <h3 class="font-semibold text-gray-800 mb-1"><?= e($item['nama_produk']) ?></h3>
-                    <p class="text-sm text-gray-500 mb-2"><?= e($item['tipe_produk']) ?></p>
+                    <?php if (!empty($item['durasi'])): ?>
+                        <p class="text-sm text-gray-500 mb-2"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></p>
+                    <?php else: ?>
+                        <p class="text-sm text-gray-500 mb-2"><?= e($item['tipe_produk']) ?></p>
+                    <?php endif; ?>
                     <p class="text-lg font-bold text-green-600"><?= rupiah($item['harga']) ?></p>
                 </div>
                 
@@ -55,6 +59,7 @@
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="hapus_item">
                     <input type="hidden" name="produk_id" value="<?= $item['produk_id'] ?>">
+                    <input type="hidden" name="varian_id" value="<?= $item['varian_id'] ?? '' ?>">
                     <button type="submit" 
                             onclick="return confirm('Hapus produk dari keranjang?')"
                             class="text-red-600 hover:text-red-800 p-2">

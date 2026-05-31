@@ -135,8 +135,9 @@ class CustomerController extends BaseController
 
         if ($action === 'hapus_item') {
             $produk_id = (int)($_POST['produk_id'] ?? 0);
+            $varian_id = isset($_POST['varian_id']) && $_POST['varian_id'] !== '' ? (int)$_POST['varian_id'] : null;
             if ($produk_id > 0) {
-                $this->keranjangModel->removeItem($user_id, $produk_id);
+                $this->keranjangModel->removeItem($user_id, $produk_id, $varian_id);
                 flash('success', 'Produk berhasil dihapus dari keranjang');
             }
         } elseif ($action === 'kosongkan') {

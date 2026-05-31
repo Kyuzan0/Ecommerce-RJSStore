@@ -63,7 +63,11 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-800"><?= e($item['nama_produk']) ?></p>
-                            <p class="text-xs text-gray-400 line-clamp-1"><?= e($item['deskripsi']) ?></p>
+                            <?php if (!empty($item['durasi'])): ?>
+                                <p class="text-xs text-gray-500"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></p>
+                            <?php else: ?>
+                                <p class="text-xs text-gray-400 line-clamp-1"><?= e($item['deskripsi']) ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <span class="text-sm font-bold text-gray-700 flex-shrink-0 ml-3"><?= rupiah($item['harga']) ?></span>
