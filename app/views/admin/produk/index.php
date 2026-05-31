@@ -30,8 +30,8 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 <div id="modal-tambah" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('tambah')"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-6 rounded-full" style="background:#42B549"></div>
                     <h2 class="font-bold text-gray-800">Tambah Produk Baru</h2>
@@ -40,32 +40,34 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="tambah">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" placeholder="Nama produk" required></div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="tambah-harga-raw" value="0"><input type="text" id="tambah-harga-display" placeholder="0" required oninput="formatHargaInput(this, 'tambah-harga-raw')"></div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
-                        <select name="tipe_produk" id="tambah-tipe" onchange="toggleAkunFields('tambah')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
-                            <?php foreach (tipe_produk_list() as $key => $cfg): ?>
-                            <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" placeholder="Nama produk" required></div>
+                        <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="tambah-harga-raw" value="0"><input type="text" id="tambah-harga-display" placeholder="0" required oninput="formatHargaInput(this, 'tambah-harga-raw')"></div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
+                            <select name="tipe_produk" id="tambah-tipe" onchange="toggleAkunFields('tambah')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                                <?php foreach (tipe_produk_list() as $key => $cfg): ?>
+                                <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
                     </div>
-                    <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
-                </div>
-                <div id="tambah-akun-wrap" class="hidden">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
-                        <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
+                    <div id="tambah-akun-wrap" class="hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
+                            <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
+                        </div>
+                        <div id="tambah-varian-list" class="space-y-3"></div>
+                        <p class="text-xs text-gray-400 mt-2">Contoh: Durasi "1 Bulan", Paket "Individual". Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
-                    <div id="tambah-varian-list" class="space-y-3"></div>
-                    <p class="text-xs text-gray-400 mt-2">Contoh: Durasi "1 Bulan", Paket "Individual". Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
                 </div>
-                <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 flex-shrink-0 bg-white">
                     <button type="button" onclick="closeModal('tambah')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">Tambah Produk</button>
                 </div>
@@ -78,8 +80,8 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 <div id="modal-edit" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('edit')"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-6 rounded-full" style="background:#1976D2"></div>
                     <h2 class="font-bold text-gray-800">Edit Produk: <span id="edit-title" style="color:#1976D2"></span></h2>
@@ -88,33 +90,35 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <form method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id_produk" id="edit-id">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" id="edit-nama" required></div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="edit-harga-raw" value="0"><input type="text" id="edit-harga-display" required oninput="formatHargaInput(this, 'edit-harga-raw')"></div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
-                        <select name="tipe_produk" id="edit-tipe" onchange="toggleAkunFields('edit')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
-                            <?php foreach (tipe_produk_list() as $key => $cfg): ?>
-                            <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" id="edit-nama" required></div>
+                        <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="edit-harga-raw" value="0"><input type="text" id="edit-harga-display" required oninput="formatHargaInput(this, 'edit-harga-raw')"></div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
+                            <select name="tipe_produk" id="edit-tipe" onchange="toggleAkunFields('edit')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                                <?php foreach (tipe_produk_list() as $key => $cfg): ?>
+                                <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
                     </div>
-                    <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
-                </div>
-                <div id="edit-akun-wrap" class="hidden">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
-                        <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
+                    <div id="edit-akun-wrap" class="hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
+                            <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
+                        </div>
+                        <div id="edit-varian-list" class="space-y-3"></div>
+                        <p class="text-xs text-gray-400 mt-2">Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
-                    <div id="edit-varian-list" class="space-y-3"></div>
-                    <p class="text-xs text-gray-400 mt-2">Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
                 </div>
-                <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 flex-shrink-0 bg-white">
                     <button type="button" onclick="closeModal('edit')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#1976D2">Simpan Perubahan</button>
                 </div>
