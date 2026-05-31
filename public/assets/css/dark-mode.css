@@ -418,6 +418,13 @@ footer {
     }
 }
 
+/* CRITICAL: flex children must allow content narrower than its min-content,
+   otherwise wide tables / overflow wrappers force the whole page wide.
+   This is the root fix for "desktop forced into mobile" overflow bleed. */
+.app-shell__body { min-width: 0; }
+.app-shell__body > main { min-width: 0; }
+main > * { min-width: 0; max-width: 100%; }
+
 /* ------------------------------------------------------------
    6. MOBILE SIDEBAR DRAWER
    ------------------------------------------------------------ */
@@ -503,7 +510,7 @@ textarea:not(.bg-transparent),
 select:not(.bg-transparent) {
     background-color: var(--ds-surface) !important;
     color: var(--ds-primary) !important;
-    border-color: var(--ds-border) !important;
+    border: 1px solid var(--ds-border-strong) !important;
     border-radius: var(--ds-radius-sm) !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
@@ -700,9 +707,6 @@ button[disabled], a.cursor-not-allowed,
     /* Auth cards & content padding scale down */
     .max-w-7xl { padding-left: var(--ds-gutter); padding-right: var(--ds-gutter); }
 
-    /* Header rows squish gracefully */
-    header .flex { flex-wrap: nowrap; }
-
     /* Modal full-width with safe padding on small viewports */
     [class*="max-w-3xl"], [class*="max-w-2xl"] { max-width: 100%; }
 
@@ -836,3 +840,329 @@ button[disabled], a.cursor-not-allowed,
 .ds-chip--warning   { --_chip-bg: var(--ds-chip-warning-bg); }
 .ds-chip--success   { --_chip-bg: var(--ds-chip-success-bg); }
 .ds-chip--danger    { --_chip-bg: var(--ds-chip-danger-bg); }
+
+/* ------------------------------------------------------------
+   18. RESPONSIVE PATTERNS (mobile-first utilities)
+       Reusable helpers for the patterns admin & customer pages
+       repeat: page toolbars, filter chip rows, tables, action
+       button groups, modal grids. Keeps view markup lean.
+   ------------------------------------------------------------ */
+
+/* Page toolbar — search input + primary action button.
+   Mobile: stacks vertically, button full-width.
+   Tablet+: row with search flex-1 and button auto-width. */
+.ds-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.ds-toolbar__search { flex: 1 1 auto; min-width: 0; }
+.ds-toolbar__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--ds-touch);
+}
+@media (min-width: 640px) {
+    .ds-toolbar { flex-direction: row; align-items: center; gap: 16px; }
+    .ds-toolbar__action { width: auto; }
+}
+
+/* Filter chip row — horizontal scroll on small viewports so chips
+   never wrap or overflow off-screen. */
+.ds-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    margin-left: calc(var(--ds-gutter) * -1);
+    margin-right: calc(var(--ds-gutter) * -1);
+    padding-left: var(--ds-gutter);
+    padding-right: var(--ds-gutter);
+
+    /* fade affordance on the right edge so users see content is scrollable */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 32px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 32px), transparent 100%);
+}
+.ds-filter-row::-webkit-scrollbar { height: 4px; }
+.ds-filter-row::-webkit-scrollbar-thumb { background: var(--ds-border-strong); border-radius: 4px; }
+.ds-filter-row > * { flex-shrink: 0; }
+@media (min-width: 768px) {
+    .ds-filter-row {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        -webkit-mask-image: none;
+                mask-image: none;
+    }
+}
+
+/* Table responsive wrapper — adds horizontal scroll on mobile,
+   fades edges to hint scrollability. */
+.ds-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.ds-table-wrap > table {
+    min-width: 640px;
+}
+.ds-table-wrap.ds-table-wrap--wide > table {
+    min-width: 880px;
+}
+
+/* ============================================================
+   Mobile card-list pattern for data tables.
+   On viewports < md: each <tr> renders as a stacked card,
+   each <td> renders as a label/value row (label from data-label).
+   On viewports >= md: regular table layout.
+
+   Usage:
+     <table class="ds-data-table">
+       <thead>...</thead>
+       <tbody>
+         <tr>
+           <td data-label="Info Produk">...</td>
+           <td data-label="Harga">...</td>
+         </tr>
+       </tbody>
+     </table>
+   When this class is present we DO NOT need ds-table-wrap;
+   the table itself becomes responsive.
+   ============================================================ */
+@media (max-width: 767px) {
+    .ds-data-table { display: block; min-width: 0; }
+    .ds-data-table thead { display: none; }
+    .ds-data-table tbody,
+    .ds-data-table tr,
+    .ds-data-table td { display: block; width: 100%; }
+
+    .ds-data-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+    }
+    .ds-data-table tr {
+        background: var(--ds-surface);
+        border: 1px solid var(--ds-border) !important;
+        border-radius: var(--ds-radius-sm);
+        padding: 12px 14px;
+        box-shadow: var(--ds-shadow-subtle);
+    }
+    .ds-data-table tr:hover { background: var(--ds-surface) !important; }
+    .ds-data-table td {
+        padding: 6px 0 !important;
+        text-align: left !important;
+        border: 0 !important;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 13px;
+    }
+    .ds-data-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--ds-muted);
+        flex-shrink: 0;
+    }
+    .ds-data-table td:not([data-label])::before { content: none; }
+    .ds-data-table td > * { text-align: right; }
+    /* Special — first cell (checkbox) and "Aksi" cell stay as full-width row without label-bg */
+    .ds-data-table td.ds-cell--full {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .ds-data-table td.ds-cell--full::before { margin-bottom: 4px; }
+    .ds-data-table td.ds-cell--actions {
+        border-top: 1px solid var(--ds-border) !important;
+        margin-top: 8px;
+        padding-top: 12px !important;
+        justify-content: flex-end;
+    }
+    .ds-data-table td.ds-cell--actions::before { content: none; }
+    .ds-data-table td.ds-cell--checkbox {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: auto;
+        padding: 0 !important;
+    }
+    .ds-data-table td.ds-cell--checkbox::before { content: none; }
+    .ds-data-table tr { position: relative; }
+
+    /* Center thumbnail / avatar block */
+    .ds-data-table td .flex.items-center.gap-3 { width: 100%; justify-content: flex-start; }
+}
+@media (min-width: 768px) {
+    .ds-data-table { width: 100%; }
+}
+
+/* Modal grid — auto-collapse 2-col layouts to single column on mobile. */
+.ds-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+@media (min-width: 640px) {
+    .ds-modal-grid { grid-template-columns: 1fr 1fr; }
+    .ds-modal-grid > .ds-modal-grid--full { grid-column: 1 / -1; }
+}
+
+/* Modal footer — stack action buttons vertically on mobile. */
+.ds-modal-footer {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--ds-border);
+    background: var(--ds-surface);
+}
+.ds-modal-footer > * { width: 100%; min-height: var(--ds-touch); }
+@media (min-width: 640px) {
+    .ds-modal-footer {
+        flex-direction: row;
+        justify-content: flex-end;
+        padding: 16px 24px;
+    }
+    .ds-modal-footer > * { width: auto; }
+}
+
+/* Modal shell — guarantees correct viewport behavior on mobile. */
+.ds-modal-shell {
+    width: 100%;
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--ds-radius-md);
+}
+
+/* Table action button group — small icon-only buttons.
+   On mobile, ensure tap-target ≥ 32px and prevent line wrapping. */
+.ds-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* Bulk action bar — fixed bottom toast.
+   Mobile: full width minus gutter, content can wrap.
+   Desktop: centered pill. */
+.ds-bulkbar-wrap {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+.ds-bulkbar-wrap > * { pointer-events: auto; max-width: 100%; }
+@media (min-width: 640px) {
+    .ds-bulkbar-wrap { left: 50%; right: auto; transform: translateX(-50%); bottom: 24px; }
+}
+
+/* Tabs (horizontal nav under page header) — mobile horizontal scroll
+   so tabs never wrap or overflow. */
+.ds-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-bottom: 1px solid var(--ds-border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-left: calc(var(--ds-gutter) * -1);
+    margin-right: calc(var(--ds-gutter) * -1);
+    padding-left: var(--ds-gutter);
+    padding-right: var(--ds-gutter);
+}
+.ds-tabs::-webkit-scrollbar { display: none; }
+.ds-tabs > * {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ds-secondary);
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.ds-tabs > .is-active {
+    color: var(--ds-tertiary);
+    border-bottom-color: var(--ds-tertiary);
+    font-weight: 600;
+}
+.ds-tabs > *:hover:not(.is-active) {
+    color: var(--ds-primary);
+}
+@media (min-width: 768px) {
+    .ds-tabs {
+        margin-left: 0; margin-right: 0;
+        padding-left: 0; padding-right: 0;
+    }
+}
+
+/* Page header — consistent rhythm matching dashboard reference */
+.ds-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+}
+.ds-page-header__row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+}
+@media (min-width: 640px) {
+    .ds-page-header__row { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+.ds-page-title { font-size: 1.25rem; font-weight: 700; color: var(--ds-primary); line-height: 1.3; }
+@media (min-width: 768px) {
+    .ds-page-title { font-size: 1.5rem; }
+}
+.ds-page-subtitle { font-size: 0.875rem; color: var(--ds-muted); }
+
+/* Form section — keep form actions stacked on mobile */
+.ds-form-actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    margin-top: 16px;
+}
+.ds-form-actions > * { width: 100%; min-height: var(--ds-touch); }
+@media (min-width: 640px) {
+    .ds-form-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+    .ds-form-actions > * { width: auto; }
+}
+
+/* Stretch primary buttons on small viewports automatically */
+@media (max-width: 639px) {
+    .ds-action-block { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .ds-action-block > * { width: 100% !important; min-height: var(--ds-touch); }
+}

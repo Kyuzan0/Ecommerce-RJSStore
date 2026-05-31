@@ -1,25 +1,25 @@
-<div class="flex items-center gap-4 mb-2">
-    <form method="GET" action="" class="relative flex-1">
+<div class="ds-toolbar">
+    <form method="GET" action="" class="relative ds-toolbar__search">
         <?php if (isset($_GET['tipe'])): ?><input type="hidden" name="tipe" value="<?= e($_GET['tipe']) ?>"><?php endif; ?>
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </span>
-        <input type="text" name="q" value="<?= e($search) ?>" placeholder="Cari nama produk atau deskripsi..." class="w-full py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500 transition" style="padding-left: 2.5rem; padding-right: 2.5rem;">
+        <input type="text" name="q" value="<?= e($search) ?>" placeholder="Cari produk..." class="w-full py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500 transition" style="padding-left: 2.5rem; padding-right: 2.5rem;">
         <?php if ($search !== ''): ?>
         <a href="<?= url('/admin-produk') . (isset($_GET['tipe']) ? '?tipe=' . e($_GET['tipe']) : '') ?>" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </a>
         <?php endif; ?>
     </form>
-    <button onclick="openTambahModal()" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition shrink-0" style="background:#42B549">
+    <button onclick="openTambahModal()" class="ds-toolbar__action px-4 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-        Tambah Produk
+        <span>Tambah Produk</span>
     </button>
 </div>
 <?php
 $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 ?>
-<div class="flex items-center gap-2 mb-3 flex-wrap">
+<div class="ds-filter-row">
     <a href="<?= url('/admin-produk') . '?' . ltrim($q_param, '&') ?>" class="ds-chip ds-chip--neutral ds-chip--filter <?= $current_tipe === '' ? 'is-active' : '' ?>">Semua <span class="ds-chip__count"><?= $total_produk ?></span></a>
     <?php foreach (tipe_produk_list() as $key => $cfg): $count = $tipe_counts[$key] ?? 0; $variant = $cfg['chip'] ?? 'neutral'; ?>
     <a href="<?= url('/admin-produk') . '?tipe=' . urlencode($key) . $q_param ?>" class="ds-chip ds-chip--<?= e($variant) ?> ds-chip--filter <?= $current_tipe === $key ? 'is-active' : '' ?>"><?= e($cfg['label']) ?> <span class="ds-chip__count"><?= $count ?></span></a>
@@ -29,22 +29,22 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 <!-- Modal Tambah Produk -->
 <div id="modal-tambah" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('tambah')"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-6 rounded-full" style="background:#42B549"></div>
-                    <h2 class="font-bold text-gray-800">Tambah Produk Baru</h2>
+    <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div class="ds-modal-shell bg-white shadow-xl border border-gray-100 max-w-2xl pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-2 h-6 rounded-full flex-shrink-0" style="background:#42B549"></div>
+                    <h2 class="font-bold text-gray-800 truncate">Tambah Produk Baru</h2>
                 </div>
-                <button onclick="closeModal('tambah')" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
+                <button onclick="closeModal('tambah')" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <form method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="tambah">
-                <div class="p-6 space-y-4 overflow-y-auto flex-1">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                    <div class="ds-modal-grid">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" placeholder="Nama produk" required></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="tambah-harga-raw" value="0"><input type="text" id="tambah-harga-display" placeholder="0" required oninput="formatHargaInput(this, 'tambah-harga-raw')"></div>
                         <div>
@@ -55,7 +55,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
+                        <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload" class="w-full"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
                     </div>
                     <div id="tambah-akun-wrap" class="hidden">
                         <div class="mb-3">
@@ -67,16 +67,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
                             <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
                             <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
                         </div>
                         <div id="tambah-varian-list" class="space-y-3"></div>
                         <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
+                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3" class="w-full"></textarea></div>
                 </div>
-                <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 flex-shrink-0 bg-white">
+                <div class="ds-modal-footer flex-shrink-0">
                     <button type="button" onclick="closeModal('tambah')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">Tambah Produk</button>
                 </div>
@@ -88,14 +88,14 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 <!-- Modal Edit Produk -->
 <div id="modal-edit" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('edit')"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-6 rounded-full" style="background:#1976D2"></div>
-                    <h2 class="font-bold text-gray-800">Edit Produk: <span id="edit-title" style="color:#1976D2"></span></h2>
+    <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div class="ds-modal-shell bg-white shadow-xl border border-gray-100 max-w-2xl pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-2 h-6 rounded-full flex-shrink-0" style="background:#1976D2"></div>
+                    <h2 class="font-bold text-gray-800 truncate">Edit: <span id="edit-title" style="color:#1976D2"></span></h2>
                 </div>
-                <button onclick="closeModal('edit')" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
+                <button onclick="closeModal('edit')" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -103,8 +103,8 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id_produk" id="edit-id">
-                <div class="p-6 space-y-4 overflow-y-auto flex-1">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                    <div class="ds-modal-grid">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Produk</label><input type="text" name="nama_produk" id="edit-nama" required></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="edit-harga-raw" value="0"><input type="text" id="edit-harga-display" required oninput="formatHargaInput(this, 'edit-harga-raw')"></div>
                         <div>
@@ -115,7 +115,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
+                        <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload" class="w-full"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
                     </div>
                     <div id="edit-akun-wrap" class="hidden">
                         <div class="mb-3">
@@ -127,16 +127,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
                             <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
                             <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
                         </div>
                         <div id="edit-varian-list" class="space-y-3"></div>
                         <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
+                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3" class="w-full"></textarea></div>
                 </div>
-                <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 flex-shrink-0 bg-white">
+                <div class="ds-modal-footer flex-shrink-0">
                     <button type="button" onclick="closeModal('edit')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#1976D2">Simpan Perubahan</button>
                 </div>
@@ -146,10 +146,10 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 </div>
 
 <!-- Bulk Delete Toast -->
-<div id="bulk-action-bar" class="fixed bottom-6 left-1/2 z-50 hidden" style="transform:translateX(-50%) translateY(20px); opacity:0; transition:transform 0.3s cubic-bezier(0.21,1.02,0.73,1), opacity 0.2s">
-    <div class="flex items-center gap-4 px-5 py-3 rounded-2xl shadow-lg border border-gray-200 bg-white">
+<div id="bulk-action-bar" class="ds-bulkbar-wrap hidden" style="opacity:0; transition:opacity 0.2s">
+    <div class="flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl shadow-lg border border-gray-200 bg-white">
         <span class="text-sm font-semibold text-gray-700"><span id="selected-count">0</span> produk dipilih</span>
-        <div class="w-px h-5 bg-gray-200"></div>
+        <div class="hidden sm:block w-px h-5 bg-gray-200"></div>
         <button type="button" onclick="deselectAll()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer">Batal Pilih</button>
         <button type="button" onclick="bulkDelete()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition cursor-pointer hover:opacity-90" style="background:#C62828">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -165,6 +165,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 </form>
 
 <div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden">
+    <div class="ds-table-wrap ds-table-wrap--wide hidden md:block">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
@@ -186,7 +187,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-3 py-3 text-center"><input type="checkbox" name="produk_ids[]" value="<?= $r['id'] ?>" class="row-checkbox w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600"></td>
                     <td class="px-5 py-3 text-center text-sm text-gray-500 font-medium"><?= $paging['offset'] + $i + 1 ?></td>
-                    <td class="px-5 py-3"> <!-- ini untuk mengatur baris di tabel -->
+                    <td class="px-5 py-3">
                         <p class="font-semibold text-gray-800 text-sm"><?= e($r['nama_produk']); ?></p>
                         <p class="text-xs text-gray-500 max-w-xs truncate"><?= e($r['deskripsi']); ?></p>
                     </td>
@@ -230,6 +231,56 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <?php } ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile card list -->
+    <div class="md:hidden p-3 space-y-3">
+        <?php if (count($products) == 0): ?>
+        <p class="text-center text-sm text-gray-500 py-8">Tidak ada produk ditemukan.</p>
+        <?php endif;
+        foreach($products as $i => $r): ?>
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 relative">
+            <input type="checkbox" name="produk_ids[]" value="<?= $r['id'] ?>" class="row-checkbox absolute top-4 right-4 w-5 h-5 rounded border-gray-300 cursor-pointer accent-green-600">
+            <div class="pr-8 mb-3">
+                <p class="text-xs text-gray-400 mb-0.5">#<?= $paging['offset'] + $i + 1 ?></p>
+                <p class="font-semibold text-gray-800 text-sm leading-tight"><?= e($r['nama_produk']); ?></p>
+                <p class="text-xs text-gray-500 line-clamp-2 mt-1"><?= e($r['deskripsi']); ?></p>
+            </div>
+            <div class="flex items-center flex-wrap gap-x-4 gap-y-2 text-xs mb-3">
+                <?= tipe_produk_badge($r['tipe_produk'] ?? 'Lainnya') ?>
+                <span class="font-bold" style="color:#42B549"><?= rupiah($r['harga']); ?></span>
+                <span class="flex items-center gap-1 text-gray-500">
+                    <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    <?= $r['avg_rating']; ?> <span class="text-gray-400">(<?= $r['total_rating'] ?>)</span>
+                </span>
+            </div>
+            <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
+                <div class="text-xs space-y-1 mb-3 pb-3 border-b border-gray-100">
+                    <?php foreach ($r['varian'] as $v):
+                        $stokModel = new AkunStok();
+                        $stokCount = $stokModel->countAvailable((int) $v['id']);
+                    ?>
+                    <a href="<?= url('/admin-produk/stok/' . (int)$v['id']) ?>" class="flex items-center justify-between hover:underline <?= $stokCount > 0 ? 'text-green-600' : 'text-red-500' ?>">
+                        <span><?= e($v['durasi'] . (!empty($v['paket']) ? ' ' . $v['paket'] : '')) ?></span>
+                        <span class="font-medium"><?= $stokCount ?> stok</span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php elseif (!empty($r['file_upload'])): ?>
+                <a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="block text-xs font-medium hover:underline mb-3" style="color:#1976D2">Lihat File →</a>
+            <?php endif; ?>
+            <div class="flex gap-2 pt-1">
+                <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
+                <form method="POST" class="flex-1" onsubmit="return confirm('Hapus produk ini?')">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="hapus">
+                    <input type="hidden" name="produk_id" value="<?= $r['id'] ?>">
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFEBEE; color:#C62828">Hapus</button>
+                </form>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
         <?= pagination_render($paging) ?>
 </div>
 
@@ -466,11 +517,9 @@ function updateBulkBar() {
         bulkBar.classList.remove('hidden');
         requestAnimationFrame(function() {
             bulkBar.style.opacity = '1';
-            bulkBar.style.transform = 'translateX(-50%) translateY(0)';
         });
     } else {
         bulkBar.style.opacity = '0';
-        bulkBar.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(function() { bulkBar.classList.add('hidden'); }, 250);
     }
     selectAll.checked = rowCheckboxes.length > 0 && count === rowCheckboxes.length;

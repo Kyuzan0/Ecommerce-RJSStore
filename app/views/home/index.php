@@ -1,9 +1,9 @@
 <!-- HERO BANNER (only on first page without search) -->
 <?php if (empty($search) && ($paging['page'] ?? 1) == 1): ?>
-<div class="max-w-7xl mx-auto px-6 mt-6">
-    <div class="rounded-2xl p-8 md:p-12 text-white relative overflow-hidden" style="background: linear-gradient(135deg, #42B549 0%, #2E7D32 100%)">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4 sm:mt-6">
+    <div class="rounded-2xl p-6 sm:p-8 md:p-12 text-white relative overflow-hidden" style="background: linear-gradient(135deg, #42B549 0%, #2E7D32 100%)">
         <div class="relative z-10 max-w-lg">
-            <h1 class="text-2xl md:text-3xl font-extrabold mb-3">Selamat Datang di RJSStore</h1>
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-3">Selamat Datang di RJSStore</h1>
             <p class="text-green-100 text-sm md:text-base mb-5">Temukan berbagai produk digital berkualitas dengan harga terbaik. Download langsung setelah pembayaran!</p>
             <?php if (!$this->auth->check()): ?>
             <a href="<?= url('/auth/register') ?>" class="inline-flex items-center gap-2 bg-white text-green-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 transition">
@@ -12,8 +12,8 @@
             </a>
             <?php endif; ?>
         </div>
-        <div class="absolute right-8 top-1/2 -translate-y-1/2 opacity-10">
-            <svg class="w-48 h-48" fill="white" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
+        <div class="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 opacity-10 hidden sm:block">
+            <svg class="w-32 sm:w-48 h-32 sm:h-48" fill="white" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
         </div>
     </div>
 </div>
@@ -21,14 +21,14 @@
 
 <!-- ULASAN PELANGGAN -->
 <?php if (!empty($ulasan_terbaru) && empty($search) && ($paging['page'] ?? 1) == 1): ?>
-<div class="max-w-7xl mx-auto px-6 mt-6">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Ulasan Pelanggan</h2>
-        <span class="text-sm text-gray-400">Dari pembeli terverifikasi</span>
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800">Ulasan Pelanggan</h2>
+        <span class="text-xs sm:text-sm text-gray-400 hidden sm:block">Dari pembeli terverifikasi</span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <?php foreach ($ulasan_terbaru as $ulasan): ?>
-        <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col gap-3 hover:shadow-md transition">
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md transition">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:#42B549">
                     <?= strtoupper(substr($ulasan['nama_user'], 0, 1)) ?>
@@ -54,21 +54,21 @@
 <?php endif; ?>
 
 <!-- MAIN CONTENT -->
-<div class="max-w-7xl mx-auto px-6 py-6">
-    <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold text-gray-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <div class="flex items-center justify-between mb-4 sm:mb-5 gap-3">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 min-w-0 truncate">
             <?php if (!empty($search)): ?>
-                Hasil Pencarian: "<?= e($search) ?>"
+                Hasil: "<?= e($search) ?>"
             <?php else: ?>
                 Katalog Produk Digital
             <?php endif; ?>
         </h2>
-        <span class="text-sm text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
+        <span class="hidden sm:inline-block text-sm text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg flex-shrink-0">
             Produk digital terpercaya
         </span>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         <?php if (empty($products)): ?>
         <div class="col-span-full text-center py-16">
             <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>

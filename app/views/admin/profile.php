@@ -1,11 +1,11 @@
 <div class="flex items-center gap-3 mb-6">
-    <a href="<?= url('/admin-dashboard') ?>" class="text-gray-400 hover:text-gray-600 transition">
+    <a href="<?= url('/admin-dashboard') ?>" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
     </a>
-    <h1 class="text-xl font-bold text-gray-800">Settings Profile</h1>
+    <h1 class="ds-page-title">Settings Profile</h1>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
     <!-- Informasi Profil -->
     <div class="bg-white rounded-2xl border border-gray-100 p-6">
         <div class="flex items-center gap-3 mb-5">

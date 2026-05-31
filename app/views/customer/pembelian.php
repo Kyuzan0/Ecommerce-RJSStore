@@ -1,5 +1,5 @@
 <!-- Breadcrumb -->
-<nav class="mb-6">
+<nav class="mb-4">
     <ol class="flex items-center space-x-2 text-sm text-gray-600">
         <li><a href="<?= url('/customer/dashboard') ?>" class="hover:text-green-600">Dashboard</a></li>
         <li><span class="text-gray-400">/</span></li>
@@ -8,93 +8,79 @@
 </nav>
 
 <!-- Page Header -->
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Riwayat Pembelian</h1>
-    
-    <!-- Filter Tabs -->
-    <div class="flex space-x-2 border-b border-gray-200">
-        <a href="<?= url('/customer/pembelian') ?>" 
-           class="px-4 py-2 <?= empty($current_status) ? 'border-b-2 border-green-600 text-green-600 font-semibold' : 'text-gray-600 hover:text-green-600' ?>">
-            Semua
-        </a>
-        <a href="<?= url('/customer/pembelian?status=pending') ?>" 
-           class="px-4 py-2 <?= $current_status === 'pending' ? 'border-b-2 border-green-600 text-green-600 font-semibold' : 'text-gray-600 hover:text-green-600' ?>">
-            Pending
-        </a>
-        <a href="<?= url('/customer/pembelian?status=success') ?>" 
-           class="px-4 py-2 <?= $current_status === 'success' ? 'border-b-2 border-green-600 text-green-600 font-semibold' : 'text-gray-600 hover:text-green-600' ?>">
-            Success
-        </a>
-        <a href="<?= url('/customer/pembelian?status=cancelled') ?>" 
-           class="px-4 py-2 <?= $current_status === 'cancelled' ? 'border-b-2 border-red-600 text-red-600 font-semibold' : 'text-gray-600 hover:text-red-600' ?>">
-            Cancelled
-        </a>
-    </div>
+<div class="ds-page-header">
+    <h1 class="ds-page-title">Riwayat Pembelian</h1>
 </div>
+
+<!-- Filter Tabs (horizontal scroll on mobile) -->
+<nav class="ds-tabs mb-6">
+    <a href="<?= url('/customer/pembelian') ?>" class="<?= empty($current_status) ? 'is-active' : '' ?>">Semua</a>
+    <a href="<?= url('/customer/pembelian?status=pending') ?>" class="<?= $current_status === 'pending' ? 'is-active' : '' ?>">Pending</a>
+    <a href="<?= url('/customer/pembelian?status=success') ?>" class="<?= $current_status === 'success' ? 'is-active' : '' ?>">Success</a>
+    <a href="<?= url('/customer/pembelian?status=cancelled') ?>" class="<?= $current_status === 'cancelled' ? 'is-active' : '' ?>">Cancelled</a>
+</nav>
 
 <?php if (empty($grouped_transactions)): ?>
     <!-- Empty State -->
-    <div class="bg-white rounded-lg shadow-md p-12 text-center">
-        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl border border-gray-100 p-8 sm:p-12 text-center">
+        <svg class="w-14 h-14 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
         </svg>
-        <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum ada transaksi</h3>
-        <p class="text-gray-500 mb-6">Mulai belanja produk digital sekarang</p>
-        <a href="<?= url('/customer/produk') ?>" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2">Belum ada transaksi</h3>
+        <p class="text-sm text-gray-500 mb-6">Mulai belanja produk digital sekarang</p>
+        <a href="<?= url('/customer/produk') ?>" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
             Lihat Produk
         </a>
     </div>
 <?php else: ?>
     <!-- Transaction List -->
-    <div class="space-y-6 mb-8">
-        <?php 
+    <div class="space-y-4 sm:space-y-6 mb-8">
+        <?php
         $status_chip_map = [
             'pending'   => 'warning',
             'success'   => 'success',
             'cancelled' => 'danger',
             'failed'    => 'danger',
         ];
-        
-        foreach ($grouped_transactions as $group): 
+
+        foreach ($grouped_transactions as $group):
             $chip_variant = $status_chip_map[$group['status']] ?? 'neutral';
         ?>
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <!-- Group Header -->
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <div>
-                    <p class="text-sm text-gray-600">Order ID: <span class="font-semibold text-gray-800"><?= e($group['order_ref']) ?></span></p>
-                    <p class="text-xs text-gray-500"><?= format_tanggal($group['tanggal']) ?></p>
+            <div class="bg-gray-50 px-4 sm:px-6 py-3 border-b border-gray-100 flex flex-wrap justify-between items-start gap-2">
+                <div class="min-w-0">
+                    <p class="text-xs sm:text-sm text-gray-500">Order ID: <span class="font-semibold text-gray-800 break-all"><?= e($group['order_ref']) ?></span></p>
+                    <p class="text-xs text-gray-500 mt-0.5"><?= format_tanggal($group['tanggal']) ?></p>
                 </div>
-                <span class="ds-chip ds-chip--<?= e($chip_variant) ?>">
+                <span class="ds-chip ds-chip--<?= e($chip_variant) ?> flex-shrink-0">
                     <?= strtoupper($group['status']) ?>
                 </span>
             </div>
-            
+
             <!-- Items -->
-            <div class="divide-y divide-gray-200">
+            <div class="divide-y divide-gray-100">
                 <?php foreach ($group['items'] as $item): ?>
-                <div class="px-6 py-4 flex items-center">
+                <div class="px-4 sm:px-6 py-3 sm:py-4 flex items-start gap-3 sm:gap-4">
                     <!-- Product Image -->
-                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 mr-4">
-                        <div class="w-full h-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-xl flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
-                    
+
                     <!-- Product Info -->
-                    <div class="flex-1">
-                        <h4 class="font-semibold text-gray-800"><?= e($item['nama_produk']) ?></h4>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold text-gray-800 text-sm sm:text-base truncate"><?= e($item['nama_produk']) ?></h4>
                         <?php if (!empty($item['durasi'])): ?>
-                            <p class="text-xs text-gray-500"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></p>
+                            <p class="text-xs text-gray-500 mt-0.5"><?= e($item['durasi'] . (!empty($item['paket']) ? ' - ' . $item['paket'] : '')) ?></p>
                         <?php endif; ?>
-                        <p class="text-sm text-gray-600"><?= rupiah($item['harga']) ?></p>
-                        
+                        <p class="text-sm text-gray-700 mt-1 font-medium"><?= rupiah($item['harga']) ?></p>
+
                         <!-- Rating Display -->
                         <?php if ($group['status'] === 'success'): ?>
                             <?php if (!empty($item['rating'])): ?>
-                                <div class="flex items-center mt-1">
+                                <div class="flex items-center mt-1.5">
                                     <?php for ($i = 1; $i <= 5; $i++): ?>
                                         <svg class="w-4 h-4 <?= $i <= $item['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
@@ -102,7 +88,7 @@
                                     <?php endfor; ?>
                                 </div>
                             <?php else: ?>
-                                <a href="<?= url('/customer/rating/' . $item['id']) ?>" class="text-sm text-green-600 hover:text-green-700 mt-1 inline-block">
+                                <a href="<?= url('/customer/rating/' . $item['id']) ?>" class="text-xs sm:text-sm text-green-600 hover:text-green-700 mt-1.5 inline-block font-medium">
                                     Beri Nilai
                                 </a>
                             <?php endif; ?>
@@ -111,18 +97,17 @@
                 </div>
                 <?php endforeach; ?>
             </div>
-            
+
             <!-- Group Footer -->
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
                 <div>
-                    <p class="text-sm text-gray-600">Total Pembayaran</p>
-                    <p class="text-lg font-bold text-gray-800"><?= rupiah($group['total']) ?></p>
+                    <p class="text-xs text-gray-500">Total Pembayaran</p>
+                    <p class="text-base sm:text-lg font-bold text-gray-800"><?= rupiah($group['total']) ?></p>
                 </div>
-                
-                <div class="flex space-x-2">
+
+                <div class="flex gap-2 flex-shrink-0">
                     <?php if ($group['status'] === 'pending'): ?>
-                        <?php 
-                        // Build payment URL
+                        <?php
                         $payment_url = url('/customer/bayar');
                         if (strpos($group['order_ref'], 'ORD-') === 0) {
                             $payment_url .= '?ref=' . urlencode($group['order_ref']);
@@ -130,13 +115,13 @@
                             $payment_url .= '?id=' . $group['items'][0]['id'];
                         }
                         ?>
-                        <a href="<?= $payment_url ?>" 
-                           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                        <a href="<?= $payment_url ?>"
+                           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
                             Bayar Sekarang
                         </a>
                     <?php elseif ($group['status'] === 'success'): ?>
-                        <a href="<?= url('/customer/download') ?>" 
-                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                        <a href="<?= url('/customer/download') ?>"
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
                             Download
                         </a>
                     <?php endif; ?>

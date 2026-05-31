@@ -1,12 +1,14 @@
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800">Kelola Preset Layanan</h1>
-        <p class="text-sm text-gray-500 mt-1">Atur daftar durasi dan paket untuk produk tipe Akun</p>
+<div class="ds-page-header">
+    <div class="ds-page-header__row">
+        <div>
+            <h1 class="ds-page-title">Kelola Preset Layanan</h1>
+            <p class="ds-page-subtitle">Atur daftar durasi dan paket untuk produk tipe Akun</p>
+        </div>
+        <button onclick="openModal('tambah-preset')" class="ds-toolbar__action px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Tambah Preset
+        </button>
     </div>
-    <button onclick="openModal('tambah-preset')" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-        Tambah Preset
-    </button>
 </div>
 
 <?php if (empty($presets)): ?>
@@ -63,30 +65,32 @@
 <!-- Modal Tambah Preset -->
 <div id="modal-tambah-preset" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('tambah-preset')"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-lg pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 class="font-bold text-gray-800">Tambah Preset Layanan</h2>
-                <button onclick="closeModal('tambah-preset')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div class="ds-modal-shell bg-white shadow-xl border border-gray-100 max-w-lg pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100">
+                <h2 class="font-bold text-gray-800 truncate">Tambah Preset Layanan</h2>
+                <button onclick="closeModal('tambah-preset')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex-shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <form method="POST" class="p-6 space-y-4">
+            <form method="POST" class="flex flex-col flex-1 overflow-hidden">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="tambah">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Layanan</label>
-                    <input type="text" name="nama_layanan" placeholder="Contoh: Spotify, Netflix, dll" required>
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Layanan</label>
+                        <input type="text" name="nama_layanan" placeholder="Contoh: Spotify, Netflix, dll" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Durasi (pisahkan dengan koma)</label>
+                        <input type="text" name="durasi" placeholder="1 Bulan, 3 Bulan, 6 Bulan, 12 Bulan" required>
+                        <p class="text-xs text-gray-400 mt-1">Contoh: 1 Bulan, 3 Bulan, 6 Bulan, 12 Bulan, Lifetime</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Paket (pisahkan dengan koma, kosongkan jika tidak ada)</label>
+                        <input type="text" name="paket" placeholder="Individual, Family, Student">
+                        <p class="text-xs text-gray-400 mt-1">Contoh: Individual, Duo, Family, Student. Kosongkan jika layanan tidak punya tier paket.</p>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Durasi (pisahkan dengan koma)</label>
-                    <input type="text" name="durasi" placeholder="1 Bulan, 3 Bulan, 6 Bulan, 12 Bulan" required>
-                    <p class="text-xs text-gray-400 mt-1">Contoh: 1 Bulan, 3 Bulan, 6 Bulan, 12 Bulan, Lifetime</p>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Paket (pisahkan dengan koma, kosongkan jika tidak ada)</label>
-                    <input type="text" name="paket" placeholder="Individual, Family, Student">
-                    <p class="text-xs text-gray-400 mt-1">Contoh: Individual, Duo, Family, Student. Kosongkan jika layanan tidak punya tier paket.</p>
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="ds-modal-footer">
                     <button type="button" onclick="closeModal('tambah-preset')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#42B549">Simpan</button>
                 </div>
@@ -98,29 +102,31 @@
 <!-- Modal Edit Preset -->
 <div id="modal-edit-preset" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('edit-preset')"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-lg pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 class="font-bold text-gray-800">Edit Preset Layanan</h2>
-                <button onclick="closeModal('edit-preset')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div class="ds-modal-shell bg-white shadow-xl border border-gray-100 max-w-lg pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100">
+                <h2 class="font-bold text-gray-800 truncate">Edit Preset Layanan</h2>
+                <button onclick="closeModal('edit-preset')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex-shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <form method="POST" class="p-6 space-y-4">
+            <form method="POST" class="flex flex-col flex-1 overflow-hidden">
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="preset_id" id="edit-preset-id">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Layanan</label>
-                    <input type="text" name="nama_layanan" id="edit-preset-nama" required>
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nama Layanan</label>
+                        <input type="text" name="nama_layanan" id="edit-preset-nama" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Durasi (pisahkan dengan koma)</label>
+                        <input type="text" name="durasi" id="edit-preset-durasi" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Paket (pisahkan dengan koma, kosongkan jika tidak ada)</label>
+                        <input type="text" name="paket" id="edit-preset-paket">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Durasi (pisahkan dengan koma)</label>
-                    <input type="text" name="durasi" id="edit-preset-durasi" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Paket (pisahkan dengan koma, kosongkan jika tidak ada)</label>
-                    <input type="text" name="paket" id="edit-preset-paket">
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="ds-modal-footer">
                     <button type="button" onclick="closeModal('edit-preset')" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition" style="background:#1976D2">Simpan</button>
                 </div>

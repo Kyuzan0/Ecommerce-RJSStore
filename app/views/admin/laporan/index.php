@@ -34,18 +34,18 @@ document.addEventListener('click', function(e) {
 
 <!-- Date Range Filter -->
 <form method="GET" action="<?= url('/admin-laporan') ?>" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
-    <div class="flex flex-col sm:flex-row items-end gap-3">
-        <div class="flex-1 min-w-0">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="min-w-0">
             <label class="block text-xs font-medium text-gray-500 mb-1">Tanggal Mulai</label>
             <input type="date" name="start_date" value="<?= e($start_date ?? '') ?>"
                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition">
         </div>
-        <div class="flex-1 min-w-0">
+        <div class="min-w-0">
             <label class="block text-xs font-medium text-gray-500 mb-1">Tanggal Akhir</label>
             <input type="date" name="end_date" value="<?= e($end_date ?? '') ?>"
                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition">
         </div>
-        <div class="flex-1 min-w-0">
+        <div class="min-w-0">
             <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
             <select name="status" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition bg-white">
                 <option value="">Semua Status</option>
@@ -54,15 +54,15 @@ document.addEventListener('click', function(e) {
                 <option value="failed" <?= ($status_filter ?? '') === 'failed' ? 'selected' : '' ?>>Failed</option>
             </select>
         </div>
-        <div class="flex gap-2">
-            <button type="submit" class="px-5 py-2 text-sm font-semibold text-white rounded-xl hover:opacity-90 transition shadow-sm" style="background:#42B549">
-                <svg class="w-4 h-4 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                Filter
-            </button>
-            <?php if ($start_date || $end_date || $status_filter): ?>
-            <a href="<?= url('/admin-laporan') ?>" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">Reset</a>
-            <?php endif; ?>
-        </div>
+    </div>
+    <div class="ds-form-actions mt-3">
+        <?php if ($start_date || $end_date || $status_filter): ?>
+        <a href="<?= url('/admin-laporan') ?>" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition text-center">Reset</a>
+        <?php endif; ?>
+        <button type="submit" class="px-5 py-2 text-sm font-semibold text-white rounded-xl hover:opacity-90 transition shadow-sm" style="background:#42B549">
+            <svg class="w-4 h-4 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filter
+        </button>
     </div>
 </form>
 
@@ -175,102 +175,129 @@ document.addEventListener('click', function(e) {
 <!-- Top Products Ranking -->
 <?php if (!empty($top_products)): ?>
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-6 overflow-hidden">
-    <div class="p-6 pb-3">
+    <div class="p-5 sm:p-6 pb-3">
         <h2 class="text-sm font-bold text-gray-800">Top 10 Produk Terlaris</h2>
     </div>
-    <div class="overflow-x-auto">
+    <!-- Desktop table -->
+    <div class="ds-table-wrap hidden md:block">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-t border-gray-100 bg-gray-50/50">
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">#</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
-                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
-                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TERJUAL</th>
-                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TOTAL</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">#</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
+                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
+                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TERJUAL</th>
+                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TOTAL</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
                 <?php foreach ($top_products as $i => $prod): ?>
                 <tr class="hover:bg-gray-50/50 transition">
-                    <td class="px-6 py-3 text-gray-400 font-bold"><?= $i + 1 ?></td>
-                    <td class="px-6 py-3 font-medium text-gray-800"><?= e($prod['nama_produk']) ?></td>
-                    <td class="px-6 py-3">
+                    <td class="px-4 sm:px-6 py-3 text-gray-400 font-bold"><?= $i + 1 ?></td>
+                    <td class="px-4 sm:px-6 py-3 font-medium text-gray-800"><?= e($prod['nama_produk']) ?></td>
+                    <td class="px-4 sm:px-6 py-3">
                         <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full
                             <?= ($prod['tipe_produk'] ?? '') === 'digital' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700' ?>">
                             <?= ucfirst(e($prod['tipe_produk'] ?? '-')) ?>
                         </span>
                     </td>
-                    <td class="px-6 py-3 text-right text-gray-600"><?= rupiah((int) $prod['harga']) ?></td>
-                    <td class="px-6 py-3 text-right font-semibold text-gray-800"><?= number_format($prod['jml_terjual']) ?></td>
-                    <td class="px-6 py-3 text-right font-semibold text-green-600"><?= rupiah((int) $prod['total_pendapatan']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-right text-gray-600 whitespace-nowrap"><?= rupiah((int) $prod['harga']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-right font-semibold text-gray-800"><?= number_format($prod['jml_terjual']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-right font-semibold text-green-600 whitespace-nowrap"><?= rupiah((int) $prod['total_pendapatan']) ?></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+    <!-- Mobile card list -->
+    <div class="md:hidden p-3 space-y-2 border-t border-gray-100">
+        <?php foreach ($top_products as $i => $prod): ?>
+        <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50/50">
+            <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0"><?= $i + 1 ?></div>
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm truncate"><?= e($prod['nama_produk']) ?></p>
+                <p class="text-xs text-gray-500 mt-0.5"><?= number_format($prod['jml_terjual']) ?> terjual · <?= rupiah((int) $prod['harga']) ?></p>
+            </div>
+            <div class="text-right flex-shrink-0">
+                <p class="text-sm font-bold text-green-600 whitespace-nowrap"><?= rupiah((int) $prod['total_pendapatan']) ?></p>
+            </div>
+        </div>
+        <?php endforeach; ?>
     </div>
 </div>
 <?php endif; ?>
 
 <!-- Transaction Detail Table -->
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-6 overflow-hidden">
-    <div class="p-6 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="p-5 sm:p-6 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 class="text-sm font-bold text-gray-800">Detail Transaksi</h2>
-        <form method="GET" action="<?= url('/admin-laporan') ?>" class="flex items-center gap-2">
+        <form method="GET" action="<?= url('/admin-laporan') ?>" class="flex items-center gap-2 w-full sm:w-auto">
             <?php if ($start_date): ?><input type="hidden" name="start_date" value="<?= e($start_date) ?>"><?php endif; ?>
             <?php if ($end_date): ?><input type="hidden" name="end_date" value="<?= e($end_date) ?>"><?php endif; ?>
             <?php if ($status_filter): ?><input type="hidden" name="status" value="<?= e($status_filter) ?>"><?php endif; ?>
             <input type="text" name="search" value="<?= e($search ?? '') ?>" placeholder="Cari nama, produk, order ref..."
-                   class="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition w-64">
-            <button type="submit" class="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 transition" style="background:#42B549">Cari</button>
+                   class="flex-1 sm:w-64 sm:flex-none px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition">
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-white rounded-xl hover:opacity-90 transition flex-shrink-0" style="background:#42B549">Cari</button>
         </form>
     </div>
 
     <?php if (!empty($transactions)): ?>
-    <div class="overflow-x-auto">
+    <!-- Desktop table -->
+    <div class="ds-table-wrap ds-table-wrap--wide hidden md:block">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-t border-gray-100 bg-gray-50/50">
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TANGGAL</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">ORDER REF</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PELANGGAN</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
-                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
-                    <th class="text-center px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">STATUS</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TANGGAL</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">ORDER REF</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PELANGGAN</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
+                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
+                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
+                    <th class="text-center px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">STATUS</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
                 <?php foreach ($transactions as $trx): ?>
                 <tr class="hover:bg-gray-50/50 transition">
-                    <td class="px-6 py-3 text-gray-600 whitespace-nowrap"><?= format_tanggal($trx['tanggal']) ?></td>
-                    <td class="px-6 py-3 text-gray-500 font-mono text-xs"><?= e($trx['order_ref'] ?? '-') ?></td>
-                    <td class="px-6 py-3 font-medium text-gray-800"><?= e($trx['nama_user']) ?></td>
-                    <td class="px-6 py-3 text-gray-700"><?= e($trx['nama_produk']) ?></td>
-                    <td class="px-6 py-3">
+                    <td class="px-4 sm:px-6 py-3 text-gray-600 whitespace-nowrap"><?= format_tanggal($trx['tanggal']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-gray-500 font-mono text-xs"><?= e($trx['order_ref'] ?? '-') ?></td>
+                    <td class="px-4 sm:px-6 py-3 font-medium text-gray-800"><?= e($trx['nama_user']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-gray-700"><?= e($trx['nama_produk']) ?></td>
+                    <td class="px-4 sm:px-6 py-3">
                         <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full
                             <?= ($trx['tipe_produk'] ?? '') === 'digital' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700' ?>">
                             <?= ucfirst(e($trx['tipe_produk'] ?? '-')) ?>
                         </span>
                     </td>
-                    <td class="px-6 py-3 text-right text-gray-700"><?= rupiah((int) $trx['harga']) ?></td>
-                    <td class="px-6 py-3 text-center">
-                        <?php
-                        $statusClass = match($trx['status']) {
-                            'success' => 'bg-green-50 text-green-700',
-                            'pending' => 'bg-yellow-50 text-yellow-700',
-                            'failed'  => 'bg-red-50 text-red-700',
-                            default   => 'bg-gray-50 text-gray-700',
-                        };
-                        ?>
-                        <span class="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full <?= $statusClass ?>">
-                            <?= ucfirst(e($trx['status'])) ?>
-                        </span>
+                    <td class="px-4 sm:px-6 py-3 text-right text-gray-700 whitespace-nowrap"><?= rupiah((int) $trx['harga']) ?></td>
+                    <td class="px-4 sm:px-6 py-3 text-center">
+                        <?= status_transaksi_badge($trx['status']) ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile card list -->
+    <div class="md:hidden p-3 space-y-3 border-t border-gray-100">
+        <?php foreach ($transactions as $trx): ?>
+        <div class="bg-gray-50/50 border border-gray-100 rounded-xl p-3">
+            <div class="flex items-start justify-between gap-3 mb-2">
+                <div class="min-w-0">
+                    <p class="font-semibold text-gray-800 text-sm truncate"><?= e($trx['nama_user']) ?></p>
+                    <p class="text-xs text-gray-500 font-mono mt-0.5 truncate"><?= e($trx['order_ref'] ?? '-') ?></p>
+                </div>
+                <div class="flex-shrink-0"><?= status_transaksi_badge($trx['status']) ?></div>
+            </div>
+            <p class="text-xs text-gray-700 mb-2 truncate"><?= e($trx['nama_produk']) ?></p>
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-500"><?= format_tanggal($trx['tanggal']) ?></span>
+                <span class="font-bold text-green-600 whitespace-nowrap"><?= rupiah((int) $trx['harga']) ?></span>
+            </div>
+        </div>
+        <?php endforeach; ?>
     </div>
 
     <?php if ($paging['total_pages'] > 1): ?>

@@ -1,5 +1,5 @@
 <!-- Breadcrumb -->
-<nav class="mb-6">
+<nav class="mb-4">
     <ol class="flex items-center space-x-2 text-sm text-gray-600">
         <li><a href="<?= url('/customer/dashboard') ?>" class="hover:text-green-600">Dashboard</a></li>
         <li><span class="text-gray-400">/</span></li>
@@ -8,26 +8,26 @@
 </nav>
 
 <!-- Page Header -->
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Download Produk</h1>
-    <p class="text-gray-600 mt-2">Produk yang sudah Anda beli dapat diunduh di sini</p>
+<div class="ds-page-header">
+    <h1 class="ds-page-title">Download Produk</h1>
+    <p class="ds-page-subtitle mt-1">Produk yang sudah Anda beli dapat diunduh di sini</p>
 </div>
 
 <?php if (empty($items)): ?>
     <!-- Empty State -->
-    <div class="bg-white rounded-lg shadow-md p-12 text-center">
-        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl border border-gray-100 p-8 sm:p-12 text-center">
+        <svg class="w-14 h-14 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
         </svg>
-        <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum ada produk untuk diunduh</h3>
-        <p class="text-gray-500 mb-6">Beli produk terlebih dahulu untuk dapat mengunduhnya</p>
-        <a href="<?= url('/customer/produk') ?>" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2">Belum ada produk untuk diunduh</h3>
+        <p class="text-sm text-gray-500 mb-6">Beli produk terlebih dahulu untuk dapat mengunduhnya</p>
+        <a href="<?= url('/customer/produk') ?>" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
             Lihat Produk
         </a>
     </div>
 <?php else: ?>
     <!-- Download Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <?php foreach ($items as $item): ?>
         <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <!-- Green Gradient Top Bar -->
