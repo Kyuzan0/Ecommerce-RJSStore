@@ -402,11 +402,8 @@ function applyPreset(prefix) {
     });
 
     list.innerHTML = '';
-    if (existing.length === 0) {
-        addVarianRow(prefix);
-    } else {
-        existing.forEach(function(d) { addVarianRow(prefix, d); });
-    }
+    // Only rebuild rows that already exist; don't auto-create new ones
+    existing.forEach(function(d) { addVarianRow(prefix, d); });
 }
 
 function getFieldVal(row, name) {
@@ -428,11 +425,7 @@ function toggleAkunFields(prefix) {
     if (isAkun) {
         akunWrap.classList.remove('hidden');
         fileWrap.classList.add('hidden');
-        // Ensure at least one variant row exists
-        var list = document.getElementById(prefix + '-varian-list');
-        if (list && list.children.length === 0) {
-            addVarianRow(prefix);
-        }
+        // Variant rows appear only when admin clicks "+ Tambah Varian"
     } else {
         akunWrap.classList.add('hidden');
         fileWrap.classList.remove('hidden');
