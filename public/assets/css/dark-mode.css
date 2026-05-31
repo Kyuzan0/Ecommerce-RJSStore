@@ -11,6 +11,12 @@
 .dark .bg-white,
 .dark [class*="bg-white"] { background-color: #1e1e32 !important; }
 
+/* Gradient backgrounds (from-white / to-white) → dark */
+/* Gradient backgrounds containing white → dark (e.g. review panel from-white to-[#f7faf7]) */
+.dark [class*="from-white"] {
+    background-image: linear-gradient(to bottom, #1e1e32, #1a1a2e) !important;
+}
+
 /* Gray backgrounds → darker */
 .dark .bg-gray-50,
 .dark [class*="bg-gray-50"] { background-color: #1e1e32 !important; }

@@ -210,6 +210,14 @@ $initial_cart_count = $initial_cart_count ?? 0;
         return div.innerHTML;
     }
 
+    // Expose a global to refresh badge + cart contents (used by external add-to-cart flows)
+    window.refreshCartBadge = function() {
+        fetch(CART_API_GET + '?action=get')
+            .then(r => r.json())
+            .then(data => { if (data.success) renderCart(data.cart); })
+            .catch(() => {});
+    };
+
     if (<?= $initial_cart_count ?> > 0) {
         fetch(CART_API_GET + '?action=get')
             .then(r => r.json())
