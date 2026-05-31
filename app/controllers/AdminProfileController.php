@@ -59,6 +59,7 @@ class AdminProfileController extends BaseController
                 'email' => $email
             ]);
             $_SESSION['user_name'] = $name;
+            AuditLog::log('update_profile', 'user', $id, 'name: ' . $name . ', email: ' . $email);
             flash('success', 'Profil berhasil diperbarui.');
         }
     }
@@ -90,6 +91,7 @@ class AdminProfileController extends BaseController
         } else {
             $new_hash = password_hash($new, PASSWORD_DEFAULT);
             $this->userModel->update($id, ['password' => $new_hash]);
+            AuditLog::log('change_password', 'user', $id, 'Admin changed own password');
             flash('success', 'Password berhasil diperbarui.');
         }
     }

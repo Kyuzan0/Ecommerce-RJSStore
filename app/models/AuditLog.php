@@ -26,9 +26,9 @@ class AuditLog extends BaseModel
     public function getRecent(int $limit = 50, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            "SELECT a.*, u.name AS admin_name
+            "SELECT a.*, COALESCE(u.name, 'System') AS admin_name
              FROM audit_log a
-             JOIN users u ON a.admin_id = u.id
+             LEFT JOIN users u ON a.admin_id = u.id
              ORDER BY a.created_at DESC
              LIMIT {$limit} OFFSET {$offset}"
         );

@@ -60,6 +60,7 @@ class AdminPresetController extends BaseController
         }
 
         $this->presetModel->createPreset($nama, $durasi, $paket);
+        AuditLog::log('tambah_preset', 'akun_preset', null, $nama);
         flash('success', 'Preset "' . $nama . '" berhasil ditambahkan!');
     }
 
