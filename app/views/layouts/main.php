@@ -24,6 +24,14 @@
     </script>
 </head>
 <body class="min-h-screen flex flex-col">
+<?php
+// Detect if current page is auth (login/register) — hide search & theme toggle
+$_current_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+$_is_auth_page = !$this->auth->check() && (
+    str_contains($_current_path, '/auth/login') ||
+    str_contains($_current_path, '/auth/register')
+);
+?>
 
 <!-- TOP NAV -->
 <header class="sticky top-0 z-40 border-b">
@@ -34,6 +42,7 @@
             </div>
             <span class="text-lg md:text-xl font-bold text-gray-800">RJS<span style="color:#42B549">Store</span></span>
         </a>
+        <?php if (!$_is_auth_page): ?>
         <div class="order-3 md:order-2 w-full md:w-auto md:flex-1 md:max-w-xl">
             <form action="<?= url('/') ?>" method="GET" class="flex bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                 <input type="text" name="search" placeholder="Cari produk di RJSStore..." value="<?= e($_GET['search'] ?? '') ?>" class="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none border-0">
@@ -42,11 +51,12 @@
                 </button>
             </form>
         </div>
+        <?php endif; ?>
         <div class="order-2 md:order-3 flex items-center gap-2 md:gap-3 ml-auto">
-            <?php
-            $initial_cart_count = $initial_cart_count ?? 0;
-            include BASE_PATH . '/app/views/partials/cart_dropdown.php';
-            ?>
+            <?php if (!$_is_auth_page):
+                $initial_cart_count = $initial_cart_count ?? 0;
+                include BASE_PATH . '/app/views/partials/cart_dropdown.php';
+            endif; ?>
 
             <?php if ($this->auth->isCustomer()): ?>
                 <a href="<?= url('/customer/pembelian') ?>" class="ds-hide-sm flex items-center gap-1.5 text-gray-600 hover:text-gray-800 text-sm px-3 py-2 rounded-lg hover:bg-gray-100">
@@ -84,10 +94,12 @@
                 </div>
                 <script>document.addEventListener('click',function(e){var d=document.getElementById('profileDropdown');var m=document.getElementById('profileMenu');if(d&&!d.contains(e.target)){m.classList.add('hidden')}});</script>
             <?php elseif (!$this->auth->check()): ?>
+                <?php if (!$_is_auth_page): ?>
                 <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500" title="Mode Gelap" aria-label="Toggle dark mode">
                     <svg class="w-5 h-5 dark-icon-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                     <svg class="w-5 h-5 dark-icon-sun hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
                 </button>
+                <?php endif; ?>
                 <a href="<?= url('/auth/login') ?>" class="text-sm font-medium text-gray-700 hover:text-gray-900 px-3 md:px-4 py-2 rounded-lg hover:bg-gray-100 transition">Masuk</a>
                 <a href="<?= url('/auth/register') ?>" class="text-sm font-semibold text-white px-3 md:px-4 py-2 rounded-lg transition hover:opacity-90" style="background:#42B549">Daftar</a>
             <?php endif; ?>
