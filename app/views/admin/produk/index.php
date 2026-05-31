@@ -56,10 +56,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </div>
                     <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
                 </div>
-                <div id="tambah-akun-wrap" class="hidden">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Informasi Akun</label>
-                    <textarea name="account_info" placeholder="Contoh:&#10;Email: akun@email.com&#10;Password: rahasia123&#10;Catatan: jangan ganti password" rows="4"></textarea>
-                    <p class="text-xs text-gray-400 mt-1">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                <div id="tambah-akun-wrap" class="hidden grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Email / Username Akun</label>
+                        <input type="text" name="account_email" id="tambah-account-email" placeholder="akun@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Password Akun</label>
+                        <input type="text" name="account_password" id="tambah-account-password" placeholder="password akun">
+                    </div>
+                    <p class="col-span-2 text-xs text-gray-400 -mt-2">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -102,10 +108,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </div>
                     <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
                 </div>
-                <div id="edit-akun-wrap" class="hidden">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Informasi Akun</label>
-                    <textarea name="account_info" id="edit-account-info" placeholder="Email: akun@email.com&#10;Password: rahasia123" rows="4"></textarea>
-                    <p class="text-xs text-gray-400 mt-1">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                <div id="edit-akun-wrap" class="hidden grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Email / Username Akun</label>
+                        <input type="text" name="account_email" id="edit-account-email" placeholder="akun@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Password Akun</label>
+                        <input type="text" name="account_password" id="edit-account-password" placeholder="password akun">
+                    </div>
+                    <p class="col-span-2 text-xs text-gray-400 -mt-2">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -234,7 +246,21 @@ function openEdit(id, nama, harga, tipe, deskripsi, accountInfo) {
     document.getElementById('edit-harga-display').value = formatHargaValue(harga);
     document.getElementById('edit-tipe').value = tipe;
     document.getElementById('edit-deskripsi').value = deskripsi;
-    document.getElementById('edit-account-info').value = accountInfo || '';
+
+    // Parse "Email: ...\nPassword: ..." back into the two fields
+    var email = '', pass = '';
+    if (accountInfo) {
+        var lines = String(accountInfo).split(/\r?\n/);
+        lines.forEach(function(line) {
+            var m = line.match(/^\s*Email\s*:\s*(.*)$/i);
+            if (m) { email = m[1].trim(); return; }
+            var p = line.match(/^\s*Password\s*:\s*(.*)$/i);
+            if (p) { pass = p[1].trim(); }
+        });
+    }
+    document.getElementById('edit-account-email').value = email;
+    document.getElementById('edit-account-password').value = pass;
+
     document.getElementById('edit-title').textContent = nama;
     toggleAkunFields('edit');
     openModal('edit');

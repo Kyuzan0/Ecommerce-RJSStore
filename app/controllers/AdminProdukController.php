@@ -139,11 +139,13 @@ class AdminProdukController extends BaseController
 
         // Account-type products store credentials instead of a file
         if ($tipe === 'Akun') {
-            $account_info = trim($_POST['account_info'] ?? '');
-            if ($account_info === '') {
-                flash('error', 'Informasi akun wajib diisi untuk produk tipe Akun.');
+            $account_email = trim($_POST['account_email'] ?? '');
+            $account_password = trim($_POST['account_password'] ?? '');
+            if ($account_email === '' || $account_password === '') {
+                flash('error', 'Email dan password akun wajib diisi untuk produk tipe Akun.');
                 return;
             }
+            $account_info = "Email: {$account_email}\nPassword: {$account_password}";
             $this->produkModel->create([
                 'nama_produk' => $nama,
                 'harga' => $harga,
@@ -196,11 +198,13 @@ class AdminProdukController extends BaseController
 
         // Account-type products: update credentials, no file required
         if ($tipe === 'Akun') {
-            $account_info = trim($_POST['account_info'] ?? '');
-            if ($account_info === '') {
-                flash('error', 'Informasi akun wajib diisi untuk produk tipe Akun.');
+            $account_email = trim($_POST['account_email'] ?? '');
+            $account_password = trim($_POST['account_password'] ?? '');
+            if ($account_email === '' || $account_password === '') {
+                flash('error', 'Email dan password akun wajib diisi untuk produk tipe Akun.');
                 return;
             }
+            $account_info = "Email: {$account_email}\nPassword: {$account_password}";
             $this->produkModel->update($id, [
                 'nama_produk' => $nama,
                 'harga' => $harga,
