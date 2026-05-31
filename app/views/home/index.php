@@ -208,7 +208,14 @@
                     </div>
 
                     <div class="flex-1 overflow-y-auto px-6 py-6 md:px-8 md:py-8" id="mp-body">
-                        <div id="mp-reviews" class="grid grid-cols-1 gap-4">
+                        <div id="mp-reviews" class="grid grid-cols-1 gap-4 min-h-[280px]">
+                        </div>
+
+                        <!-- Reviews pagination -->
+                        <div id="mp-reviews-pagination" class="hidden flex items-center justify-between mt-5 pt-4 border-t border-gray-100/80">
+                            <button type="button" id="mp-rev-prev" onclick="reviewsPage(-1)" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed">← Sebelumnya</button>
+                            <span id="mp-rev-info" class="text-xs text-gray-500 font-medium"></span>
+                            <button type="button" id="mp-rev-next" onclick="reviewsPage(1)" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed">Berikutnya →</button>
                         </div>
 
                         <div id="mp-no-reviews" class="hidden bg-white rounded-[1.75rem] border border-gray-100 p-8 text-center shadow-[0_20px_50px_-35px_rgba(0,0,0,0.2)]">
@@ -231,6 +238,11 @@ var PRODUCT_MODAL_LOADING_HTML = '<svg class="animate-spin h-10 w-10 text-green-
 // Holds variants + selection for the product currently open in the modal
 var MP_VARIANTS = [];
 var MP_SELECTED_VARIANT = null;
+
+// Reviews pagination state
+var MP_REVIEWS = [];
+var MP_REV_PAGE = 1;
+var MP_REV_PER_PAGE = 3;
 
 function escapeHtml(unsafe) {
     return (unsafe || '').toString()
@@ -300,41 +312,81 @@ function syncPageCardToInCart(productId) {
 }
 
 function renderModalReviews(reviews) {
-    var reviewsEl = document.getElementById('mp-reviews');
     var noReviews = document.getElementById('mp-no-reviews');
+    var reviewsEl = document.getElementById('mp-reviews');
+    var pagWrap = document.getElementById('mp-reviews-pagination');
 
-    reviewsEl.innerHTML = '';
+    MP_REVIEWS = reviews || [];
+    MP_REV_PAGE = 1;
 
-    if (reviews && reviews.length > 0) {
-        noReviews.classList.add('hidden');
-        reviewsEl.classList.remove('hidden');
-
-        reviews.forEach(function(rev) {
-            var stars = '';
-            for (var i = 1; i <= 5; i++) {
-                stars += '<svg class="w-4 h-4 ' + (i <= rev.rating ? 'text-yellow-400' : 'text-gray-200') + '" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
-            }
-
-            reviewsEl.innerHTML += '<div class="bg-gray-50 rounded-2xl p-5 border border-gray-100/50 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all">' +
-                '<div class="flex items-start justify-between gap-3 mb-3">' +
-                    '<div class="flex items-center gap-3 min-w-0">' +
-                        '<div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0" style="background: linear-gradient(135deg, #42B549 0%, #2E7D32 100%)">' + escapeHtml(rev.initial) + '</div>' +
-                        '<div class="min-w-0">' +
-                            '<p class="text-sm font-bold text-gray-800 truncate">' + escapeHtml(rev.nama_user) + '</p>' +
-                            '<span class="text-xs text-gray-400 font-medium">' + escapeHtml(rev.tanggal) + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="flex items-center gap-0.5 bg-white px-2 py-1 rounded-full shadow-sm shrink-0">' + stars + '</div>' +
-                '</div>' +
-                '<p class="text-sm text-gray-600 leading-relaxed">' + escapeHtml(rev.ulasan) + '</p>' +
-            '</div>';
-        });
-
+    if (!MP_REVIEWS.length) {
+        reviewsEl.classList.add('hidden');
+        pagWrap.classList.add('hidden');
+        noReviews.classList.remove('hidden');
         return;
     }
 
-    noReviews.classList.remove('hidden');
-    reviewsEl.classList.add('hidden');
+    noReviews.classList.add('hidden');
+    reviewsEl.classList.remove('hidden');
+    renderReviewsPage();
+}
+
+function renderReviewsPage() {
+    var reviewsEl = document.getElementById('mp-reviews');
+    var pagWrap = document.getElementById('mp-reviews-pagination');
+    var info = document.getElementById('mp-rev-info');
+    var prevBtn = document.getElementById('mp-rev-prev');
+    var nextBtn = document.getElementById('mp-rev-next');
+
+    var totalPages = Math.max(1, Math.ceil(MP_REVIEWS.length / MP_REV_PER_PAGE));
+    if (MP_REV_PAGE > totalPages) MP_REV_PAGE = totalPages;
+    var start = (MP_REV_PAGE - 1) * MP_REV_PER_PAGE;
+    var pageItems = MP_REVIEWS.slice(start, start + MP_REV_PER_PAGE);
+
+    reviewsEl.innerHTML = '';
+    pageItems.forEach(function(rev) {
+        var stars = '';
+        for (var i = 1; i <= 5; i++) {
+            stars += '<svg class="w-4 h-4 ' + (i <= rev.rating ? 'text-yellow-400' : 'text-gray-200') + '" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
+        }
+
+        reviewsEl.innerHTML += '<div class="bg-gray-50 rounded-2xl p-5 border border-gray-100/50 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all">' +
+            '<div class="flex items-start justify-between gap-3 mb-3">' +
+                '<div class="flex items-center gap-3 min-w-0">' +
+                    '<div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0" style="background: linear-gradient(135deg, #42B549 0%, #2E7D32 100%)">' + escapeHtml(rev.initial) + '</div>' +
+                    '<div class="min-w-0">' +
+                        '<p class="text-sm font-bold text-gray-800 truncate">' + escapeHtml(rev.nama_user) + '</p>' +
+                        '<span class="text-xs text-gray-400 font-medium">' + escapeHtml(rev.tanggal) + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flex items-center gap-0.5 bg-white px-2 py-1 rounded-full shadow-sm shrink-0">' + stars + '</div>' +
+            '</div>' +
+            '<p class="text-sm text-gray-600 leading-relaxed">' + escapeHtml(rev.ulasan) + '</p>' +
+        '</div>';
+    });
+
+    // Pagination controls — only show when multiple pages
+    if (totalPages > 1) {
+        pagWrap.classList.remove('hidden');
+        pagWrap.classList.add('flex');
+        info.textContent = 'Halaman ' + MP_REV_PAGE + ' dari ' + totalPages;
+        prevBtn.disabled = (MP_REV_PAGE === 1);
+        nextBtn.disabled = (MP_REV_PAGE === totalPages);
+    } else {
+        pagWrap.classList.add('hidden');
+        pagWrap.classList.remove('flex');
+    }
+}
+
+function reviewsPage(delta) {
+    var totalPages = Math.max(1, Math.ceil(MP_REVIEWS.length / MP_REV_PER_PAGE));
+    var newPage = MP_REV_PAGE + delta;
+    if (newPage < 1 || newPage > totalPages) return;
+    MP_REV_PAGE = newPage;
+    renderReviewsPage();
+    // Scroll reviews container back to top
+    var body = document.getElementById('mp-body');
+    if (body) body.scrollTop = 0;
 }
 
 function renderModalProduct(product) {
@@ -404,11 +456,15 @@ function resetProductModalState() {
     loading.innerHTML = PRODUCT_MODAL_LOADING_HTML;
     document.getElementById('mp-reviews').innerHTML = '';
     document.getElementById('mp-no-reviews').classList.add('hidden');
+    var pagWrap = document.getElementById('mp-reviews-pagination');
+    if (pagWrap) pagWrap.classList.add('hidden');
     document.getElementById('mp-cta-container').innerHTML = '';
     var mpv = document.getElementById('mp-variants');
     if (mpv) mpv.classList.add('hidden');
     MP_VARIANTS = [];
     MP_SELECTED_VARIANT = null;
+    MP_REVIEWS = [];
+    MP_REV_PAGE = 1;
 }
 
 function openCartFromModal() {
