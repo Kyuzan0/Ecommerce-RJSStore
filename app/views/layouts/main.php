@@ -12,13 +12,8 @@
     <script>tailwind.config={darkMode:'class'}</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <?php if (isset($extra_head)) echo $extra_head; ?>
-    <style>
-        body { font-family: 'Inter', sans-serif; background:#F5F5F5; }
-        .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .product-card { transition: all 0.2s; }
-        <?php if (isset($extra_css)) echo $extra_css; ?>
-    </style>
     <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/dark-mode.css') ?>">
+    <?php if (isset($extra_css)): ?><style><?= $extra_css ?></style><?php endif; ?>
     <script>
         (function(){
             var theme = localStorage.getItem('theme');
@@ -31,39 +26,39 @@
 <body class="min-h-screen flex flex-col">
 
 <!-- TOP NAV -->
-<header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-4">
+<header class="sticky top-0 z-40 border-b">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 flex-wrap md:flex-nowrap">
         <a href="<?= url('/') ?>" class="flex items-center gap-2 flex-shrink-0">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#42B549">
                 <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
             </div>
-            <span class="text-xl font-bold text-gray-800">RJS<span style="color:#42B549">Store</span></span>
+            <span class="text-lg md:text-xl font-bold text-gray-800">RJS<span style="color:#42B549">Store</span></span>
         </a>
-        <div class="flex-1 max-w-xl">
+        <div class="order-3 md:order-2 w-full md:w-auto md:flex-1 md:max-w-xl">
             <form action="<?= url('/') ?>" method="GET" class="flex bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
-                <input type="text" name="search" placeholder="Cari produk di RJSStore..." value="<?= e($_GET['search'] ?? '') ?>" class="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none">
-                <button type="submit" class="px-5 py-2.5 text-white text-sm font-semibold" style="background:#42B549">
+                <input type="text" name="search" placeholder="Cari produk di RJSStore..." value="<?= e($_GET['search'] ?? '') ?>" class="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none border-0">
+                <button type="submit" class="px-4 md:px-5 py-2.5 text-white text-sm font-semibold" style="background:#42B549">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </button>
             </form>
         </div>
-        <div class="flex items-center gap-3 ml-auto">
+        <div class="order-2 md:order-3 flex items-center gap-2 md:gap-3 ml-auto">
             <?php
             $initial_cart_count = $initial_cart_count ?? 0;
             include BASE_PATH . '/app/views/partials/cart_dropdown.php';
             ?>
 
             <?php if ($this->auth->isCustomer()): ?>
-                <a href="<?= url('/customer/pembelian') ?>" class="flex items-center gap-1.5 text-gray-600 hover:text-gray-800 text-sm px-3 py-2 rounded-lg hover:bg-gray-100">
+                <a href="<?= url('/customer/pembelian') ?>" class="ds-hide-sm flex items-center gap-1.5 text-gray-600 hover:text-gray-800 text-sm px-3 py-2 rounded-lg hover:bg-gray-100">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     Pesanan
                 </a>
                 <div class="relative" id="profileDropdown">
-                    <button onclick="document.getElementById('profileMenu').classList.toggle('hidden')" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-xl px-3 py-2 transition cursor-pointer">
+                    <button onclick="document.getElementById('profileMenu').classList.toggle('hidden')" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-xl px-2.5 md:px-3 py-2 transition cursor-pointer">
                         <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#42B549">
                             <?= strtoupper(substr($this->auth->user()['name'], 0, 1)) ?>
                         </div>
-                        <span class="text-sm font-medium text-gray-700"><?= e($this->auth->user()['name']) ?></span>
+                        <span class="text-sm font-medium text-gray-700 ds-hide-sm"><?= e($this->auth->user()['name']) ?></span>
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
@@ -89,12 +84,12 @@
                 </div>
                 <script>document.addEventListener('click',function(e){var d=document.getElementById('profileDropdown');var m=document.getElementById('profileMenu');if(d&&!d.contains(e.target)){m.classList.add('hidden')}});</script>
             <?php elseif (!$this->auth->check()): ?>
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500" title="Mode Gelap">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500" title="Mode Gelap" aria-label="Toggle dark mode">
                     <svg class="w-5 h-5 dark-icon-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                     <svg class="w-5 h-5 dark-icon-sun hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
                 </button>
-                <a href="<?= url('/auth/login') ?>" class="text-sm font-medium text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition">Masuk</a>
-                <a href="<?= url('/auth/register') ?>" class="text-sm font-semibold text-white px-4 py-2 rounded-lg transition hover:opacity-90" style="background:#42B549">Daftar</a>
+                <a href="<?= url('/auth/login') ?>" class="text-sm font-medium text-gray-700 hover:text-gray-900 px-3 md:px-4 py-2 rounded-lg hover:bg-gray-100 transition">Masuk</a>
+                <a href="<?= url('/auth/register') ?>" class="text-sm font-semibold text-white px-3 md:px-4 py-2 rounded-lg transition hover:opacity-90" style="background:#42B549">Daftar</a>
             <?php endif; ?>
         </div>
     </div>
@@ -106,8 +101,8 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="bg-white border-t border-gray-200 mt-8">
-    <div class="max-w-7xl mx-auto px-6 py-6 text-center">
+<footer class="border-t mt-8">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 text-center">
         <p class="text-sm text-gray-500">&copy; <?= date('Y') ?> RJSStore. Toko Produk Digital Terpercaya.</p>
     </div>
 </footer>

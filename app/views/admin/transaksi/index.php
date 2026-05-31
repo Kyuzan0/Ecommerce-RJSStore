@@ -16,9 +16,9 @@
 $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 ?>
 <div class="flex items-center gap-2 mb-3 flex-wrap">
-    <a href="<?= url('/admin-transaksi') . '?' . ltrim($q_param, '&') ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_status === '' ? 'ring-2 ring-offset-1 ring-gray-300' : 'hover:opacity-80' ?>" style="color:#374151; background:#E5E7EB">Semua <span class="ml-1 opacity-70"><?= $total_transaksi ?></span></a>
-    <?php foreach (status_transaksi_list() as $key => $cfg): $count = $status_counts[$key] ?? 0; ?>
-    <a href="<?= url('/admin-transaksi') . '?status=' . urlencode($key) . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_status === $key ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:<?= $cfg['color'] ?>; background:<?= $cfg['bg'] ?>; <?= $current_status === $key ? 'ring-color:'.$cfg['color'] : '' ?>"><?= e($cfg['label']) ?> <span class="ml-1 opacity-70"><?= $count ?></span></a>
+    <a href="<?= url('/admin-transaksi') . '?' . ltrim($q_param, '&') ?>" class="ds-chip ds-chip--neutral ds-chip--filter <?= $current_status === '' ? 'is-active' : '' ?>">Semua <span class="ds-chip__count"><?= $total_transaksi ?></span></a>
+    <?php foreach (status_transaksi_list() as $key => $cfg): $count = $status_counts[$key] ?? 0; $variant = $cfg['chip'] ?? 'neutral'; ?>
+    <a href="<?= url('/admin-transaksi') . '?status=' . urlencode($key) . $q_param ?>" class="ds-chip ds-chip--<?= e($variant) ?> ds-chip--filter <?= $current_status === $key ? 'is-active' : '' ?>"><?= e($cfg['label']) ?> <span class="ds-chip__count"><?= $count ?></span></a>
     <?php endforeach; ?>
 </div>
 

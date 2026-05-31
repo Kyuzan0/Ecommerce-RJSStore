@@ -1,195 +1,838 @@
 /* ============================================================
-   RJSStore Dark Mode Overrides
-   Applied when <html class="dark"> is set.
-   Uses !important to override Tailwind utility classes.
+   RJSStore — Muted Pastels Design System
+   Single source of truth: DESIGN.md
+   This file replaces the previous dark-mode override sheet and
+   now provides full theming, responsive layout, and component
+   styling for both light and dark modes.
+   File path is preserved so existing layouts keep loading it.
    ============================================================ */
 
-/* Body & base backgrounds */
-.dark body { background: #0f0f1a !important; color: #e2e8f0 !important; }
+/* ------------------------------------------------------------
+   1. DESIGN TOKENS  (DESIGN.md — Muted Pastels)
+   ------------------------------------------------------------ */
+:root {
+    /* Light theme — soft, airy, clean, minimal */
+    --ds-bg:               #F7F7F5;
+    --ds-surface:          #FFFFFF;
+    --ds-surface-hover:    #F1F1EF;
 
-/* White backgrounds → dark */
-.dark .bg-white,
-.dark [class*="bg-white"] { background-color: #1e1e32 !important; }
+    --ds-primary:          #2C2C2C;
+    --ds-secondary:        rgba(44,44,44,0.72);
+    --ds-muted:            rgba(44,44,44,0.52);
 
-/* Gradient backgrounds containing white → dark (e.g. review panel from-white to-[#f7faf7]) */
-.dark [class*="from-white"] {
-    background-image: linear-gradient(to bottom, #1e1e32, #1a1a2e) !important;
+    --ds-accent-primary:   #7FBFC4;   /* teal pastel */
+    --ds-accent-secondary: #F4B6C2;   /* rose pastel */
+    --ds-tertiary:         #5C9C7E;   /* sage green — primary CTA / brand */
+    --ds-on-tertiary:      #FFFFFF;
+
+    --ds-border:           rgba(44,44,44,0.08);
+    --ds-border-strong:    rgba(44,44,44,0.16);
+
+    /* Soft tinted surfaces for icon chips / category backgrounds */
+    --ds-tint-tertiary:    rgba(92,156,126,0.16);   /* sage tint */
+    --ds-tint-accent:      rgba(127,191,196,0.14);
+    --ds-tint-rose:        rgba(244,182,194,0.18);
+    --ds-tint-warning:     rgba(229,160,98,0.18);
+    --ds-tint-success:     rgba(127,191,196,0.18);
+    --ds-tint-danger:      rgba(220,90,90,0.14);
+
+    /* Semantic */
+    --ds-success:          #6BAE8A;
+    --ds-warning:          #E1A562;
+    --ds-danger:           #D77878;
+    --ds-info:             #7FBFC4;
+
+    /* Spacing */
+    --ds-space-xs:  4px;
+    --ds-space-sm:  8px;
+    --ds-space-md:  16px;
+    --ds-space-lg:  24px;
+    --ds-space-xl:  32px;
+    --ds-space-xxl: 48px;
+
+    /* Radius */
+    --ds-radius-sm:   12px;
+    --ds-radius-md:   16px;
+    --ds-radius-lg:   20px;
+    --ds-radius-full: 999px;
+
+    /* Elevation */
+    --ds-shadow-subtle: 0 2px 8px rgba(0,0,0,0.04);
+    --ds-shadow-soft:   0 8px 24px rgba(0,0,0,0.06);
+
+    /* Layout */
+    --ds-max-w:   1280px;
+    --ds-gutter:  16px;
+    --ds-touch:   44px;
+    --ds-sidebar-w: 240px;
+
+    color-scheme: light;
 }
 
-/* Product detail modal — variant dropdown & hero panel */
-.dark #mp-variant-select { background-color: #252540 !important; border-color: #3d3d5c !important; color: #e2e8f0 !important; }
-.dark #mp-variant-select option { background-color: #1e1e32 !important; color: #e2e8f0 !important; }
-.dark #mp-icon-container { background: rgba(255,255,255,0.06) !important; }
-.dark #mp-type-badge { background: rgba(255,255,255,0.08) !important; }
-.dark .modal-content [class*="bg-white/"] { background-color: rgba(255,255,255,0.05) !important; }
-/* Hero panel: override JS-set inline gradient to match right panel in dark mode */
-.dark #mp-hero-bg { background: #1e1e32 !important; border-color: #2d2d4a !important; }
+@media (min-width: 768px) {
+    :root { --ds-gutter: 24px; }
+}
+@media (min-width: 1024px) {
+    :root { --ds-gutter: 32px; }
+}
 
-/* Reviews pagination buttons in modal */
-.dark #mp-reviews-pagination { border-color: #2d2d4a !important; }
-.dark #mp-rev-prev, .dark #mp-rev-next { color: #cbd5e1 !important; }
-.dark #mp-rev-prev:hover:not(:disabled), .dark #mp-rev-next:hover:not(:disabled) { background-color: #2d2d4a !important; }
-.dark #mp-rev-info { color: #94a3b8 !important; }
+.dark {
+    /* Dark theme — calm, premium, modern, elegant */
+    --ds-bg:               #2C2C2C;
+    --ds-surface:          #353535;
+    --ds-surface-hover:    #404040;
 
-/* Gray backgrounds → darker */
-.dark .bg-gray-50,
-.dark [class*="bg-gray-50"] { background-color: #1e1e32 !important; }
-.dark .bg-gray-100,
-.dark [class*="bg-gray-100"] { background-color: #252540 !important; }
-.dark .bg-gray-200,
-.dark [class*="bg-gray-200"] { background-color: #2d2d4a !important; }
+    --ds-primary:          #E4E4E4;
+    --ds-secondary:        rgba(228,228,228,0.72);
+    --ds-muted:            rgba(228,228,228,0.5);
 
-/* Text colors */
-.dark .text-gray-900,
-.dark .text-gray-800 { color: #f1f5f9 !important; }
-.dark .text-gray-700 { color: #e2e8f0 !important; }
-.dark .text-gray-600 { color: #cbd5e1 !important; }
-.dark .text-gray-500 { color: #94a3b8 !important; }
-.dark .text-gray-400 { color: #64748b !important; }
-.dark .text-gray-300 { color: #475569 !important; }
+    --ds-accent-primary:   #A8DADC;
+    --ds-accent-secondary: #FFC1CC;
+    --ds-tertiary:         #7FB89A;   /* mint pastel — primary CTA / brand */
+    --ds-on-tertiary:      #FFFFFF;
 
-/* Borders */
-.dark .border-gray-100,
-.dark .border-gray-200,
-.dark .border-gray-300,
-.dark [class*="border-gray-100"],
-.dark [class*="border-gray-200"],
-.dark [class*="border-gray-300"] { border-color: #2d2d4a !important; }
+    --ds-border:           rgba(255,255,255,0.08);
+    --ds-border-strong:    rgba(255,255,255,0.16);
 
-/* Hover states — visibly different from resting state */
-.dark .hover\:bg-gray-50:hover { background-color: #333355 !important; }
-.dark .hover\:bg-gray-100:hover { background-color: #3d3d5c !important; }
-.dark .hover\:bg-gray-200:hover { background-color: #4a4a6a !important; }
-.dark .hover\:bg-white:hover { background-color: #333355 !important; }
-/* Hover on cards/links that use inline hover classes */
-.dark [class*="hover\:bg-gray"]:hover { background-color: #3d3d5c !important; }
-.dark [class*="hover\:bg-white"]:hover { background-color: #333355 !important; }
-.dark [class*="hover\:shadow"]:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+    --ds-tint-tertiary:    rgba(127,184,154,0.20);   /* mint tint */
+    --ds-tint-accent:      rgba(168,218,220,0.16);
+    --ds-tint-rose:        rgba(255,193,204,0.16);
+    --ds-tint-warning:     rgba(229,160,98,0.20);
+    --ds-tint-success:     rgba(168,218,220,0.18);
+    --ds-tint-danger:      rgba(220,120,120,0.18);
 
-/* Shadows */
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg,
-.dark .shadow-xl,
-.dark .shadow-2xl { box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+    --ds-success:          #8BC4A6;
+    --ds-warning:          #E8B074;
+    --ds-danger:           #E08F8F;
+    --ds-info:             #A8DADC;
 
-/* Form elements */
-.dark input,
-.dark textarea,
-.dark select { background-color: #252540 !important; border-color: #3d3d5c !important; color: #e2e8f0 !important; }
-.dark input::placeholder,
-.dark textarea::placeholder { color: #64748b !important; }
-.dark input:focus,
-.dark textarea:focus,
-.dark select:focus { border-color: #42B549 !important; }
+    --ds-shadow-subtle: 0 2px 8px rgba(0,0,0,0.12);
+    --ds-shadow-soft:   0 8px 24px rgba(0,0,0,0.18);
 
-/* Tables */
-.dark table thead,
-.dark table thead tr { background-color: #252540 !important; }
-.dark table tbody tr:hover { background-color: #1e1e32 !important; }
-.dark .divide-y > :not([hidden]) ~ :not([hidden]),
-.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]),
-.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #2d2d4a !important; }
+    color-scheme: dark;
+}
 
-/* Header & navigation */
-.dark header { background-color: #1a1a2e !important; border-color: #2d2d4a !important; }
-.dark aside { background-color: #1a1a2e !important; border-color: #2d2d4a !important; }
-.dark footer { background-color: #1a1a2e !important; border-color: #2d2d4a !important; }
+/* ------------------------------------------------------------
+   2. BASE LAYER
+   ------------------------------------------------------------ */
+html, body {
+    background: var(--ds-bg);
+    color: var(--ds-primary);
+}
+body {
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
 
-/* Dropdown menus */
-.dark #profileMenu { background-color: #1e1e32 !important; border-color: #3d3d5c !important; }
-.dark #cartDropdown { background-color: #1e1e32 !important; border-color: #3d3d5c !important; }
-
-/* Modals */
-.dark .modal-content,
-.dark [class*="rounded-2xl"][class*="bg-white"],
-.dark [class*="rounded-2xl"][class*="shadow"] { background-color: #1e1e32 !important; border-color: #3d3d5c !important; }
-
-/* Buttons with gray backgrounds */
-.dark button[class*="bg-gray-100"],
-.dark a[class*="bg-gray-100"],
-.dark button[class*="bg-gray-200"],
-.dark a[class*="bg-gray-200"],
-.dark .bg-gray-100,
-.dark .bg-gray-200 { background-color: #2d2d4a !important; color: #e2e8f0 !important; }
-
-/* Button hover — must override resting state visibly */
-.dark button[class*="bg-gray-100"],
-.dark button[class*="bg-gray-200"],
-.dark a[class*="bg-gray-100"],
-.dark a[class*="bg-gray-200"] { transition: background-color 0.15s ease !important; }
-.dark button[class*="bg-gray-100"]:hover,
-.dark button[class*="bg-gray-200"]:hover,
-.dark a[class*="bg-gray-100"]:hover,
-.dark a[class*="bg-gray-200"]:hover { background-color: #50506e !important; }
-
-/* Cards & panels */
-.dark [class*="rounded-lg"][class*="shadow"],
-.dark [class*="rounded-2xl"][class*="border-gray"] { background-color: #1e1e32 !important; border-color: #2d2d4a !important; }
-
-/* Sidebar links */
-.dark .sidebar-link { color: #cbd5e1 !important; }
-.dark .sidebar-link:hover { background: #2d2d4a !important; }
-.dark .sidebar-link.active { background: #1a3a1e !important; color: #42B549 !important; }
-
-/* Specific component overrides */
-.dark .border-b { border-color: #2d2d4a !important; }
-.dark .border-t { border-color: #2d2d4a !important; }
-.dark .border-r { border-color: #2d2d4a !important; }
-.dark .border-l { border-color: #2d2d4a !important; }
-
-/* Product cards */
-.dark .product-card { background-color: #1e1e32 !important; border-color: #2d2d4a !important; }
-.dark .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
-
-/* Toast notifications - keep visible */
-.dark [id*="toast"] .bg-white { background-color: #252540 !important; }
-
-/* Backdrop blur modals */
-.dark .backdrop-blur-sm { background-color: rgba(0,0,0,0.6) !important; }
-
-/* Colored hover states in dark mode */
-.dark .hover\:bg-red-50:hover { background-color: #3d1f1f !important; }
-.dark .hover\:bg-green-50:hover { background-color: #1a3a1e !important; }
-.dark .hover\:bg-yellow-50:hover { background-color: #3d3520 !important; }
-.dark .hover\:bg-blue-50:hover { background-color: #1a2a4a !important; }
-.dark .hover\:bg-orange-50:hover { background-color: #3d2a15 !important; }
-.dark .hover\:bg-purple-50:hover { background-color: #2a1a3d !important; }
-/* Colored hover borders */
-.dark .hover\:border-green-300:hover { border-color: #2e7d32 !important; }
-.dark .hover\:border-blue-300:hover { border-color: #1976D2 !important; }
-.dark .hover\:border-orange-300:hover { border-color: #E65100 !important; }
-.dark .hover\:border-purple-300:hover { border-color: #7B1FA2 !important; }
-
-/* Transition for smooth dark mode toggle */
-body, .bg-white, header, aside, footer, .sidebar-link, input, textarea, select {
+/* Smooth theme toggle for layout chrome */
+header, aside, footer, main, .product-card,
+.bg-white, [class*="bg-gray-"], [class*="border-gray-"],
+input, textarea, select, button {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* ============================================================
-   Logout Modal (custom-classed, not Tailwind utilities)
-   ============================================================ */
-.dark .logout-modal-card { background: #1e1e32 !important; box-shadow: 0 25px 60px rgba(0,0,0,0.6) !important; }
-.dark .logout-modal-title { color: #f1f5f9 !important; }
-.dark .logout-modal-desc { color: #94a3b8 !important; }
-.dark .logout-modal-icon-bg { background: #3d1f1f !important; border-color: #5c2b2b !important; }
-.dark .logout-modal-btn-cancel { background: #2d2d4a !important; color: #e2e8f0 !important; border-color: #3d3d5c !important; }
-.dark .logout-modal-btn-cancel:hover { background: #3d3d5c !important; border-color: #4a4a6a !important; }
-/* confirm button (red) stays the same — already good in dark */
+/* Headings — DESIGN.md typography scale */
+h1 { letter-spacing: -0.01em; }
+h2 { letter-spacing: -0.005em; }
 
-/* ============================================================
-   Toast Notifications (custom-classed)
-   ============================================================ */
-.dark .toast-item { background: #1e1e32 !important; border-color: #3d3d5c !important; box-shadow: 0 8px 30px rgba(0,0,0,0.5) !important; }
-.dark .toast-success { background: #14271a !important; border-color: #1f5132 !important; }
-.dark .toast-success .toast-title { color: #4ade80 !important; }
-.dark .toast-success .toast-msg { color: #86efac !important; }
-.dark .toast-error { background: #2a1515 !important; border-color: #5c2b2b !important; }
-.dark .toast-error .toast-title { color: #f87171 !important; }
-.dark .toast-error .toast-msg { color: #fca5a5 !important; }
-.dark .toast-warning { background: #2a2415 !important; border-color: #5c4a1f !important; }
-.dark .toast-warning .toast-title { color: #fbbf24 !important; }
-.dark .toast-warning .toast-msg { color: #fcd34d !important; }
-.dark .toast-info { background: #15202a !important; border-color: #1f3a5c !important; }
-.dark .toast-info .toast-title { color: #60a5fa !important; }
-.dark .toast-info .toast-msg { color: #93c5fd !important; }
+/* Focus ring — accessible & on-brand */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--ds-accent-primary);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* Min touch target on mobile (DESIGN.md: 44px) */
+@media (max-width: 767px) {
+    button, .sidebar-link, a[role="button"], .ds-touch {
+        min-height: var(--ds-touch);
+    }
+}
+
+/* Avoid horizontal page overflow on small viewports */
+html, body { overflow-x: hidden; }
+
+/* ------------------------------------------------------------
+   3. SURFACE & TEXT REMAPS  (Tailwind utility → tokens)
+   ------------------------------------------------------------ */
+.bg-white                 { background-color: var(--ds-surface) !important; }
+.bg-gray-50               { background-color: var(--ds-surface-hover) !important; }
+.bg-gray-100              { background-color: var(--ds-surface-hover) !important; }
+.bg-gray-200              { background-color: var(--ds-border-strong) !important; }
+.bg-gray-50\/50           { background-color: color-mix(in srgb, var(--ds-surface-hover) 50%, transparent) !important; }
+
+.hover\:bg-white:hover    { background-color: var(--ds-surface) !important; }
+.hover\:bg-gray-50:hover  { background-color: var(--ds-surface-hover) !important; }
+.hover\:bg-gray-100:hover { background-color: var(--ds-surface-hover) !important; }
+.hover\:bg-gray-200:hover { background-color: var(--ds-border-strong) !important; }
+
+.text-gray-900,
+.text-gray-800            { color: var(--ds-primary) !important; }
+.text-gray-700,
+.text-gray-600            { color: var(--ds-secondary) !important; }
+.text-gray-500,
+.text-gray-400            { color: var(--ds-muted) !important; }
+.text-gray-300            { color: color-mix(in srgb, var(--ds-muted) 60%, transparent) !important; }
+
+.border-gray-100,
+.border-gray-200,
+.border-gray-300,
+.border-b, .border-t, .border-l, .border-r,
+.divide-gray-50  > :not([hidden]) ~ :not([hidden]),
+.divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--ds-border) !important;
+}
+
+/* Shadows — soften per design system */
+.shadow-sm    { box-shadow: var(--ds-shadow-subtle) !important; }
+.shadow,
+.shadow-md    { box-shadow: var(--ds-shadow-subtle) !important; }
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl   { box-shadow: var(--ds-shadow-soft)   !important; }
+.hover\:shadow-md:hover,
+.hover\:shadow-lg:hover,
+.hover\:shadow:hover { box-shadow: var(--ds-shadow-soft) !important; }
+
+/* Rounded — keep tighter mapping to DESIGN.md radius scale */
+.rounded-lg    { border-radius: var(--ds-radius-sm) !important; }
+.rounded-xl    { border-radius: var(--ds-radius-sm) !important; }
+.rounded-2xl   { border-radius: var(--ds-radius-md) !important; }
+.rounded-3xl,
+.rounded-\[2rem\] { border-radius: var(--ds-radius-lg) !important; }
+.rounded-full  { border-radius: var(--ds-radius-full) !important; }
+
+/* ------------------------------------------------------------
+   4. BRAND COLOR REMAPS  (legacy hex → tokens)
+       The codebase uses inline `style="background:#42B549"` etc.
+       in many views. We remap them via attribute selectors so
+       the design system applies everywhere without touching each file.
+   ------------------------------------------------------------ */
+
+/* Primary brand green → tertiary (lavender) */
+[style*="#42B549"][style*="background"],
+[style*="background:#42B549"],
+[style*="background: #42B549"] {
+    background: var(--ds-tertiary) !important;
+}
+[style*="#42B549"][style*="color"],
+[style*="color:#42B549"],
+[style*="color: #42B549"] {
+    color: var(--ds-tertiary) !important;
+}
+/* Brand-green gradient hero */
+[style*="linear-gradient"][style*="#42B549"] {
+    background: linear-gradient(135deg, var(--ds-tertiary) 0%, color-mix(in srgb, var(--ds-tertiary) 70%, var(--ds-primary)) 100%) !important;
+}
+
+/* Tailwind green utilities → tertiary */
+.bg-green-500, .bg-green-600, .bg-green-700,
+.bg-emerald-500, .bg-emerald-600 {
+    background-color: var(--ds-tertiary) !important;
+    color: var(--ds-on-tertiary) !important;
+}
+.hover\:bg-green-600:hover, .hover\:bg-green-700:hover,
+.hover\:bg-green-50:hover {
+    background-color: color-mix(in srgb, var(--ds-tertiary) 88%, var(--ds-primary)) !important;
+}
+.text-green-500, .text-green-600, .text-green-700,
+.text-green-800, .text-green-900,
+.hover\:text-green-600:hover {
+    color: var(--ds-tertiary) !important;
+}
+.text-green-100, .text-green-200 {
+    color: color-mix(in srgb, var(--ds-on-tertiary) 88%, transparent) !important;
+}
+.border-green-300, .border-green-500, .border-green-600,
+.hover\:border-green-300:hover {
+    border-color: color-mix(in srgb, var(--ds-tertiary) 60%, transparent) !important;
+}
+.bg-green-50, .bg-green-100 {
+    background-color: var(--ds-tint-tertiary) !important;
+}
+.focus\:ring-green-500:focus,
+.focus\:border-green-500:focus,
+.focus\:ring-2:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-accent-primary) 35%, transparent) !important;
+    border-color: var(--ds-accent-primary) !important;
+}
+
+/* Soft tinted backgrounds used in icon chips & inline badge backgrounds.
+   Paired with the foreground remaps further below — both fg+bg are
+   designed to keep AA contrast in light & dark themes. */
+[style*="background:#E8F5E9"],
+[style*="background: #E8F5E9"] { background: var(--ds-chip-success-bg) !important; }
+[style*="background:#E3F2FD"],
+[style*="background: #E3F2FD"] { background: var(--ds-chip-accent-bg) !important; }
+[style*="background:#FFF3E0"],
+[style*="background: #FFF3E0"] { background: var(--ds-chip-warning-bg) !important; }
+[style*="background:#F3E5F5"],
+[style*="background: #F3E5F5"] { background: var(--ds-chip-tertiary-bg) !important; }
+[style*="background:#FCE4EC"],
+[style*="background: #FCE4EC"] { background: var(--ds-chip-rose-bg) !important; }
+[style*="background:#FFEBEE"],
+[style*="background: #FFEBEE"] { background: var(--ds-chip-danger-bg) !important; }
+[style*="background:#FFF8E1"],
+[style*="background: #FFF8E1"] { background: var(--ds-chip-warning-bg) !important; }
+[style*="background:#F3F4F6"],
+[style*="background: #F3F4F6"] { background: var(--ds-chip-neutral-bg) !important; }
+[style*="background:#FEF3C7"],
+[style*="background: #FEF3C7"] { background: var(--ds-chip-warning-bg) !important; }
+[style*="background:#E5E7EB"],
+[style*="background: #E5E7EB"] { background: var(--ds-chip-neutral-bg) !important; }
+
+/* Foreground hex remaps — must use chip-fg tokens so they stay readable
+   on the chip-bg tokens above. */
+[style*="color:#1565C0"],
+[style*="color:#1976D2"]    { color: var(--ds-chip-accent-fg)   !important; }
+[style*="color:#2E7D32"]    { color: var(--ds-chip-success-fg)  !important; }
+[style*="color:#E65100"],
+[style*="color:#F57F17"]    { color: var(--ds-chip-warning-fg)  !important; }
+[style*="color:#7B1FA2"],
+[style*="color:#6A1B9A"]    { color: var(--ds-chip-tertiary-fg) !important; }
+[style*="color:#AD1457"]    { color: var(--ds-chip-rose-fg)     !important; }
+[style*="color:#C62828"]    { color: var(--ds-chip-danger-fg)   !important; }
+[style*="color:#374151"]    { color: var(--ds-chip-neutral-fg)  !important; }
+[style*="color:#6B7280"]    { color: var(--ds-muted)            !important; }
+
+/* Avatar background variants used in admin layout */
+[style*="background:#1565C0"],
+[style*="background: #1565C0"] { background: var(--ds-accent-primary) !important; }
+
+/* Orange brand badge used in cart count, admin tag, etc. */
+[style*="background:#E65100"],
+[style*="background: #E65100"] { background: var(--ds-warning) !important; }
+[style*="background:#FF9800"],
+[style*="background: #FF9800"] { background: var(--ds-warning) !important; }
+
+/* Yellow stars stay yellow (visually critical) */
+.text-yellow-400, .text-yellow-500 { color: #E8C275 !important; }
+.dark .text-yellow-400, .dark .text-yellow-500 { color: #F0D08A !important; }
+.text-yellow-200 { color: color-mix(in srgb, #E8C275 40%, transparent) !important; }
+
+/* Tailwind blue / purple / orange / pink utilities → tokens */
+.bg-blue-50, .bg-blue-100   { background-color: var(--ds-tint-accent)   !important; }
+.text-blue-500, .text-blue-600, .text-blue-700,
+.text-blue-800, .text-blue-900 { color: var(--ds-accent-primary) !important; }
+.border-blue-200, .border-blue-300, .hover\:border-blue-300:hover { border-color: color-mix(in srgb, var(--ds-accent-primary) 50%, transparent) !important; }
+.hover\:bg-blue-50:hover    { background-color: var(--ds-tint-accent)   !important; }
+
+.bg-purple-50, .bg-purple-100 { background-color: var(--ds-tint-tertiary) !important; }
+.text-purple-500, .text-purple-600, .text-purple-700, .text-purple-800 { color: var(--ds-tertiary) !important; }
+.border-purple-200, .border-purple-300, .hover\:border-purple-300:hover { border-color: color-mix(in srgb, var(--ds-tertiary) 50%, transparent) !important; }
+.hover\:bg-purple-50:hover  { background-color: var(--ds-tint-tertiary) !important; }
+
+.bg-orange-50, .bg-orange-100 { background-color: var(--ds-tint-warning) !important; }
+.text-orange-500, .text-orange-600, .text-orange-700, .text-orange-800 { color: var(--ds-warning) !important; }
+.border-orange-200, .border-orange-300, .hover\:border-orange-300:hover { border-color: color-mix(in srgb, var(--ds-warning) 50%, transparent) !important; }
+.hover\:bg-orange-50:hover  { background-color: var(--ds-tint-warning) !important; }
+
+.bg-pink-50, .bg-pink-100   { background-color: var(--ds-tint-rose)     !important; }
+.text-pink-500, .text-pink-600, .text-pink-700, .text-pink-800 { color: var(--ds-accent-secondary) !important; }
+
+.bg-yellow-50, .bg-yellow-100 { background-color: var(--ds-tint-warning) !important; }
+.text-yellow-700, .text-yellow-800, .text-yellow-900 { color: var(--ds-warning) !important; }
+.hover\:bg-yellow-50:hover    { background-color: var(--ds-tint-warning) !important; }
+
+.bg-red-50, .bg-red-100     { background-color: var(--ds-tint-danger)   !important; }
+.text-red-500, .text-red-600, .text-red-700, .text-red-800 { color: var(--ds-danger) !important; }
+.border-red-200, .border-red-300 { border-color: color-mix(in srgb, var(--ds-danger) 50%, transparent) !important; }
+.hover\:bg-red-50:hover     { background-color: var(--ds-tint-danger)   !important; }
+.hover\:text-red-500:hover, .hover\:text-red-600:hover, .hover\:text-red-800:hover { color: var(--ds-danger) !important; }
+
+/* Tailwind gradients (e.g. from-green-500 to-emerald-600) */
+[class*="from-green-"][class*="to-emerald-"],
+[class*="from-green-"][class*="to-green-"],
+[class*="bg-gradient-to-r"][class*="from-green-"],
+[class*="bg-gradient-to-br"][class*="from-green-"],
+[class*="bg-gradient-to-b"][class*="from-green-"] {
+    background-image: linear-gradient(135deg, var(--ds-tertiary) 0%, color-mix(in srgb, var(--ds-tertiary) 70%, var(--ds-primary)) 100%) !important;
+}
+[class*="from-white"]:not([class*="bg-white"]) {
+    background-image: linear-gradient(180deg, var(--ds-surface) 0%, var(--ds-surface-hover) 100%) !important;
+}
+
+/* ------------------------------------------------------------
+   5. LAYOUT CHROME  (header, sidebar, main, footer)
+   ------------------------------------------------------------ */
+header {
+    background: var(--ds-surface) !important;
+    border-color: var(--ds-border) !important;
+    backdrop-filter: saturate(160%) blur(8px);
+}
+
+aside {
+    background: var(--ds-surface) !important;
+    border-color: var(--ds-border) !important;
+}
+
+footer {
+    background: var(--ds-surface) !important;
+    border-color: var(--ds-border) !important;
+    color: var(--ds-secondary);
+}
+
+/* Sidebar links — DESIGN.md tokens */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--ds-radius-sm);
+    color: var(--ds-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    line-height: 1.4;
+    position: relative;
+}
+.sidebar-link:hover {
+    background: var(--ds-surface-hover);
+    color: var(--ds-primary);
+}
+.sidebar-link.active {
+    background: var(--ds-tint-tertiary);
+    color: var(--ds-primary);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 0 var(--ds-tertiary);
+}
+.sidebar-link.active svg { color: var(--ds-tertiary); }
+
+/* Layout viewport rules: convert fixed-height shell to scrollable on mobile */
+@media (max-width: 1023px) {
+    body.app-shell {
+        height: auto !important;
+        min-height: 100vh;
+        overflow: visible !important;
+    }
+    body.app-shell > .app-shell__body {
+        height: auto !important;
+        overflow: visible !important;
+    }
+    body.app-shell > .app-shell__body > main {
+        overflow: visible !important;
+    }
+}
+
+/* ------------------------------------------------------------
+   6. MOBILE SIDEBAR DRAWER
+   ------------------------------------------------------------ */
+.app-shell__aside {
+    width: var(--ds-sidebar-w);
+    transition: transform 0.25s ease;
+}
+
+@media (max-width: 1023px) {
+    .app-shell__aside {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 60;
+        height: 100dvh;
+        width: min(82vw, 320px);
+        transform: translateX(-105%);
+        box-shadow: var(--ds-shadow-soft);
+    }
+    body.aside-open .app-shell__aside {
+        transform: translateX(0);
+    }
+    .app-shell__overlay {
+        position: fixed; inset: 0; z-index: 55;
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(2px);
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    body.aside-open .app-shell__overlay {
+        opacity: 1; pointer-events: auto;
+    }
+    body.aside-open { overflow: hidden; }
+}
+
+@media (min-width: 1024px) {
+    .app-shell__overlay { display: none !important; }
+    .app-shell__menu-toggle { display: none !important; }
+}
+
+.app-shell__menu-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: var(--ds-radius-sm);
+    background: transparent;
+    border: 1px solid var(--ds-border);
+    color: var(--ds-secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.app-shell__menu-toggle:hover {
+    background: var(--ds-surface-hover);
+    color: var(--ds-primary);
+}
+
+/* Hide desktop-only items on mobile when needed */
+@media (max-width: 767px) {
+    .ds-hide-sm { display: none !important; }
+}
+@media (max-width: 1023px) {
+    .ds-hide-md { display: none !important; }
+}
+
+/* ------------------------------------------------------------
+   7. CARDS & PRODUCT CARDS
+   ------------------------------------------------------------ */
+.product-card {
+    background: var(--ds-surface);
+    border: 1px solid var(--ds-border);
+    border-radius: var(--ds-radius-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.product-card:hover {
+    box-shadow: var(--ds-shadow-soft);
+    transform: translateY(-2px);
+    border-color: var(--ds-border-strong);
+}
+
+/* ------------------------------------------------------------
+   8. FORMS  (input, textarea, select)
+   ------------------------------------------------------------ */
+input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]):not(.bg-transparent),
+textarea:not(.bg-transparent),
+select:not(.bg-transparent) {
+    background-color: var(--ds-surface) !important;
+    color: var(--ds-primary) !important;
+    border-color: var(--ds-border) !important;
+    border-radius: var(--ds-radius-sm) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+input.bg-transparent, textarea.bg-transparent, select.bg-transparent {
+    background-color: transparent !important;
+    color: var(--ds-primary) !important;
+    border-color: transparent !important;
+}
+input::placeholder,
+textarea::placeholder { color: var(--ds-muted) !important; }
+input:focus, textarea:focus, select:focus {
+    border-color: var(--ds-accent-primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-accent-primary) 30%, transparent) !important;
+    outline: none !important;
+}
+
+/* Input groups (search bars w/ trailing button) */
+.bg-gray-100.flex,
+form.flex[class*="bg-gray-100"] {
+    background: var(--ds-surface-hover) !important;
+    border: 1px solid var(--ds-border) !important;
+}
+
+/* ------------------------------------------------------------
+   9. TABLES
+   ------------------------------------------------------------ */
+table { width: 100%; border-collapse: collapse; }
+table thead, table thead tr {
+    background-color: var(--ds-surface-hover) !important;
+    color: var(--ds-secondary);
+}
+table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ds-muted) !important;
+}
+table tbody tr { border-color: var(--ds-border) !important; }
+table tbody tr:hover { background-color: var(--ds-surface-hover) !important; }
+
+/* Mobile table — horizontal scroll wrapper (DESIGN.md rule) */
+.overflow-x-auto > table { min-width: 560px; }
+
+/* ------------------------------------------------------------
+   10. BUTTONS  (primary / secondary tokens)
+   ------------------------------------------------------------ */
+button[class*="bg-gray-100"],
+a[class*="bg-gray-100"],
+button[class*="bg-gray-200"],
+a[class*="bg-gray-200"] {
+    background-color: var(--ds-surface-hover) !important;
+    color: var(--ds-primary) !important;
+    border-radius: var(--ds-radius-sm);
+}
+button[class*="bg-gray-100"]:hover,
+button[class*="bg-gray-200"]:hover,
+a[class*="bg-gray-100"]:hover,
+a[class*="bg-gray-200"]:hover {
+    background-color: var(--ds-border-strong) !important;
+}
+
+/* Disabled / muted state */
+button[disabled], a.cursor-not-allowed,
+.bg-gray-400 {
+    background-color: var(--ds-surface-hover) !important;
+    color: var(--ds-muted) !important;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------
+   11. DROPDOWN MENUS, MODALS, BACKDROPS
+   ------------------------------------------------------------ */
+#profileMenu, #cartDropdown {
+    background: var(--ds-surface) !important;
+    border-color: var(--ds-border) !important;
+    box-shadow: var(--ds-shadow-soft) !important;
+    border-radius: var(--ds-radius-md) !important;
+}
+
+.modal-content,
+[class*="rounded-2xl"][class*="bg-white"],
+[class*="rounded-\[2rem\]"][class*="bg-white"] {
+    background-color: var(--ds-surface) !important;
+    border-color: var(--ds-border) !important;
+}
+
+.backdrop-blur-sm,
+.backdrop-blur-md {
+    background-color: rgba(0,0,0,0.45) !important;
+}
+
+/* ------------------------------------------------------------
+   12. PAGINATION  (helpers/functions.php pagination_render)
+   ------------------------------------------------------------ */
+.flex.items-center.justify-center.gap-1 a,
+.flex.items-center.justify-center.gap-1 span {
+    border-radius: var(--ds-radius-sm) !important;
+}
+.flex.items-center.justify-center.gap-1 a:hover {
+    background: var(--ds-surface-hover) !important;
+    color: var(--ds-primary) !important;
+}
+/* Active page (rendered with style="background:#42B549") gets remapped via global rule */
+
+/* ------------------------------------------------------------
+   13. LOGOUT MODAL  (custom classes — re-skinned)
+   ------------------------------------------------------------ */
+.logout-modal-card {
+    background: var(--ds-surface) !important;
+    border-radius: var(--ds-radius-md) !important;
+    box-shadow: var(--ds-shadow-soft) !important;
+    color: var(--ds-primary);
+}
+.logout-modal-title { color: var(--ds-primary)   !important; }
+.logout-modal-desc  { color: var(--ds-secondary) !important; }
+.logout-modal-icon-bg {
+    background: var(--ds-tint-danger) !important;
+    border-color: color-mix(in srgb, var(--ds-danger) 40%, transparent) !important;
+}
+.logout-modal-icon-bg svg { color: var(--ds-danger) !important; }
+.logout-modal-btn-cancel {
+    background: var(--ds-surface-hover) !important;
+    color: var(--ds-primary) !important;
+    border-color: var(--ds-border) !important;
+    border-radius: var(--ds-radius-sm) !important;
+}
+.logout-modal-btn-cancel:hover {
+    background: var(--ds-border-strong) !important;
+    border-color: var(--ds-border-strong) !important;
+}
+.logout-modal-btn-confirm {
+    background: var(--ds-danger) !important;
+    border-color: var(--ds-danger) !important;
+    color: #fff !important;
+    border-radius: var(--ds-radius-sm) !important;
+}
+.logout-modal-btn-confirm:hover {
+    filter: brightness(0.94);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--ds-danger) 35%, transparent);
+}
+
+/* ------------------------------------------------------------
+   14. TOASTS  (custom classes — re-skinned with semantic tints)
+   ------------------------------------------------------------ */
+.toast-item {
+    background: var(--ds-surface) !important;
+    border: 1px solid var(--ds-border) !important;
+    box-shadow: var(--ds-shadow-soft) !important;
+    border-radius: var(--ds-radius-sm) !important;
+    color: var(--ds-primary);
+}
+.toast-success {
+    background: color-mix(in srgb, var(--ds-success) 12%, var(--ds-surface)) !important;
+    border-color: color-mix(in srgb, var(--ds-success) 40%, transparent) !important;
+}
+.toast-success .toast-icon, .toast-success .toast-title { color: var(--ds-success) !important; }
+.toast-success .toast-msg { color: var(--ds-secondary) !important; }
+.toast-success .toast-progress { background: var(--ds-success) !important; }
+
+.toast-error {
+    background: color-mix(in srgb, var(--ds-danger) 12%, var(--ds-surface)) !important;
+    border-color: color-mix(in srgb, var(--ds-danger) 40%, transparent) !important;
+}
+.toast-error .toast-icon, .toast-error .toast-title { color: var(--ds-danger) !important; }
+.toast-error .toast-msg { color: var(--ds-secondary) !important; }
+.toast-error .toast-progress { background: var(--ds-danger) !important; }
+
+.toast-warning {
+    background: color-mix(in srgb, var(--ds-warning) 12%, var(--ds-surface)) !important;
+    border-color: color-mix(in srgb, var(--ds-warning) 40%, transparent) !important;
+}
+.toast-warning .toast-icon, .toast-warning .toast-title { color: var(--ds-warning) !important; }
+.toast-warning .toast-msg { color: var(--ds-secondary) !important; }
+.toast-warning .toast-progress { background: var(--ds-warning) !important; }
+
+.toast-info {
+    background: color-mix(in srgb, var(--ds-info) 12%, var(--ds-surface)) !important;
+    border-color: color-mix(in srgb, var(--ds-info) 40%, transparent) !important;
+}
+.toast-info .toast-icon, .toast-info .toast-title { color: var(--ds-info) !important; }
+.toast-info .toast-msg { color: var(--ds-secondary) !important; }
+.toast-info .toast-progress { background: var(--ds-info) !important; }
+
+@media (max-width: 480px) {
+    #toast-container { top: 12px !important; right: 12px !important; left: 12px !important; }
+    .toast-item     { min-width: 0 !important; max-width: none !important; width: 100%; }
+}
+
+/* ------------------------------------------------------------
+   15. RESPONSIVE LAYOUT FIXES
+   ------------------------------------------------------------ */
+@media (max-width: 767px) {
+    /* Auth cards & content padding scale down */
+    .max-w-7xl { padding-left: var(--ds-gutter); padding-right: var(--ds-gutter); }
+
+    /* Header rows squish gracefully */
+    header .flex { flex-wrap: nowrap; }
+
+    /* Modal full-width with safe padding on small viewports */
+    [class*="max-w-3xl"], [class*="max-w-2xl"] { max-width: 100%; }
+
+    /* Search input full-width */
+    header form { width: 100%; }
+}
+
+/* Hide the white avatar logos getting too wide on mobile */
+@media (max-width: 480px) {
+    header .max-w-xl { max-width: 100%; }
+}
+
+/* ------------------------------------------------------------
+   16. UTILITY HELPERS
+   ------------------------------------------------------------ */
+.ds-stack-sm > * + * { margin-top: var(--ds-space-sm); }
+.ds-stack-md > * + * { margin-top: var(--ds-space-md); }
+.ds-stack-lg > * + * { margin-top: var(--ds-space-lg); }
+
+/* Keep brand-tinted gradient overlays inside product modal harmonized */
+[id="mp-hero-bg"] {
+    background: var(--ds-surface-hover) !important;
+}
+
+/* ------------------------------------------------------------
+   17. CHIP / BADGE COMPONENT  (design-system pairs)
+       Foreground & background are designed in pairs with
+       guaranteed contrast in both light and dark themes.
+       Used by: tipe_produk_badge, status_transaksi_badge,
+       admin filter rows (produk / users / transaksi).
+   ------------------------------------------------------------ */
+:root {
+    /* CHIP color pairs — light theme */
+    --ds-chip-neutral-bg: #ECECE8;
+    --ds-chip-neutral-fg: #2C2C2C;
+    --ds-chip-accent-bg:  #DDF0F1;   /* teal-tinted */
+    --ds-chip-accent-fg:  #2F6F73;
+    --ds-chip-tertiary-bg:#E8DFF2;   /* lavender */
+    --ds-chip-tertiary-fg:#6A4F8C;
+    --ds-chip-rose-bg:    #FBE3E8;
+    --ds-chip-rose-fg:    #9D4A5A;
+    --ds-chip-warning-bg: #F8E3CC;
+    --ds-chip-warning-fg: #8C5A24;
+    --ds-chip-success-bg: #DDEEDC;
+    --ds-chip-success-fg: #3F7A4D;
+    --ds-chip-danger-bg:  #F4D9D9;
+    --ds-chip-danger-fg:  #984040;
+}
+.dark {
+    /* CHIP color pairs — dark theme (lighter fg on darker tint) */
+    --ds-chip-neutral-bg: rgba(255,255,255,0.08);
+    --ds-chip-neutral-fg: #E4E4E4;
+    --ds-chip-accent-bg:  rgba(168,218,220,0.18);
+    --ds-chip-accent-fg:  #C4E7E9;
+    --ds-chip-tertiary-bg:rgba(179,156,208,0.20);
+    --ds-chip-tertiary-fg:#D5C5E8;
+    --ds-chip-rose-bg:    rgba(255,193,204,0.18);
+    --ds-chip-rose-fg:    #F4C5CD;
+    --ds-chip-warning-bg: rgba(232,176,116,0.22);
+    --ds-chip-warning-fg: #F1CFA0;
+    --ds-chip-success-bg: rgba(139,196,166,0.22);
+    --ds-chip-success-fg: #B6DEC4;
+    --ds-chip-danger-bg:  rgba(224,143,143,0.22);
+    --ds-chip-danger-fg:  #ECB8B8;
+}
+
+.ds-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-chip-neutral-bg);
+    color: var(--ds-chip-neutral-fg);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+.ds-chip:hover { filter: brightness(0.96); }
+.dark .ds-chip:hover { filter: brightness(1.08); }
+
+.ds-chip__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    padding: 0 6px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: var(--ds-radius-full);
+    background: rgba(0,0,0,0.08);
+    color: inherit;
+}
+.dark .ds-chip__count { background: rgba(255,255,255,0.12); }
+
+/* Variants */
+.ds-chip--neutral   { background: var(--ds-chip-neutral-bg);   color: var(--ds-chip-neutral-fg); }
+.ds-chip--accent    { background: var(--ds-chip-accent-bg);    color: var(--ds-chip-accent-fg); }
+.ds-chip--tertiary  { background: var(--ds-chip-tertiary-bg);  color: var(--ds-chip-tertiary-fg); }
+.ds-chip--rose      { background: var(--ds-chip-rose-bg);      color: var(--ds-chip-rose-fg); }
+.ds-chip--warning   { background: var(--ds-chip-warning-bg);   color: var(--ds-chip-warning-fg); }
+.ds-chip--success   { background: var(--ds-chip-success-bg);   color: var(--ds-chip-success-fg); }
+.ds-chip--danger    { background: var(--ds-chip-danger-bg);    color: var(--ds-chip-danger-fg); }
+
+/* Filter chip (clickable, can be active) */
+.ds-chip--filter {
+    cursor: pointer;
+    padding: 6px 12px;
+}
+.ds-chip--filter.is-active {
+    border-color: currentColor;
+    box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+/* The CSS attribute remap rules earlier in this file would otherwise
+   re-paint .ds-chip backgrounds (because of [class*="bg-"] selectors).
+   Lock down chip styles against utility-color overrides. */
+.ds-chip,
+.ds-chip__count {
+    background-color: var(--_chip-bg, inherit);
+}
+.ds-chip--neutral   { --_chip-bg: var(--ds-chip-neutral-bg); }
+.ds-chip--accent    { --_chip-bg: var(--ds-chip-accent-bg); }
+.ds-chip--tertiary  { --_chip-bg: var(--ds-chip-tertiary-bg); }
+.ds-chip--rose      { --_chip-bg: var(--ds-chip-rose-bg); }
+.ds-chip--warning   { --_chip-bg: var(--ds-chip-warning-bg); }
+.ds-chip--success   { --_chip-bg: var(--ds-chip-success-bg); }
+.ds-chip--danger    { --_chip-bg: var(--ds-chip-danger-bg); }

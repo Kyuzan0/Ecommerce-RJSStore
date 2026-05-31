@@ -20,9 +20,9 @@
 $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 ?>
 <div class="flex items-center gap-2 mb-3 flex-wrap">
-    <a href="<?= url('/admin-user') . '?' . ltrim($q_param, '&') ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === '' ? 'ring-2 ring-offset-1 ring-gray-300' : 'hover:opacity-80' ?>" style="color:#374151; background:#E5E7EB">Semua <span class="ml-1 opacity-70"><?= $total_users ?></span></a>
-    <a href="<?= url('/admin-user') . '?role=admin' . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === 'admin' ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:#1565C0; background:#E3F2FD; <?= $current_role === 'admin' ? 'ring-color:#1565C0' : '' ?>">Admin <span class="ml-1 opacity-70"><?= $role_counts['admin'] ?? 0 ?></span></a>
-    <a href="<?= url('/admin-user') . '?role=customer' . $q_param ?>" class="text-xs font-bold px-3 py-1.5 rounded-lg transition <?= $current_role === 'customer' ? 'ring-2 ring-offset-1' : 'hover:opacity-80' ?>" style="color:#2E7D32; background:#E8F5E9; <?= $current_role === 'customer' ? 'ring-color:#2E7D32' : '' ?>">Customer <span class="ml-1 opacity-70"><?= $role_counts['customer'] ?? 0 ?></span></a>
+    <a href="<?= url('/admin-user') . '?' . ltrim($q_param, '&') ?>" class="ds-chip ds-chip--neutral ds-chip--filter <?= $current_role === '' ? 'is-active' : '' ?>">Semua <span class="ds-chip__count"><?= $total_users ?></span></a>
+    <a href="<?= url('/admin-user') . '?role=admin' . $q_param ?>" class="ds-chip ds-chip--accent ds-chip--filter <?= $current_role === 'admin' ? 'is-active' : '' ?>">Admin <span class="ds-chip__count"><?= $role_counts['admin'] ?? 0 ?></span></a>
+    <a href="<?= url('/admin-user') . '?role=customer' . $q_param ?>" class="ds-chip ds-chip--success ds-chip--filter <?= $current_role === 'customer' ? 'is-active' : '' ?>">Customer <span class="ds-chip__count"><?= $role_counts['customer'] ?? 0 ?></span></a>
 </div>
 
 <!-- Modal Tambah User -->

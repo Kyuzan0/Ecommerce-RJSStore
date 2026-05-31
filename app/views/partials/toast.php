@@ -2,6 +2,8 @@
 <div id="toast-container" style="position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;"></div>
 
 <style>
+/* Animations + structural-only rules; colors come from design tokens
+   (see public/assets/css/dark-mode.css → section 14 Toasts) */
 @keyframes toast-in {
     from { opacity:0; transform:translateX(40px) scale(0.96); }
     to { opacity:1; transform:translateX(0) scale(1); }
@@ -11,14 +13,12 @@
     to { opacity:0; transform:translateX(40px) scale(0.96); }
 }
 .toast-item {
+    position:relative; overflow:hidden;
     display:flex; align-items:flex-start; gap:10px;
-    padding:14px 18px; border-radius:12px;
-    background:#fff; border:1px solid #e5e7eb;
-    box-shadow:0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    padding:14px 18px;
     min-width:300px; max-width:420px;
     pointer-events:auto; cursor:pointer;
     animation:toast-in 0.35s cubic-bezier(0.21,1.02,0.73,1) forwards;
-    font-family:'Inter',sans-serif;
 }
 .toast-item.toast-exit {
     animation:toast-out 0.25s cubic-bezier(0.06,0.71,0.55,1) forwards;
@@ -27,32 +27,7 @@
 .toast-body { flex:1; }
 .toast-title { font-size:13px; font-weight:600; margin-bottom:2px; }
 .toast-msg { font-size:13px; line-height:1.4; }
-.toast-progress { position:absolute; bottom:0; left:0; height:3px; border-radius:0 0 12px 12px; transition:width linear; }
-.toast-item { position:relative; overflow:hidden; }
-
-.toast-success .toast-icon { color:#16a34a; }
-.toast-success .toast-title { color:#15803d; }
-.toast-success .toast-msg { color:#166534; }
-.toast-success .toast-progress { background:#22c55e; }
-.toast-success { border-color:#bbf7d0; background:#f0fdf4; }
-
-.toast-error .toast-icon { color:#dc2626; }
-.toast-error .toast-title { color:#b91c1c; }
-.toast-error .toast-msg { color:#991b1b; }
-.toast-error .toast-progress { background:#ef4444; }
-.toast-error { border-color:#fecaca; background:#fef2f2; }
-
-.toast-warning .toast-icon { color:#d97706; }
-.toast-warning .toast-title { color:#b45309; }
-.toast-warning .toast-msg { color:#92400e; }
-.toast-warning .toast-progress { background:#f59e0b; }
-.toast-warning { border-color:#fde68a; background:#fffbeb; }
-
-.toast-info .toast-icon { color:#2563eb; }
-.toast-info .toast-title { color:#1d4ed8; }
-.toast-info .toast-msg { color:#1e40af; }
-.toast-info .toast-progress { background:#3b82f6; }
-.toast-info { border-color:#bfdbfe; background:#eff6ff; }
+.toast-progress { position:absolute; bottom:0; left:0; height:3px; transition:width linear; border-radius:0 0 12px 12px; }
 </style>
 
 <script>

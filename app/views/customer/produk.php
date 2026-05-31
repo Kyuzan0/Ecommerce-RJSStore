@@ -41,17 +41,19 @@
     <!-- Product Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <?php
-        $tipe_colors = [
-            'Aplikasi' => 'bg-blue-100 text-blue-800',
-            'Game' => 'bg-purple-100 text-purple-800',
-            'Template' => 'bg-green-100 text-green-800',
-            'Plugin' => 'bg-orange-100 text-orange-800',
-            'Ebook' => 'bg-pink-100 text-pink-800'
+        $tipe_chip_map = [
+            'Aplikasi' => 'accent',
+            'Game'     => 'warning',
+            'Template' => 'rose',
+            'Plugin'   => 'warning',
+            'Ebook'    => 'tertiary',
+            'Akun'     => 'accent',
+            'Software' => 'success',
         ];
 
         foreach ($products as $product):
             $pid = (int) $product['id'];
-            $tipe_class = $tipe_colors[$product['tipe_produk']] ?? 'bg-gray-100 text-gray-800';
+            $chip_variant = $tipe_chip_map[$product['tipe_produk'] ?? ''] ?? 'neutral';
             $is_purchased = in_array($product['id'], $purchased_produk_ids);
             $is_in_cart = in_array($product['id'], $cart_produk_ids);
             $is_akun = (($product['tipe_produk'] ?? '') === 'Akun');
@@ -67,7 +69,7 @@
             <!-- Product Info -->
             <div class="p-4">
                 <!-- Type Badge -->
-                <span class="inline-block px-2 py-1 text-xs font-semibold rounded <?= $tipe_class ?> mb-2">
+                <span class="ds-chip ds-chip--<?= e($chip_variant) ?> mb-2">
                     <?= e($product['tipe_produk']) ?>
                 </span>
 

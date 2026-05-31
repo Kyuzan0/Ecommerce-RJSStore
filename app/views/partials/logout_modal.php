@@ -21,6 +21,8 @@
 </div>
 
 <style>
+/* Structural rules only; colors driven by design tokens
+   (see public/assets/css/dark-mode.css → section 13 Logout Modal) */
 .logout-modal-overlay {
     position: fixed;
     inset: 0;
@@ -38,12 +40,9 @@
     backdrop-filter: blur(4px);
 }
 .logout-modal-card {
-    background: #fff;
-    border-radius: 16px;
     padding: 32px 28px 24px;
     width: 100%;
     max-width: 360px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
     text-align: center;
     transform: scale(0.9) translateY(10px);
     opacity: 0;
@@ -62,8 +61,7 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,67 +69,38 @@
 .logout-modal-title {
     font-size: 17px;
     font-weight: 700;
-    color: #111827;
     margin-bottom: 6px;
-    font-family: 'Inter', sans-serif;
 }
 .logout-modal-desc {
     font-size: 13.5px;
-    color: #6b7280;
     line-height: 1.5;
     margin-bottom: 24px;
-    font-family: 'Inter', sans-serif;
 }
 .logout-modal-actions {
     display: flex;
     gap: 10px;
 }
-.logout-modal-btn-cancel {
-    flex: 1;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-family: 'Inter', sans-serif;
-}
-.logout-modal-btn-cancel:hover {
-    background: #e5e7eb;
-    border-color: #d1d5db;
-}
+.logout-modal-btn-cancel,
 .logout-modal-btn-confirm {
     flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    border: 1px solid transparent;
+}
+.logout-modal-btn-confirm {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    background: #ef4444;
-    border: 1px solid #dc2626;
-    cursor: pointer;
-    transition: all 0.15s ease;
     text-decoration: none;
-    font-family: 'Inter', sans-serif;
-}
-.logout-modal-btn-confirm:hover {
-    background: #dc2626;
-    border-color: #b91c1c;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 .logout-modal-btn-cancel:active,
 .logout-modal-btn-confirm:active {
     transform: scale(0.97);
 }
-
-/* Closing animation */
 .logout-modal-overlay.closing {
     background: rgba(0, 0, 0, 0);
     backdrop-filter: blur(0px);

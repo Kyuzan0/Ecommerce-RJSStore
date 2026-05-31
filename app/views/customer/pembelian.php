@@ -48,15 +48,15 @@
     <!-- Transaction List -->
     <div class="space-y-6 mb-8">
         <?php 
-        $status_colors = [
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'success' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-            'failed' => 'bg-red-100 text-red-800'
+        $status_chip_map = [
+            'pending'   => 'warning',
+            'success'   => 'success',
+            'cancelled' => 'danger',
+            'failed'    => 'danger',
         ];
         
         foreach ($grouped_transactions as $group): 
-            $status_class = $status_colors[$group['status']] ?? 'bg-gray-100 text-gray-800';
+            $chip_variant = $status_chip_map[$group['status']] ?? 'neutral';
         ?>
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <!-- Group Header -->
@@ -65,7 +65,7 @@
                     <p class="text-sm text-gray-600">Order ID: <span class="font-semibold text-gray-800"><?= e($group['order_ref']) ?></span></p>
                     <p class="text-xs text-gray-500"><?= format_tanggal($group['tanggal']) ?></p>
                 </div>
-                <span class="px-3 py-1 text-xs font-semibold rounded-full <?= $status_class ?>">
+                <span class="ds-chip ds-chip--<?= e($chip_variant) ?>">
                     <?= strtoupper($group['status']) ?>
                 </span>
             </div>

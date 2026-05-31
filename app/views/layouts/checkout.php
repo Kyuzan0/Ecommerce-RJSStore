@@ -9,13 +9,22 @@
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= e($ga_id) ?>');</script>
     <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class'}</script>
     <?php if (!empty($snap_url)): ?>
     <script src="<?= e($snap_url) ?>" data-client-key="<?= e($client_key ?? '') ?>"></script>
     <?php endif; ?>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/dark-mode.css') ?>">
+    <script>
+        (function(){
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 md:p-6">
     <?= $content ?>
 <?php include BASE_PATH . '/app/views/partials/toast.php'; ?>
 </body>

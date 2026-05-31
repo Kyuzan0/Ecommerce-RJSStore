@@ -339,13 +339,17 @@ function current_user_name(): string
 
 function tipe_produk_list(): array
 {
+    // 'chip' = design-system chip variant (see public/assets/css/dark-mode.css → .ds-chip--*)
+    // 'color' / 'bg' kept for backward compatibility (used by JS-rendered hero gradient,
+    // category icon backgrounds in product cards, etc). Those legacy hex values are
+    // remapped to design tokens via attribute selectors in the stylesheet.
     return [
-        'Akun'     => ['label' => 'Akun',     'color' => '#1565C0', 'bg' => '#E3F2FD'],
-        'Ebook'    => ['label' => 'Ebook',    'color' => '#6A1B9A', 'bg' => '#F3E5F5'],
-        'Game'     => ['label' => 'Game',     'color' => '#E65100', 'bg' => '#FFF3E0'],
-        'Software' => ['label' => 'Software', 'color' => '#2E7D32', 'bg' => '#E8F5E9'],
-        'Template' => ['label' => 'Template', 'color' => '#AD1457', 'bg' => '#FCE4EC'],
-        'Lainnya'  => ['label' => 'Lainnya',  'color' => '#42B549', 'bg' => '#E8F5E9'],
+        'Akun'     => ['label' => 'Akun',     'chip' => 'accent',    'color' => '#1565C0', 'bg' => '#E3F2FD'],
+        'Ebook'    => ['label' => 'Ebook',    'chip' => 'tertiary',  'color' => '#6A1B9A', 'bg' => '#F3E5F5'],
+        'Game'     => ['label' => 'Game',     'chip' => 'warning',   'color' => '#E65100', 'bg' => '#FFF3E0'],
+        'Software' => ['label' => 'Software', 'chip' => 'success',   'color' => '#2E7D32', 'bg' => '#E8F5E9'],
+        'Template' => ['label' => 'Template', 'chip' => 'rose',      'color' => '#AD1457', 'bg' => '#FCE4EC'],
+        'Lainnya'  => ['label' => 'Lainnya',  'chip' => 'neutral',   'color' => '#42B549', 'bg' => '#E8F5E9'],
     ];
 }
 
@@ -358,7 +362,8 @@ function tipe_produk_config(string $tipe): array
 function tipe_produk_badge(string $tipe): string
 {
     $cfg = tipe_produk_config($tipe);
-    return '<span class="text-xs font-bold px-2 py-1 rounded-lg" style="color:' . $cfg['color'] . '; background:' . $cfg['bg'] . '">' . e($cfg['label']) . '</span>';
+    $variant = $cfg['chip'] ?? 'neutral';
+    return '<span class="ds-chip ds-chip--' . $variant . '">' . e($cfg['label']) . '</span>';
 }
 
 // ============================================================
@@ -368,23 +373,24 @@ function tipe_produk_badge(string $tipe): string
 function status_transaksi_list(): array
 {
     return [
-        'pending'   => ['label' => 'Pending',   'color' => '#E65100', 'bg' => '#FFF3E0'],
-        'success'   => ['label' => 'Success',   'color' => '#2E7D32', 'bg' => '#E8F5E9'],
-        'failed'    => ['label' => 'Failed',    'color' => '#C62828', 'bg' => '#FFEBEE'],
-        'cancelled' => ['label' => 'Cancelled', 'color' => '#6B7280', 'bg' => '#F3F4F6'],
+        'pending'   => ['label' => 'Pending',   'chip' => 'warning', 'color' => '#E65100', 'bg' => '#FFF3E0'],
+        'success'   => ['label' => 'Success',   'chip' => 'success', 'color' => '#2E7D32', 'bg' => '#E8F5E9'],
+        'failed'    => ['label' => 'Failed',    'chip' => 'danger',  'color' => '#C62828', 'bg' => '#FFEBEE'],
+        'cancelled' => ['label' => 'Cancelled', 'chip' => 'neutral', 'color' => '#6B7280', 'bg' => '#F3F4F6'],
     ];
 }
 
 function status_transaksi_config(string $status): array
 {
     $list = status_transaksi_list();
-    return $list[$status] ?? ['label' => ucfirst($status), 'color' => '#374151', 'bg' => '#F3F4F6'];
+    return $list[$status] ?? ['label' => ucfirst($status), 'chip' => 'neutral', 'color' => '#374151', 'bg' => '#F3F4F6'];
 }
 
 function status_transaksi_badge(string $status): string
 {
     $cfg = status_transaksi_config($status);
-    return '<span class="text-xs font-bold px-2 py-1 rounded-lg" style="color:' . $cfg['color'] . '; background:' . $cfg['bg'] . '">' . e($cfg['label']) . '</span>';
+    $variant = $cfg['chip'] ?? 'neutral';
+    return '<span class="ds-chip ds-chip--' . $variant . '">' . e($cfg['label']) . '</span>';
 }
 
 // ============================================================
