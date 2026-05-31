@@ -40,6 +40,18 @@ function env_load(): array
 
 function env(string $key, string $default = ''): string
 {
+    // First check system environment variables (Docker/Dokploy)
+    $sysEnv = getenv($key);
+    if ($sysEnv !== false) {
+        return $sysEnv;
+    }
+    if (isset($_ENV[$key])) {
+        return $_ENV[$key];
+    }
+    if (isset($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
+    // Fallback to .env file
     $env = env_load();
     return $env[$key] ?? $default;
 }

@@ -25,6 +25,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && mkdir -p /var/www/html/public/uploads \
     && chown -R www-data:www-data /var/www/html/public/uploads
 
+# Allow PHP-FPM to read environment variables
+RUN echo "clear_env = no" >> /usr/local/etc/php-fpm.d/www.conf
+
 # Expose port 80
 EXPOSE 80
 
