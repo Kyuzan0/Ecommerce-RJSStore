@@ -133,8 +133,43 @@
 .dark .hover\:bg-green-50:hover { background-color: #1a3a1e !important; }
 .dark .hover\:bg-yellow-50:hover { background-color: #3d3520 !important; }
 .dark .hover\:bg-blue-50:hover { background-color: #1a2a4a !important; }
+.dark .hover\:bg-orange-50:hover { background-color: #3d2a15 !important; }
+.dark .hover\:bg-purple-50:hover { background-color: #2a1a3d !important; }
+/* Colored hover borders */
+.dark .hover\:border-green-300:hover { border-color: #2e7d32 !important; }
+.dark .hover\:border-blue-300:hover { border-color: #1976D2 !important; }
+.dark .hover\:border-orange-300:hover { border-color: #E65100 !important; }
+.dark .hover\:border-purple-300:hover { border-color: #7B1FA2 !important; }
 
 /* Transition for smooth dark mode toggle */
 body, .bg-white, header, aside, footer, .sidebar-link, input, textarea, select {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
+
+/* ============================================================
+   Logout Modal (custom-classed, not Tailwind utilities)
+   ============================================================ */
+.dark .logout-modal-card { background: #1e1e32 !important; box-shadow: 0 25px 60px rgba(0,0,0,0.6) !important; }
+.dark .logout-modal-title { color: #f1f5f9 !important; }
+.dark .logout-modal-desc { color: #94a3b8 !important; }
+.dark .logout-modal-icon-bg { background: #3d1f1f !important; border-color: #5c2b2b !important; }
+.dark .logout-modal-btn-cancel { background: #2d2d4a !important; color: #e2e8f0 !important; border-color: #3d3d5c !important; }
+.dark .logout-modal-btn-cancel:hover { background: #3d3d5c !important; border-color: #4a4a6a !important; }
+/* confirm button (red) stays the same — already good in dark */
+
+/* ============================================================
+   Toast Notifications (custom-classed)
+   ============================================================ */
+.dark .toast-item { background: #1e1e32 !important; border-color: #3d3d5c !important; box-shadow: 0 8px 30px rgba(0,0,0,0.5) !important; }
+.dark .toast-success { background: #14271a !important; border-color: #1f5132 !important; }
+.dark .toast-success .toast-title { color: #4ade80 !important; }
+.dark .toast-success .toast-msg { color: #86efac !important; }
+.dark .toast-error { background: #2a1515 !important; border-color: #5c2b2b !important; }
+.dark .toast-error .toast-title { color: #f87171 !important; }
+.dark .toast-error .toast-msg { color: #fca5a5 !important; }
+.dark .toast-warning { background: #2a2415 !important; border-color: #5c4a1f !important; }
+.dark .toast-warning .toast-title { color: #fbbf24 !important; }
+.dark .toast-warning .toast-msg { color: #fcd34d !important; }
+.dark .toast-info { background: #15202a !important; border-color: #1f3a5c !important; }
+.dark .toast-info .toast-title { color: #60a5fa !important; }
+.dark .toast-info .toast-msg { color: #93c5fd !important; }
