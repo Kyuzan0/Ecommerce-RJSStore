@@ -50,16 +50,18 @@ class HomeController extends BaseController
             foreach ($_SESSION['cart'] as $ci) $cart_produk_ids[] = (int) $ci['produk_id'];
         }
 
-        // Search & pagination
+        // Search, filter & sort
         $search  = $_GET['search'] ?? '';
+        $tipe    = $_GET['tipe'] ?? '';
+        $sort    = $_GET['sort'] ?? 'terbaru';
         $page    = max(1, (int) ($_GET['page'] ?? 1));
         $perPage = 12;
-        $total   = $this->produkModel->countSearch($search);
+        $total   = $this->produkModel->countSearch($search, $tipe !== '' ? $tipe : null);
         $totalPages = max(1, (int) ceil($total / $perPage));
         $page    = min($page, $totalPages);
         $offset  = ($page - 1) * $perPage;
 
-        $products = $this->produkModel->search($search, $perPage, $offset);
+        $products = $this->produkModel->search($search, $perPage, $offset, $tipe !== '' ? $tipe : null, $sort);
 
         $paging = [
             'page'        => $page,
@@ -82,6 +84,8 @@ class HomeController extends BaseController
             'cart_produk_ids'      => $cart_produk_ids,
             'purchased_produk_ids' => $purchased_produk_ids,
             'search'               => $search,
+            'tipe_filter'          => $tipe,
+            'sort'                 => $sort,
             'products'             => $products,
             'paging'               => $paging,
             'ulasan_terbaru'       => $ulasan_terbaru,

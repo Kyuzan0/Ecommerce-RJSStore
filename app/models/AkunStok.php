@@ -21,10 +21,15 @@ class AkunStok extends BaseModel
      */
     public function getByVarian(int $varianId): array
     {
-        return $this->db->fetchAll(
+        $rows = $this->db->fetchAll(
             "SELECT * FROM akun_stok WHERE varian_id = ? ORDER BY status ASC, id DESC",
             [$varianId]
         );
+        foreach ($rows as &$row) {
+            $row['account_email'] = decrypt_value($row['account_email']);
+            $row['account_password'] = decrypt_value($row['account_password']);
+        }
+        return $rows;
     }
 
     /**
@@ -34,8 +39,8 @@ class AkunStok extends BaseModel
     {
         return $this->create([
             'varian_id'        => $varianId,
-            'account_email'    => $email,
-            'account_password' => $password,
+            'account_email'    => encrypt_value($email),
+            'account_password' => encrypt_value($password),
             'status'           => 'available',
         ]);
     }
@@ -54,7 +59,7 @@ class AkunStok extends BaseModel
 
             $this->db->execute(
                 "INSERT INTO akun_stok (varian_id, account_email, account_password, status) VALUES (?, ?, ?, 'available')",
-                [$varianId, $email, $pass]
+                [$varianId, encrypt_value($email), encrypt_value($pass)]
             );
             $count++;
         }
@@ -63,7 +68,7 @@ class AkunStok extends BaseModel
 
     /**
      * Assign one available stock to a transaction.
-     * Returns the assigned stock row, or null if out of stock.
+     * Returns the assigned stock row (decrypted), or null if out of stock.
      */
     public function assignToTransaction(int $varianId, int $transaksiId): ?array
     {
@@ -84,18 +89,26 @@ class AkunStok extends BaseModel
             [$transaksiId, $stock['id']]
         );
 
+        // Return decrypted values
+        $stock['account_email'] = decrypt_value($stock['account_email']);
+        $stock['account_password'] = decrypt_value($stock['account_password']);
         return $stock;
     }
 
     /**
-     * Get the stock assigned to a specific transaction.
+     * Get the stock assigned to a specific transaction (decrypted).
      */
     public function getByTransaksi(int $transaksiId): ?array
     {
-        return $this->db->fetchOne(
+        $row = $this->db->fetchOne(
             "SELECT * FROM akun_stok WHERE transaksi_id = ?",
             [$transaksiId]
         );
+        if ($row) {
+            $row['account_email'] = decrypt_value($row['account_email']);
+            $row['account_password'] = decrypt_value($row['account_password']);
+        }
+        return $row;
     }
 
     /**

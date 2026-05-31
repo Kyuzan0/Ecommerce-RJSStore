@@ -55,7 +55,7 @@
 
 <!-- MAIN CONTENT -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-    <div class="flex items-center justify-between mb-4 sm:mb-5 gap-3">
+    <div class="flex items-center justify-between mb-4 sm:mb-5 gap-3 flex-wrap">
         <h2 class="text-lg sm:text-xl font-bold text-gray-800 min-w-0 truncate">
             <?php if (!empty($search)): ?>
                 Hasil: "<?= e($search) ?>"
@@ -63,10 +63,31 @@
                 Katalog Produk Digital
             <?php endif; ?>
         </h2>
-        <span class="hidden sm:inline-block text-sm text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg flex-shrink-0">
-            Produk digital terpercaya
-        </span>
+        <div class="flex items-center gap-2 flex-wrap">
+            <select onchange="applyFilter(this.value, '<?= e($sort ?? 'terbaru') ?>')" class="text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 outline-none cursor-pointer">
+                <option value="" <?= ($tipe_filter ?? '') === '' ? 'selected' : '' ?>>Semua Tipe</option>
+                <?php foreach (tipe_produk_list() as $key => $cfg): ?>
+                <option value="<?= e($key) ?>" <?= ($tipe_filter ?? '') === $key ? 'selected' : '' ?>><?= e($cfg['label']) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select onchange="applyFilter('<?= e($tipe_filter ?? '') ?>', this.value)" class="text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 outline-none cursor-pointer">
+                <option value="terbaru" <?= ($sort ?? '') === 'terbaru' ? 'selected' : '' ?>>Terbaru</option>
+                <option value="harga_asc" <?= ($sort ?? '') === 'harga_asc' ? 'selected' : '' ?>>Harga Terendah</option>
+                <option value="harga_desc" <?= ($sort ?? '') === 'harga_desc' ? 'selected' : '' ?>>Harga Tertinggi</option>
+                <option value="rating" <?= ($sort ?? '') === 'rating' ? 'selected' : '' ?>>Rating Tertinggi</option>
+            </select>
+        </div>
     </div>
+
+    <script>
+    function applyFilter(tipe, sort) {
+        var params = new URLSearchParams(window.location.search);
+        if (tipe) params.set('tipe', tipe); else params.delete('tipe');
+        if (sort && sort !== 'terbaru') params.set('sort', sort); else params.delete('sort');
+        params.delete('page');
+        window.location.href = '<?= url('/') ?>' + (params.toString() ? '?' + params.toString() : '');
+    }
+    </script>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         <?php if (empty($products)): ?>
@@ -88,7 +109,11 @@
         ?>
         <div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col cursor-pointer" data-product-id="<?= $pid ?>" data-cart-state="<?= $purchased ? 'purchased' : ($in_cart ? 'in_cart' : 'default') ?>" onclick="openProductModal(<?= $pid ?>, event)">
             <div class="relative h-40 flex items-center justify-center" style="background: linear-gradient(135deg, <?= $tipe_cfg['bg'] ?> 0%, <?= $tipe_cfg['bg'] ?>dd 100%)">
-                <svg class="w-16 h-16 opacity-40" style="color:<?= $tipe_cfg['color'] ?>" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
+                <?php if (!empty($row['thumbnail'])): ?>
+                    <img src="<?= url('/uploads/thumbnails/' . e($row['thumbnail'])) ?>" alt="<?= e($row['nama_produk']) ?>" class="w-full h-full object-cover">
+                <?php else: ?>
+                    <svg class="w-16 h-16 opacity-40" style="color:<?= $tipe_cfg['color'] ?>" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
+                <?php endif; ?>
                 <span class="absolute top-2 left-2 bg-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm" style="color:<?= $tipe_cfg['color'] ?>"><?= e($tipe_cfg['label']) ?></span>
             </div>
             <div class="p-4 flex flex-col flex-1">

@@ -423,3 +423,42 @@ function akun_presets_fallback(): array
         ],
     ];
 }
+
+// ============================================================
+// ENCRYPTION HELPERS (AES-256-CBC)
+// ============================================================
+
+/**
+ * Encrypt a string using AES-256-CBC with the APP_KEY.
+ * Returns base64-encoded ciphertext (iv + encrypted).
+ */
+function encrypt_value(string $plaintext): string
+{
+    $key = env('APP_KEY', '');
+    if ($key === '' || $plaintext === '') return $plaintext;
+
+    $key = hash('sha256', $key, true);
+    $iv = random_bytes(16);
+    $encrypted = openssl_encrypt($plaintext, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
+/**
+ * Decrypt a base64-encoded AES-256-CBC ciphertext.
+ * Returns plaintext, or the original value if decryption fails (backward compat).
+ */
+function decrypt_value(string $ciphertext): string
+{
+    $key = env('APP_KEY', '');
+    if ($key === '' || $ciphertext === '') return $ciphertext;
+
+    $key = hash('sha256', $key, true);
+    $data = base64_decode($ciphertext, true);
+    if ($data === false || strlen($data) < 17) return $ciphertext; // Not encrypted (legacy)
+
+    $iv = substr($data, 0, 16);
+    $encrypted = substr($data, 16);
+    $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+
+    return $decrypted !== false ? $decrypted : $ciphertext; // Fallback to raw if decrypt fails
+}

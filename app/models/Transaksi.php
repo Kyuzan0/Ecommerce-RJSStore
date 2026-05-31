@@ -96,6 +96,11 @@ class Transaksi extends BaseModel
         // Auto-assign stock when payment succeeds
         if ($status === 'success') {
             $this->assignStockForOrder($orderRef);
+            // Send notification to customer
+            $tx = $this->db->fetchOne("SELECT user_id FROM transaksi WHERE order_ref = ? LIMIT 1", [$orderRef]);
+            if ($tx) {
+                Notifikasi::send((int) $tx['user_id'], 'Pembayaran Berhasil', 'Pesanan ' . $orderRef . ' telah dikonfirmasi. Produk siap diakses.', 'order', '/customer/download');
+            }
         }
 
         return $result;

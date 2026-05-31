@@ -44,6 +44,9 @@ $router->post('api/cart/remove', 'CartController', 'apiRemove');
 $router->post('api/cart/clear', 'CartController', 'apiClear');
 $router->post('webhook/midtrans', 'WebhookController', 'handle');
 $router->get('api/product-detail/:id', 'HomeController', 'productDetail');
+$router->get('api/notifikasi', 'NotifikasiController', 'apiGet');
+$router->post('api/notifikasi/read', 'NotifikasiController', 'apiRead');
+$router->post('api/notifikasi/read-all', 'NotifikasiController', 'apiReadAll');
 
 // Customer checkout uses dedicated CheckoutController
 $router->get('customer/checkout', 'CheckoutController', 'index');
@@ -60,6 +63,12 @@ $router->get('customer/download-file/:id', 'CustomerController', 'downloadFile')
 $router->get('admin-produk/file/:id', 'AdminProdukController', 'file');
 $router->get('admin-produk/stok/:id', 'AdminProdukController', 'stok');
 $router->post('admin-produk/stok/:id', 'AdminProdukController', 'stok');
+
+// Chat routes
+$router->get('customer/chat', 'ChatController', 'index');
+$router->post('api/chat/send', 'ChatController', 'apiSend');
+$router->get('api/chat/poll', 'ChatController', 'apiPoll');
+$router->get('admin-chat/view/:id', 'AdminChatController', 'view_conv');
 
 // Dispatch request
 $uri    = $_SERVER['REQUEST_URI'];

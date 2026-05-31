@@ -163,9 +163,11 @@ class AdminProdukController extends BaseController
                 'tipe_produk' => $tipe,
                 'file_upload' => null,
                 'account_info' => null,
+                'thumbnail' => $this->handleThumbnail(),
             ]);
             $this->varianModel->replaceForProduk((int) $newId, $variants);
             flash('success', 'Produk akun berhasil ditambahkan!');
+            AuditLog::log('tambah_produk', 'produk', (int) $newId, $nama . ' (Akun)');
             return;
         }
 
@@ -190,9 +192,11 @@ class AdminProdukController extends BaseController
                 'harga' => $harga,
                 'deskripsi' => $deskripsi,
                 'tipe_produk' => $tipe,
-                'file_upload' => $nama_file_db
+                'file_upload' => $nama_file_db,
+                'thumbnail' => $this->handleThumbnail(),
             ]);
             flash('success', 'Produk berhasil ditambahkan!');
+            AuditLog::log('tambah_produk', 'produk', null, $nama);
         } else {
             flash('error', 'File produk wajib diupload.');
         }
@@ -215,13 +219,16 @@ class AdminProdukController extends BaseController
                 return;
             }
             $minHarga = min(array_column($variants, 'harga'));
-            $this->produkModel->update($id, [
+            $updateData = [
                 'nama_produk' => $nama,
                 'harga' => $minHarga,
                 'deskripsi' => $deskripsi,
                 'tipe_produk' => $tipe,
                 'account_info' => null,
-            ]);
+            ];
+            $thumb = $this->handleThumbnail();
+            if ($thumb) $updateData['thumbnail'] = $thumb;
+            $this->produkModel->update($id, $updateData);
             $this->varianModel->replaceForProduk($id, $variants);
             flash('success', 'Produk akun berhasil diupdate!');
             return;
@@ -377,6 +384,39 @@ class AdminProdukController extends BaseController
         return null;
     }
 
+    /**
+     * Handle optional thumbnail upload. Returns filename or null.
+     */
+    private function handleThumbnail(): ?string
+    {
+        $file = $_FILES['thumbnail'] ?? null;
+        if (!$file || empty($file['name']) || $file['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        // Validate: images only, max 2MB
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!validate_file_type($file, $allowedMimes)) {
+            return null;
+        }
+        if (!validate_file_size($file, 2 * 1024 * 1024)) {
+            return null;
+        }
+
+        $uploadDir = BASE_PATH . '/public/uploads/thumbnails/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $storedName = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+
+        if (move_uploaded_file($file['tmp_name'], $uploadDir . $storedName)) {
+            return $storedName;
+        }
+        return null;
+    }
+
     private function handleHapus()
     {
         $id = (int) ($_POST['produk_id'] ?? 0);
@@ -386,6 +426,7 @@ class AdminProdukController extends BaseController
         }
         $this->produkModel->delete($id);
         flash('success', 'Produk berhasil dihapus.');
+        AuditLog::log('hapus_produk', 'produk', $id);
     }
 
     private function handleHapusBulk()
