@@ -404,54 +404,12 @@ function json_response(array $data, int $code = 200): void
 // ============================================================
 
 /**
- * Curated presets for popular subscription/account services.
- * Helps admins fill variant fields (durasi + paket) without manual typing.
- *
- * Each service provides:
- *   - durasi: common subscription durations
- *   - paket:  available plan tiers (empty array = no plan tiers)
- *
- * Source data researched from official service pages; structure may be
- * adjusted by the admin per variant since pricing/availability changes.
+ * Fallback presets (used only if DB table doesn't exist yet).
+ * In production, presets are managed via admin panel (akun_preset table).
  */
-function akun_presets(): array
+function akun_presets_fallback(): array
 {
     return [
-        'Spotify' => [
-            'label'  => 'Spotify',
-            'durasi' => ['1 Bulan', '2 Bulan', '3 Bulan', '6 Bulan', '12 Bulan'],
-            'paket'  => ['Individual', 'Duo', 'Family', 'Student'],
-        ],
-        'Netflix' => [
-            'label'  => 'Netflix',
-            'durasi' => ['1 Bulan', '3 Bulan', '6 Bulan', '12 Bulan'],
-            'paket'  => ['Mobile', 'Basic', 'Standard', 'Premium'],
-        ],
-        'YouTube Premium' => [
-            'label'  => 'YouTube Premium',
-            'durasi' => ['1 Bulan', '3 Bulan', '6 Bulan', '12 Bulan'],
-            'paket'  => ['Individual', 'Family', 'Student'],
-        ],
-        'Disney+ Hotstar' => [
-            'label'  => 'Disney+ Hotstar',
-            'durasi' => ['1 Bulan', '3 Bulan', '6 Bulan', '12 Bulan'],
-            'paket'  => ['Mobile', 'Premium'],
-        ],
-        'Steam' => [
-            'label'  => 'Steam',
-            'durasi' => ['Lifetime'],
-            'paket'  => [],
-        ],
-        'Canva Pro' => [
-            'label'  => 'Canva Pro',
-            'durasi' => ['1 Bulan', '3 Bulan', '6 Bulan', '12 Bulan'],
-            'paket'  => ['Pro', 'Team'],
-        ],
-        'Microsoft Office 365' => [
-            'label'  => 'Microsoft Office 365',
-            'durasi' => ['1 Tahun', 'Lifetime'],
-            'paket'  => ['Personal', 'Family'],
-        ],
         'Lainnya' => [
             'label'  => 'Lainnya (custom)',
             'durasi' => ['1 Bulan', '3 Bulan', '6 Bulan', '12 Bulan', 'Lifetime'],

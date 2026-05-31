@@ -383,27 +383,32 @@ function handleVarianSelect(sel) {
     input.focus();
 }
 
-// Apply a service preset: rebuild existing variant rows using the preset options,
-// preserving any data already typed.
+// Apply a service preset: generate variant rows for all combinations of durasi × paket.
+// Admin only needs to fill harga + credentials.
 function applyPreset(prefix) {
+    var presetKey = document.getElementById(prefix + '-preset').value;
+    if (!presetKey || !AKUN_PRESETS[presetKey]) return;
+
+    var preset = AKUN_PRESETS[presetKey];
     var list = document.getElementById(prefix + '-varian-list');
-    if (!list) return;
-
-    // Capture existing row data
-    var existing = [];
-    list.querySelectorAll('.varian-row').forEach(function(row) {
-        existing.push({
-            durasi: getFieldVal(row, 'varian_durasi[]'),
-            paket: getFieldVal(row, 'varian_paket[]'),
-            harga: getFieldVal(row, 'varian_harga[]').replace(/\D/g, ''),
-            email: getFieldVal(row, 'varian_email[]'),
-            password: getFieldVal(row, 'varian_password[]')
-        });
-    });
-
     list.innerHTML = '';
-    // Only rebuild rows that already exist; don't auto-create new ones
-    existing.forEach(function(d) { addVarianRow(prefix, d); });
+
+    var durasiList = preset.durasi || [];
+    var paketList = preset.paket || [];
+
+    if (paketList.length === 0) {
+        // No paket tiers (e.g. Steam) — one row per durasi
+        durasiList.forEach(function(d) {
+            addVarianRow(prefix, { durasi: d, paket: '', harga: 0, email: '', password: '' });
+        });
+    } else {
+        // Generate durasi × paket combinations
+        durasiList.forEach(function(d) {
+            paketList.forEach(function(p) {
+                addVarianRow(prefix, { durasi: d, paket: p, harga: 0, email: '', password: '' });
+            });
+        });
+    }
 }
 
 function getFieldVal(row, name) {

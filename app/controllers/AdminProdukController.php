@@ -2,11 +2,13 @@
 require_once __DIR__ . '/../core/BaseController.php';
 require_once __DIR__ . '/../models/Produk.php';
 require_once __DIR__ . '/../models/ProdukVarian.php';
+require_once __DIR__ . '/../models/AkunPreset.php';
 
 class AdminProdukController extends BaseController
 {
     private $produkModel;
     private $varianModel;
+    private $presetModel;
 
     public function __construct()
     {
@@ -14,6 +16,7 @@ class AdminProdukController extends BaseController
         $this->requireAuth('admin');
         $this->produkModel = new Produk();
         $this->varianModel = new ProdukVarian();
+        $this->presetModel = new AkunPreset();
     }
 
     public function index()
@@ -78,7 +81,7 @@ class AdminProdukController extends BaseController
             'active_page' => 'produk',
             'page_title' => 'Kelola Produk',
             'extra_css' => $extra_css,
-            'akun_presets' => akun_presets(),
+            'akun_presets' => $this->presetModel->getForForm(),
         ], 'admin');
     }
 
