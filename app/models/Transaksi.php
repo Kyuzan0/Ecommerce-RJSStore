@@ -88,10 +88,17 @@ class Transaksi extends BaseModel
      */
     public function updateStatusByRef(string $orderRef, string $status): bool
     {
-        return $this->db->execute(
+        $result = $this->db->execute(
             "UPDATE transaksi SET status = ? WHERE order_ref = ?",
             [$status, $orderRef]
         );
+
+        // Auto-assign stock when payment succeeds
+        if ($status === 'success') {
+            $this->assignStockForOrder($orderRef);
+        }
+
+        return $result;
     }
 
     /**
@@ -99,7 +106,41 @@ class Transaksi extends BaseModel
      */
     public function updateStatusById(int $id, string $status): bool
     {
-        return $this->update($id, ['status' => $status]);
+        $result = $this->update($id, ['status' => $status]);
+
+        // Auto-assign stock when payment succeeds
+        if ($status === 'success') {
+            $row = $this->find($id);
+            if ($row && $row['order_ref']) {
+                $this->assignStockForOrder($row['order_ref']);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Assign available stock to all varian-based transactions in an order.
+     * Called automatically when order status becomes 'success'.
+     */
+    private function assignStockForOrder(string $orderRef): void
+    {
+        $items = $this->db->fetchAll(
+            "SELECT t.id, t.varian_id FROM transaksi t
+             WHERE t.order_ref = ? AND t.varian_id IS NOT NULL AND t.status = 'success'",
+            [$orderRef]
+        );
+
+        if (empty($items)) return;
+
+        $stokModel = new AkunStok();
+        foreach ($items as $item) {
+            // Check if stock already assigned (idempotent)
+            $existing = $stokModel->getByTransaksi((int) $item['id']);
+            if ($existing) continue;
+
+            $stokModel->assignToTransaction((int) $item['varian_id'], (int) $item['id']);
+        }
     }
 
     /**
@@ -150,22 +191,27 @@ class Transaksi extends BaseModel
     {
         return $this->db->fetchAll(
             "SELECT p.id AS produk_id,
+                    t.id AS transaksi_id,
                     t.varian_id,
                     p.nama_produk,
                     COALESCE(v.harga, p.harga) AS harga,
                     p.file_upload,
                     p.tipe_produk,
-                    COALESCE(v.account_info, p.account_info) AS account_info,
+                    COALESCE(
+                        CONCAT('Email: ', s.account_email, '\nPassword: ', s.account_password),
+                        v.account_info,
+                        p.account_info
+                    ) AS account_info,
                     p.deskripsi,
                     v.durasi,
                     v.paket,
-                    MAX(t.tanggal) AS tanggal
+                    t.tanggal
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              LEFT JOIN produk_varian v ON t.varian_id = v.id
+             LEFT JOIN akun_stok s ON s.transaksi_id = t.id
              WHERE t.user_id = ? AND t.status = 'success'
-             GROUP BY p.id, t.varian_id
-             ORDER BY tanggal DESC
+             ORDER BY t.tanggal DESC
              LIMIT {$limit} OFFSET {$offset}",
             [$userId]
         );
@@ -177,10 +223,13 @@ class Transaksi extends BaseModel
     public function countDownloadable(int $userId): int
     {
         $row = $this->db->fetchOne(
-            "SELECT COUNT(DISTINCT CONCAT(p.id, '-', COALESCE(t.varian_id, 0))) AS total
+            "SELECT COUNT(*) AS total
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
-             WHERE t.user_id = ? AND t.status = 'success'",
+             WHERE t.user_id = ? AND t.status = 'success'
+             AND ((p.file_upload IS NOT NULL AND p.file_upload != '')
+                  OR t.varian_id IS NOT NULL
+                  OR (p.account_info IS NOT NULL AND p.account_info != ''))",
             [$userId]
         );
         return $row ? (int) $row['total'] : 0;

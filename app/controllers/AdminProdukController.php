@@ -3,6 +3,7 @@ require_once __DIR__ . '/../core/BaseController.php';
 require_once __DIR__ . '/../models/Produk.php';
 require_once __DIR__ . '/../models/ProdukVarian.php';
 require_once __DIR__ . '/../models/AkunPreset.php';
+require_once __DIR__ . '/../models/AkunStok.php';
 
 class AdminProdukController extends BaseController
 {
@@ -409,5 +410,115 @@ class AdminProdukController extends BaseController
         }
 
         flash('success', $deleted . ' produk berhasil dihapus.');
+    }
+
+    /**
+     * Manage stock for a product variant (admin page).
+     * GET: show stock list + add form
+     * POST: add stock (single or bulk)
+     */
+    public function stok($id)
+    {
+        $varian_id = (int) $id;
+        $varian = $this->db->fetchOne(
+            "SELECT v.*, p.nama_produk FROM produk_varian v JOIN produk p ON v.produk_id = p.id WHERE v.id = ?",
+            [$varian_id]
+        );
+
+        if (!$varian) {
+            flash('error', 'Varian tidak ditemukan.');
+            $this->redirect('/admin-produk');
+            return;
+        }
+
+        $stokModel = new AkunStok();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->csrfValidate();
+            $action = $_POST['action'] ?? '';
+
+            if ($action === 'tambah_single') {
+                $email = trim($_POST['account_email'] ?? '');
+                $pass = trim($_POST['account_password'] ?? '');
+                if ($email !== '' && $pass !== '') {
+                    $stokModel->addStock($varian_id, $email, $pass);
+                    flash('success', '1 stok berhasil ditambahkan.');
+                } else {
+                    flash('error', 'Email dan password wajib diisi.');
+                }
+            } elseif ($action === 'tambah_bulk') {
+                $bulkText = trim($_POST['bulk_data'] ?? '');
+                $items = $this->parseBulkStok($bulkText);
+                if (!empty($items)) {
+                    $count = $stokModel->addBulk($varian_id, $items);
+                    flash('success', $count . ' stok berhasil ditambahkan.');
+                } else {
+                    flash('error', 'Format bulk tidak valid. Gunakan format: email:password (satu per baris).');
+                }
+            } elseif ($action === 'hapus_stok') {
+                $stok_id = (int) ($_POST['stok_id'] ?? 0);
+                if ($stok_id > 0) {
+                    $stokModel->deleteIfAvailable($stok_id);
+                    flash('success', 'Stok berhasil dihapus.');
+                }
+            }
+
+            $this->redirect('/admin-produk/stok/' . $varian_id);
+            return;
+        }
+
+        $stocks = $stokModel->getByVarian($varian_id);
+        $available = $stokModel->countAvailable($varian_id);
+
+        $label = $varian['durasi'];
+        if (!empty($varian['paket'])) $label .= ' - ' . $varian['paket'];
+
+        $extra_css = 'input[type=text],textarea { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; transition:border 0.15s; } input:focus,textarea:focus { border-color:#42B549; box-shadow:0 0 0 3px rgba(66,181,73,0.12); }';
+
+        $this->view('admin/produk/stok', [
+            'varian'      => $varian,
+            'varian_label' => $label,
+            'stocks'      => $stocks,
+            'available'   => $available,
+            'active_page' => 'produk',
+            'page_title'  => 'Kelola Stok - ' . $varian['nama_produk'],
+            'extra_css'   => $extra_css,
+        ], 'admin');
+    }
+
+    /**
+     * Parse bulk paste text into stock items.
+     * Supported formats:
+     *   email:password (one per line)
+     *   email|password
+     *   email password (tab or space separated)
+     */
+    private function parseBulkStok(string $text): array
+    {
+        $lines = preg_split('/\r?\n/', $text);
+        $items = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') continue;
+
+            // Try common separators: colon, pipe, tab
+            $parts = null;
+            if (strpos($line, ':') !== false) {
+                $parts = explode(':', $line, 2);
+            } elseif (strpos($line, '|') !== false) {
+                $parts = explode('|', $line, 2);
+            } elseif (strpos($line, "\t") !== false) {
+                $parts = explode("\t", $line, 2);
+            }
+
+            if ($parts && count($parts) === 2) {
+                $email = trim($parts[0]);
+                $pass = trim($parts[1]);
+                if ($email !== '' && $pass !== '') {
+                    $items[] = ['email' => $email, 'password' => $pass];
+                }
+            }
+        }
+        return $items;
     }
 }

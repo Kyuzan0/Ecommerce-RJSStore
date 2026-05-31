@@ -112,12 +112,15 @@ class HomeController extends BaseController
         $variantList = [];
         if (($produk['tipe_produk'] ?? '') === 'Akun') {
             require_once BASE_PATH . '/app/models/ProdukVarian.php';
+            require_once BASE_PATH . '/app/models/AkunStok.php';
             $varianModel = new ProdukVarian();
+            $stokModel = new AkunStok();
             foreach ($varianModel->getByProduk($produkId) as $v) {
                 $label = $v['durasi'];
                 if (!empty($v['paket'])) {
                     $label .= ' - ' . $v['paket'];
                 }
+                $stok = $stokModel->countAvailable((int) $v['id']);
                 $variantList[] = [
                     'id'              => (int) $v['id'],
                     'label'           => $label,
@@ -125,6 +128,7 @@ class HomeController extends BaseController
                     'paket'           => $v['paket'],
                     'harga'           => (int) $v['harga'],
                     'harga_formatted' => rupiah($v['harga']),
+                    'stok'            => $stok,
                 ];
             }
         }

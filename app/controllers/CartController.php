@@ -89,6 +89,12 @@ class CartController extends BaseController
                     $this->json(['success' => false, 'message' => 'Varian tidak valid.']);
                     return;
                 }
+                // Check stock availability
+                $stokModel = new AkunStok();
+                if ($stokModel->countAvailable($varianId) <= 0) {
+                    $this->json(['success' => false, 'message' => 'Stok habis untuk varian ini.']);
+                    return;
+                }
             } else {
                 $varianId = null;
             }

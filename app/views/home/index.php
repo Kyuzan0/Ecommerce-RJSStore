@@ -375,10 +375,16 @@ function renderVariants(product, variants) {
     MP_VARIANTS.forEach(function(v) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'mp-variant-btn px-4 py-2 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-green-400 transition';
+        var isOutOfStock = (v.stok !== undefined && v.stok <= 0);
+        btn.className = 'mp-variant-btn px-4 py-2 rounded-xl border-2 text-sm font-semibold transition ' +
+            (isOutOfStock ? 'border-gray-200 text-gray-400 cursor-not-allowed opacity-60' : 'border-gray-200 text-gray-700 hover:border-green-400');
         btn.setAttribute('data-variant-id', v.id);
-        btn.innerHTML = escapeHtml(v.label) + ' <span class="block text-xs font-bold" style="color:#42B549">' + escapeHtml(v.harga_formatted) + '</span>';
-        btn.onclick = function() { selectVariant(product.id, v); };
+        btn.disabled = isOutOfStock;
+        var stokLabel = (v.stok !== undefined) ? ' <span class="text-[10px] ' + (isOutOfStock ? 'text-red-400' : 'text-gray-400') + '">' + (isOutOfStock ? 'Habis' : 'Stok: ' + v.stok) + '</span>' : '';
+        btn.innerHTML = escapeHtml(v.label) + ' <span class="block text-xs font-bold" style="color:#42B549">' + escapeHtml(v.harga_formatted) + '</span>' + stokLabel;
+        if (!isOutOfStock) {
+            btn.onclick = function() { selectVariant(product.id, v); };
+        }
         optionsEl.appendChild(btn);
     });
 }

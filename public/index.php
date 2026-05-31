@@ -58,6 +58,8 @@ $router->post('customer/rating/:id', 'CustomerRatingController', 'index');
 // Secure file download (verifies purchase before serving)
 $router->get('customer/download-file/:id', 'CustomerController', 'downloadFile');
 $router->get('admin-produk/file/:id', 'AdminProdukController', 'file');
+$router->get('admin-produk/stok/:id', 'AdminProdukController', 'stok');
+$router->post('admin-produk/stok/:id', 'AdminProdukController', 'stok');
 
 // Dispatch request
 $uri    = $_SERVER['REQUEST_URI'];

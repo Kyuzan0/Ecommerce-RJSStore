@@ -200,8 +200,17 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         </div>
                     </td>
                     <td class="px-5 py-4">
-                        <?php if (($r['tipe_produk'] ?? '') === 'Akun'): ?>
-                            <span class="text-xs font-medium text-gray-500">Info Akun</span>
+                        <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
+                            <div class="space-y-1">
+                                <?php foreach ($r['varian'] as $v):
+                                    $stokModel = new AkunStok();
+                                    $stokCount = $stokModel->countAvailable((int) $v['id']);
+                                ?>
+                                <a href="<?= url('/admin-produk/stok/' . (int)$v['id']) ?>" class="block text-xs hover:underline <?= $stokCount > 0 ? 'text-green-600' : 'text-red-500' ?>">
+                                    <?= e($v['durasi'] . (!empty($v['paket']) ? ' ' . $v['paket'] : '')) ?>: <?= $stokCount ?> stok
+                                </a>
+                                <?php endforeach; ?>
+                            </div>
                         <?php elseif (!empty($r['file_upload'])): ?>
                             <a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a>
                         <?php else: ?>
