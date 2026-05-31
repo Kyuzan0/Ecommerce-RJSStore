@@ -11,11 +11,18 @@
 .dark .bg-white,
 .dark [class*="bg-white"] { background-color: #1e1e32 !important; }
 
-/* Gradient backgrounds (from-white / to-white) → dark */
 /* Gradient backgrounds containing white → dark (e.g. review panel from-white to-[#f7faf7]) */
 .dark [class*="from-white"] {
     background-image: linear-gradient(to bottom, #1e1e32, #1a1a2e) !important;
 }
+
+/* Product detail modal — variant dropdown & hero panel */
+.dark #mp-variant-select { background-color: #252540 !important; border-color: #3d3d5c !important; color: #e2e8f0 !important; }
+.dark #mp-variant-select option { background-color: #1e1e32 !important; color: #e2e8f0 !important; }
+.dark #mp-icon-container { background: rgba(255,255,255,0.06) !important; }
+.dark #mp-type-badge { background: rgba(255,255,255,0.08) !important; }
+.dark .modal-content [class*="bg-white/"] { background-color: rgba(255,255,255,0.05) !important; }
+.dark #mp-hero-bg { border-color: #2d2d4a !important; }
 
 /* Gray backgrounds → darker */
 .dark .bg-gray-50,

@@ -158,8 +158,10 @@
                         <p id="mp-price" class="font-black text-3xl md:text-4xl mb-6" style="color:#42B549"></p>
 
                         <div id="mp-variants" class="hidden mb-6">
-                            <h4 class="text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-3">Pilih Varian</h4>
-                            <div id="mp-variant-options" class="flex flex-wrap gap-2"></div>
+                            <label class="block text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-2">Pilih Varian</label>
+                            <select id="mp-variant-select" onchange="onVariantChange()" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-white outline-none focus:border-green-500 transition cursor-pointer">
+                                <option value="">— Pilih varian —</option>
+                            </select>
                         </div>
 
                         <div class="rounded-[1.75rem] bg-white/78 border border-white/70 shadow p-5 md:p-6 mb-6">
@@ -224,34 +226,29 @@ function renderModalCTA(productId, state, isLoading) {
 
 function renderVariants(product, variants) {
     var wrap = document.getElementById('mp-variants');
-    var optionsEl = document.getElementById('mp-variant-options');
+    var sel = document.getElementById('mp-variant-select');
     MP_VARIANTS = variants || [];
     MP_SELECTED_VARIANT = null;
-    if (!MP_VARIANTS.length) { wrap.classList.add('hidden'); optionsEl.innerHTML = ''; return; }
+    if (!MP_VARIANTS.length) { wrap.classList.add('hidden'); sel.innerHTML = ''; return; }
     wrap.classList.remove('hidden');
-    optionsEl.innerHTML = '';
+    var opts = '<option value="">— Pilih varian —</option>';
     MP_VARIANTS.forEach(function(v) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
         var out = (v.stok !== undefined && v.stok <= 0);
-        btn.className = 'mp-variant-btn px-4 py-2 rounded-xl border-2 text-sm font-semibold transition ' + (out ? 'border-gray-200 text-gray-400 cursor-not-allowed opacity-60' : 'border-gray-200 text-gray-700 hover:border-green-400');
-        btn.setAttribute('data-variant-id', v.id);
-        btn.disabled = out;
-        var stokLabel = (v.stok !== undefined) ? ' <span class="text-[10px] ' + (out ? 'text-red-400' : 'text-gray-400') + '">' + (out ? 'Habis' : 'Stok: ' + v.stok) + '</span>' : '';
-        btn.innerHTML = escapeHtml(v.label) + ' <span class="block text-xs font-bold" style="color:#42B549">' + escapeHtml(v.harga_formatted) + '</span>' + stokLabel;
-        if (!out) btn.onclick = function() { selectVariant(product.id, v); };
-        optionsEl.appendChild(btn);
+        var stokText = (v.stok !== undefined) ? (out ? ' (Habis)' : ' — Stok: ' + v.stok) : '';
+        opts += '<option value="' + v.id + '"' + (out ? ' disabled' : '') + '>' + escapeHtml(v.label) + ' — ' + escapeHtml(v.harga_formatted) + stokText + '</option>';
     });
+    sel.innerHTML = opts;
 }
 
-function selectVariant(productId, variant) {
-    MP_SELECTED_VARIANT = variant;
-    document.querySelectorAll('.mp-variant-btn').forEach(function(b) {
-        var sel = parseInt(b.getAttribute('data-variant-id'), 10) === variant.id;
-        b.style.borderColor = sel ? '#42B549' : '';
-        b.style.background = sel ? '#E8F5E9' : '';
-    });
-    document.getElementById('mp-price').textContent = variant.harga_formatted;
+function onVariantChange() {
+    var sel = document.getElementById('mp-variant-select');
+    var id = parseInt(sel.value, 10);
+    if (!id) { MP_SELECTED_VARIANT = null; return; }
+    var variant = MP_VARIANTS.find(function(v) { return v.id === id; });
+    if (variant) {
+        MP_SELECTED_VARIANT = variant;
+        document.getElementById('mp-price').textContent = variant.harga_formatted;
+    }
 }
 
 function renderModalReviews(reviews) {
