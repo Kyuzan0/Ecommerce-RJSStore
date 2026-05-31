@@ -1,0 +1,7 @@
+.git
+.env
+.sisyphus
+*.rar
+*.zip
+node_modules
+docker-compose.yml

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($page_title ?? 'Checkout - RJSStore') ?></title>
+    <?php $ga_id = env('GA_MEASUREMENT_ID', ''); if ($ga_id): ?>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?= e($ga_id) ?>"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= e($ga_id) ?>');</script>
+    <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <?php if (!empty($snap_url)): ?>
     <script src="<?= e($snap_url) ?>" data-client-key="<?= e($client_key ?? '') ?>"></script>
