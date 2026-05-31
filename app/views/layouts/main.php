@@ -14,24 +14,11 @@
     <?php if (isset($extra_head)) echo $extra_head; ?>
     <style>
         body { font-family: 'Inter', sans-serif; background:#F5F5F5; }
-        .dark body, .dark .bg-white { background-color: #1a1a2e; }
-        .dark body { background: #0f0f1a; color: #e2e8f0; }
-        .dark .bg-white { background-color: #1e1e32; }
-        .dark .bg-gray-50, .dark .bg-gray-100 { background-color: #252540; }
-        .dark .text-gray-800, .dark .text-gray-900 { color: #f1f5f9; }
-        .dark .text-gray-700 { color: #e2e8f0; }
-        .dark .text-gray-600 { color: #cbd5e1; }
-        .dark .text-gray-500 { color: #94a3b8; }
-        .dark .text-gray-400 { color: #64748b; }
-        .dark .border-gray-200, .dark .border-gray-100 { border-color: #2d2d4a; }
-        .dark .hover\:bg-gray-100:hover { background-color: #2d2d4a; }
-        .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .dark input, .dark textarea, .dark select { background-color: #252540; border-color: #3d3d5c; color: #e2e8f0; }
-        .dark input::placeholder, .dark textarea::placeholder { color: #64748b; }
         .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .product-card { transition: all 0.2s; }
         <?php if (isset($extra_css)) echo $extra_css; ?>
     </style>
+    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>">
     <script>
         (function(){
             var theme = localStorage.getItem('theme');
