@@ -18,7 +18,7 @@
         .product-card { transition: all 0.2s; }
         <?php if (isset($extra_css)) echo $extra_css; ?>
     </style>
-    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>">
+    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/dark-mode.css') ?>">
     <script>
         (function(){
             var theme = localStorage.getItem('theme');

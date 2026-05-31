@@ -22,7 +22,7 @@
         .nav-badge { background:#FFF3E0; color:#E65100; font-size:11px; font-weight:700; padding:2px 7px; border-radius:99px; }
         <?php if (isset($extra_css)) echo $extra_css; ?>
     </style>
-    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>">
+    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/dark-mode.css') ?>">
     <script>
         (function(){
             var theme = localStorage.getItem('theme');

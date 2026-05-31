@@ -19,7 +19,7 @@
         .sidebar-link.active { background:#e8f5e9; color:#42B549; font-weight:600; }
         <?php if (isset($extra_css)) echo $extra_css; ?>
     </style>
-    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>">
+    <link rel="stylesheet" href="<?= url('/assets/css/dark-mode.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/dark-mode.css') ?>">
     <script>
         (function(){
             var theme = localStorage.getItem('theme');

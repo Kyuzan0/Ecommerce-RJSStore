@@ -94,10 +94,14 @@
 .dark .bg-gray-200 { background-color: #2d2d4a !important; color: #e2e8f0 !important; }
 
 /* Button hover — must override resting state visibly */
+.dark button[class*="bg-gray-100"],
+.dark button[class*="bg-gray-200"],
+.dark a[class*="bg-gray-100"],
+.dark a[class*="bg-gray-200"] { transition: background-color 0.15s ease !important; }
 .dark button[class*="bg-gray-100"]:hover,
 .dark button[class*="bg-gray-200"]:hover,
 .dark a[class*="bg-gray-100"]:hover,
-.dark a[class*="bg-gray-200"]:hover { background-color: #4a4a6a !important; }
+.dark a[class*="bg-gray-200"]:hover { background-color: #50506e !important; }
 
 /* Cards & panels */
 .dark [class*="rounded-lg"][class*="shadow"],
