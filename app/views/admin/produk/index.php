@@ -58,12 +58,21 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
                     </div>
                     <div id="tambah-akun-wrap" class="hidden">
+                        <div class="mb-3">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Layanan (preset)</label>
+                            <select id="tambah-preset" onchange="applyPreset('tambah')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                                <option value="">— Pilih layanan untuk saran durasi & paket —</option>
+                                <?php foreach ($akun_presets as $key => $cfg): ?>
+                                <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
                             <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
                         </div>
                         <div id="tambah-varian-list" class="space-y-3"></div>
-                        <p class="text-xs text-gray-400 mt-2">Contoh: Durasi "1 Bulan", Paket "Individual". Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                        <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
                 </div>
@@ -109,12 +118,21 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
                     </div>
                     <div id="edit-akun-wrap" class="hidden">
+                        <div class="mb-3">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Layanan (preset)</label>
+                            <select id="edit-preset" onchange="applyPreset('edit')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                                <option value="">— Pilih layanan untuk saran durasi & paket —</option>
+                                <?php foreach ($akun_presets as $key => $cfg): ?>
+                                <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-xs font-semibold text-gray-500">Varian Akun</label>
                             <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
                         </div>
                         <div id="edit-varian-list" class="space-y-3"></div>
-                        <p class="text-xs text-gray-400 mt-2">Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                        <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                     </div>
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
                 </div>
@@ -207,6 +225,8 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 </div>
 
 <script>
+var AKUN_PRESETS = <?= json_encode($akun_presets) ?>;
+
 function formatHargaInput(el, hiddenId) {
     var raw = el.value.replace(/\D/g, '');
     document.getElementById(hiddenId).value = raw;
@@ -232,6 +252,8 @@ function openTambahModal() {
     var form = document.querySelector('#modal-tambah form');
     if (form) form.reset();
     document.getElementById('tambah-harga-raw').value = '0';
+    var presetSel = document.getElementById('tambah-preset');
+    if (presetSel) presetSel.value = '';
     document.getElementById('tambah-varian-list').innerHTML = '';
     openModal('tambah');
     toggleAkunFields('tambah');
@@ -254,6 +276,10 @@ function openEdit(id, nama, harga, tipe, deskripsi, variants) {
     document.getElementById('edit-tipe').value = tipe;
     document.getElementById('edit-deskripsi').value = deskripsi;
     document.getElementById('edit-title').textContent = nama;
+
+    // Reset preset selector (existing values render as text/custom)
+    var editPreset = document.getElementById('edit-preset');
+    if (editPreset) editPreset.value = '';
 
     // Populate variant rows
     var list = document.getElementById('edit-varian-list');
@@ -287,25 +313,105 @@ function parseAccountInfo(text) {
     return { email: email, password: password };
 }
 
-// Build one variant editor row
+// Build one variant editor row.
+// If a preset is active for this prefix, durasi & paket render as dropdowns
+// (with a "Custom" escape hatch); otherwise as free text inputs.
 function addVarianRow(prefix, data) {
     data = data || {};
     var list = document.getElementById(prefix + '-varian-list');
+    var presetKey = document.getElementById(prefix + '-preset') ? document.getElementById(prefix + '-preset').value : '';
+    var preset = presetKey && AKUN_PRESETS[presetKey] ? AKUN_PRESETS[presetKey] : null;
+
+    var hargaVal = data.harga ? Number(data.harga).toLocaleString('id-ID') : '';
+
+    var durasiField = preset && preset.durasi && preset.durasi.length
+        ? buildSelectField('varian_durasi[]', preset.durasi, data.durasi)
+        : '<input type="text" name="varian_durasi[]" placeholder="1 Bulan" value="' + escapeAttr(data.durasi) + '">';
+
+    var paketField;
+    if (preset && preset.paket && preset.paket.length) {
+        paketField = buildSelectField('varian_paket[]', preset.paket, data.paket, true);
+    } else {
+        paketField = '<input type="text" name="varian_paket[]" placeholder="Individual / Family" value="' + escapeAttr(data.paket) + '">';
+    }
+
     var row = document.createElement('div');
     row.className = 'varian-row border border-gray-200 rounded-xl p-3 grid grid-cols-2 gap-3 relative';
     row.innerHTML =
-        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Durasi</label>' +
-        '<input type="text" name="varian_durasi[]" placeholder="1 Bulan" value="' + escapeAttr(data.durasi) + '"></div>' +
-        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Paket (opsional)</label>' +
-        '<input type="text" name="varian_paket[]" placeholder="Individual / Family" value="' + escapeAttr(data.paket) + '"></div>' +
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Durasi</label>' + durasiField + '</div>' +
+        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Paket (opsional)</label>' + paketField + '</div>' +
         '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Harga (Rp)</label>' +
-        '<input type="text" name="varian_harga[]" placeholder="0" value="' + (data.harga ? Number(data.harga).toLocaleString('id-ID') : '') + '" oninput="this.value=this.value.replace(/\\D/g,\'\')===\'\'?\'\':Number(this.value.replace(/\\D/g,\'\')).toLocaleString(\'id-ID\')"></div>' +
+        '<input type="text" name="varian_harga[]" placeholder="0" value="' + hargaVal + '" oninput="this.value=this.value.replace(/\\D/g,\'\')===\'\'?\'\':Number(this.value.replace(/\\D/g,\'\')).toLocaleString(\'id-ID\')"></div>' +
         '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Email / Username</label>' +
         '<input type="text" name="varian_email[]" placeholder="akun@email.com" value="' + escapeAttr(data.email) + '"></div>' +
         '<div class="col-span-2"><label class="block text-[11px] font-semibold text-gray-400 mb-1">Password</label>' +
         '<input type="text" name="varian_password[]" placeholder="password akun" value="' + escapeAttr(data.password) + '"></div>' +
         '<button type="button" onclick="this.closest(\'.varian-row\').remove()" class="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600" title="Hapus varian">&times;</button>';
     list.appendChild(row);
+}
+
+// Build a <select> with preset options + selected value + a "custom" text fallback.
+function buildSelectField(name, options, selected, optional) {
+    selected = selected || '';
+    var opts = '';
+    if (optional) {
+        opts += '<option value="">— Tidak ada —</option>';
+    }
+    var found = false;
+    options.forEach(function(o) {
+        var sel = (o === selected) ? ' selected' : '';
+        if (o === selected) found = true;
+        opts += '<option value="' + escapeAttr(o) + '"' + sel + '>' + escapeAttr(o) + '</option>';
+    });
+    // If the stored value isn't in preset options, keep it as a selected custom option
+    if (selected && !found) {
+        opts += '<option value="' + escapeAttr(selected) + '" selected>' + escapeAttr(selected) + ' (custom)</option>';
+    }
+    opts += '<option value="__custom__">+ Ketik manual…</option>';
+    return '<select name="' + name + '" onchange="handleVarianSelect(this)">' + opts + '</select>';
+}
+
+// When "+ Ketik manual" is chosen, swap the select for a text input.
+function handleVarianSelect(sel) {
+    if (sel.value !== '__custom__') return;
+    var name = sel.getAttribute('name');
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.name = name;
+    input.placeholder = 'Ketik manual';
+    sel.replaceWith(input);
+    input.focus();
+}
+
+// Apply a service preset: rebuild existing variant rows using the preset options,
+// preserving any data already typed.
+function applyPreset(prefix) {
+    var list = document.getElementById(prefix + '-varian-list');
+    if (!list) return;
+
+    // Capture existing row data
+    var existing = [];
+    list.querySelectorAll('.varian-row').forEach(function(row) {
+        existing.push({
+            durasi: getFieldVal(row, 'varian_durasi[]'),
+            paket: getFieldVal(row, 'varian_paket[]'),
+            harga: getFieldVal(row, 'varian_harga[]').replace(/\D/g, ''),
+            email: getFieldVal(row, 'varian_email[]'),
+            password: getFieldVal(row, 'varian_password[]')
+        });
+    });
+
+    list.innerHTML = '';
+    if (existing.length === 0) {
+        addVarianRow(prefix);
+    } else {
+        existing.forEach(function(d) { addVarianRow(prefix, d); });
+    }
+}
+
+function getFieldVal(row, name) {
+    var el = row.querySelector('[name="' + name + '"]');
+    return el ? el.value : '';
 }
 
 function escapeAttr(val) {

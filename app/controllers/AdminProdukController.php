@@ -77,7 +77,8 @@ class AdminProdukController extends BaseController
             'search' => $search,
             'active_page' => 'produk',
             'page_title' => 'Kelola Produk',
-            'extra_css' => $extra_css
+            'extra_css' => $extra_css,
+            'akun_presets' => akun_presets(),
         ], 'admin');
     }
 
@@ -290,6 +291,10 @@ class AdminProdukController extends BaseController
             $harga = (int) preg_replace('/\D/', '', (string) ($hargaArr[$i] ?? '0'));
             $email = trim((string) ($emailArr[$i] ?? ''));
             $pass = trim((string) ($passArr[$i] ?? ''));
+
+            // Ignore the "type manually" placeholder value if it slips through
+            if ($durasi === '__custom__') $durasi = '';
+            if ($paket === '__custom__') $paket = '';
 
             // Skip incomplete rows
             if ($durasi === '' || $email === '' || $pass === '') {
