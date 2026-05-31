@@ -370,7 +370,8 @@ function status_transaksi_list(): array
     return [
         'pending'   => ['label' => 'Pending',   'color' => '#E65100', 'bg' => '#FFF3E0'],
         'success'   => ['label' => 'Success',   'color' => '#2E7D32', 'bg' => '#E8F5E9'],
-        'cancelled' => ['label' => 'Cancelled', 'color' => '#C62828', 'bg' => '#FFEBEE'],
+        'failed'    => ['label' => 'Failed',    'color' => '#C62828', 'bg' => '#FFEBEE'],
+        'cancelled' => ['label' => 'Cancelled', 'color' => '#6B7280', 'bg' => '#F3F4F6'],
     ];
 }
 

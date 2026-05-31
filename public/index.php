@@ -24,6 +24,7 @@ require_once BASE_PATH . '/app/core/Auth.php';
 require_once BASE_PATH . '/app/core/BaseController.php';
 require_once BASE_PATH . '/app/core/BaseModel.php';
 require_once BASE_PATH . '/app/core/Router.php';
+require_once BASE_PATH . '/app/core/MidtransService.php';
 
 // Simple autoloader for models
 spl_autoload_register(function (string $class) {
@@ -53,6 +54,10 @@ $router->get('customer/checkout/callback', 'CheckoutController', 'callback');
 $router->get('customer/bayar', 'CustomerBayarController', 'index');
 $router->get('customer/rating/:id', 'CustomerRatingController', 'index');
 $router->post('customer/rating/:id', 'CustomerRatingController', 'index');
+
+// Secure file download (verifies purchase before serving)
+$router->get('customer/download-file/:id', 'CustomerController', 'downloadFile');
+$router->get('admin-produk/file/:id', 'AdminProdukController', 'file');
 
 // Dispatch request
 $uri    = $_SERVER['REQUEST_URI'];

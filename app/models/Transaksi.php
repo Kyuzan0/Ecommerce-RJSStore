@@ -12,7 +12,7 @@ class Transaksi extends BaseModel
     {
         $this->db->beginTransaction();
         try {
-            $tanggal = date('Y-m-d');
+            $tanggal = date('Y-m-d H:i:s');
             foreach ($cartItems as $item) {
                 $this->db->execute(
                     "INSERT INTO transaksi (user_id, produk_id, tanggal, status, order_ref) VALUES (?, ?, ?, 'pending', ?)",

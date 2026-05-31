@@ -94,6 +94,41 @@ class AdminProdukController extends BaseController
         $this->redirect('/admin-produk');
     }
 
+    /**
+     * Serve a product file for admin preview/download (admin-only).
+     */
+    public function file($id)
+    {
+        $produk_id = (int) $id;
+        $row = $this->db->fetchOne("SELECT file_upload, nama_produk FROM produk WHERE id = ?", [$produk_id]);
+
+        if (!$row || empty($row['file_upload'])) {
+            http_response_code(404);
+            echo 'File tidak ditemukan.';
+            return;
+        }
+
+        $fileName = basename($row['file_upload']);
+        $filePath = BASE_PATH . '/storage/uploads/' . $fileName;
+
+        if (!is_file($filePath)) {
+            http_response_code(404);
+            echo 'File tidak ditemukan.';
+            return;
+        }
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Length: ' . filesize($filePath));
+        header('X-Content-Type-Options: nosniff');
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        readfile($filePath);
+        exit;
+    }
+
     private function handleTambah()
     {
         $nama = $_POST['nama_produk'] ?? '';
@@ -106,20 +141,26 @@ class AdminProdukController extends BaseController
         $file_tmp = $_FILES['file_upload']['tmp_name'] ?? '';
 
         if ($file_name && $file_tmp) {
-            $nama_file_db = time() . "_" . basename($file_name);
-            $file_dest = BASE_PATH . '/public/uploads/' . $nama_file_db;
-            if (move_uploaded_file($file_tmp, $file_dest)) {
-                $this->produkModel->create([
-                    'nama_produk' => $nama,
-                    'harga' => $harga,
-                    'deskripsi' => $deskripsi,
-                    'tipe_produk' => $tipe,
-                    'file_upload' => $nama_file_db
-                ]);
-                flash('success', 'Produk berhasil ditambahkan!');
-            } else {
-                flash('error', 'Gagal mengupload file.');
+            $error = $this->validateUpload($_FILES['file_upload']);
+            if ($error !== null) {
+                flash('error', $error);
+                return;
             }
+
+            $nama_file_db = $this->storeUpload($_FILES['file_upload']);
+            if ($nama_file_db === null) {
+                flash('error', 'Gagal mengupload file.');
+                return;
+            }
+
+            $this->produkModel->create([
+                'nama_produk' => $nama,
+                'harga' => $harga,
+                'deskripsi' => $deskripsi,
+                'tipe_produk' => $tipe,
+                'file_upload' => $nama_file_db
+            ]);
+            flash('success', 'Produk berhasil ditambahkan!');
         } else {
             flash('error', 'File produk wajib diupload.');
         }
@@ -135,15 +176,26 @@ class AdminProdukController extends BaseController
         if (!array_key_exists($tipe, tipe_produk_list())) $tipe = 'Lainnya';
 
         $file_name = $_FILES['file_upload']['name'] ?? '';
-        $file_tmp = $_FILES['file_upload']['tmp_name'] ?? '';
 
         if ($file_name != "") {
-            $d_lama = $this->db->fetchOne("SELECT file_upload FROM produk WHERE id = ?", [$id]);
-            if ($d_lama && file_exists(BASE_PATH . '/public/uploads/' . $d_lama['file_upload'])) {
-                unlink(BASE_PATH . '/public/uploads/' . $d_lama['file_upload']);
+            $error = $this->validateUpload($_FILES['file_upload']);
+            if ($error !== null) {
+                flash('error', $error);
+                return;
             }
-            $nama_file_db = time() . "_" . basename($file_name);
-            move_uploaded_file($file_tmp, BASE_PATH . '/public/uploads/' . $nama_file_db);
+
+            $nama_file_db = $this->storeUpload($_FILES['file_upload']);
+            if ($nama_file_db === null) {
+                flash('error', 'Gagal mengupload file.');
+                return;
+            }
+
+            // Delete old file after the new one is stored successfully
+            $d_lama = $this->db->fetchOne("SELECT file_upload FROM produk WHERE id = ?", [$id]);
+            if ($d_lama && $d_lama['file_upload'] && file_exists(BASE_PATH . '/storage/uploads/' . $d_lama['file_upload'])) {
+                unlink(BASE_PATH . '/storage/uploads/' . $d_lama['file_upload']);
+            }
+
             $this->produkModel->update($id, [
                 'nama_produk' => $nama,
                 'harga' => $harga,
@@ -162,12 +214,73 @@ class AdminProdukController extends BaseController
         flash('success', 'Produk berhasil diupdate!');
     }
 
+    /**
+     * Validate an uploaded product file. Returns an error message, or null if valid.
+     */
+    private function validateUpload(array $file): ?string
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return 'Terjadi kesalahan saat mengupload file.';
+        }
+
+        // Max 50MB
+        if (!validate_file_size($file, 50 * 1024 * 1024)) {
+            return 'Ukuran file maksimal 50MB.';
+        }
+
+        // Whitelist allowed digital-product file types
+        $allowedMimes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/x-rar-compressed',
+            'application/vnd.rar',
+            'application/octet-stream',
+            'text/plain',
+            'image/jpeg',
+            'image/png',
+        ];
+        if (!validate_file_type($file, $allowedMimes)) {
+            return 'Tipe file tidak diizinkan. Gunakan PDF, ZIP, RAR, TXT, atau gambar.';
+        }
+
+        // Block dangerous extensions regardless of MIME
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $blockedExt = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'pht', 'cgi', 'pl', 'exe', 'sh', 'htaccess'];
+        if (in_array($ext, $blockedExt, true)) {
+            return 'Ekstensi file tidak diizinkan.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Store an uploaded file in the private storage dir. Returns stored filename or null.
+     */
+    private function storeUpload(array $file): ?string
+    {
+        $uploadDir = BASE_PATH . '/storage/uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Sanitize and randomize filename
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $safeBase = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($file['name'], PATHINFO_FILENAME));
+        $storedName = time() . '_' . bin2hex(random_bytes(4)) . '_' . substr($safeBase, 0, 40) . ($ext ? '.' . $ext : '');
+
+        if (move_uploaded_file($file['tmp_name'], $uploadDir . $storedName)) {
+            return $storedName;
+        }
+        return null;
+    }
+
     private function handleHapus()
     {
         $id = (int) ($_POST['produk_id'] ?? 0);
         $data_file = $this->db->fetchOne("SELECT file_upload FROM produk WHERE id = ?", [$id]);
-        if ($data_file && file_exists(BASE_PATH . '/public/uploads/' . $data_file['file_upload'])) {
-            unlink(BASE_PATH . '/public/uploads/' . $data_file['file_upload']);
+        if ($data_file && $data_file['file_upload'] && file_exists(BASE_PATH . '/storage/uploads/' . $data_file['file_upload'])) {
+            unlink(BASE_PATH . '/storage/uploads/' . $data_file['file_upload']);
         }
         $this->produkModel->delete($id);
         flash('success', 'Produk berhasil dihapus.');
@@ -187,8 +300,8 @@ class AdminProdukController extends BaseController
             if ($id <= 0) continue;
 
             $data_file = $this->db->fetchOne("SELECT file_upload FROM produk WHERE id = ?", [$id]);
-            if ($data_file && file_exists(BASE_PATH . '/public/uploads/' . $data_file['file_upload'])) {
-                unlink(BASE_PATH . '/public/uploads/' . $data_file['file_upload']);
+            if ($data_file && $data_file['file_upload'] && file_exists(BASE_PATH . '/storage/uploads/' . $data_file['file_upload'])) {
+                unlink(BASE_PATH . '/storage/uploads/' . $data_file['file_upload']);
             }
             $this->produkModel->delete($id);
             $deleted++;

@@ -3,11 +3,13 @@
 class AuthController extends BaseController
 {
     private User $userModel;
+    private Keranjang $keranjangModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->userModel = new User();
+        $this->keranjangModel = new Keranjang();
     }
 
     public function login(): void
@@ -47,37 +49,7 @@ class AuthController extends BaseController
 
             // Merge guest cart into DB for customers
             if ($user['role'] === 'customer' && !empty($guestCart)) {
-                $userId      = (int) $user['id'];
-                $mergedCount = 0;
-
-                foreach ($guestCart as $cartItem) {
-                    $produkId = (int) $cartItem['produk_id'];
-
-                    // Skip if already in DB cart
-                    $existing = $this->db->fetchOne(
-                        "SELECT id FROM keranjang WHERE user_id = ? AND produk_id = ?",
-                        [$userId, $produkId]
-                    );
-                    if ($existing) continue;
-
-                    // Skip if already purchased
-                    $purchased = $this->db->fetchOne(
-                        "SELECT id FROM transaksi WHERE user_id = ? AND produk_id = ? AND status IN ('pending', 'success')",
-                        [$userId, $produkId]
-                    );
-                    if ($purchased) continue;
-
-                    // Verify product exists
-                    $produk = $this->db->fetchOne("SELECT id FROM produk WHERE id = ?", [$produkId]);
-                    if (!$produk) continue;
-
-                    $this->db->execute(
-                        "INSERT INTO keranjang (user_id, produk_id) VALUES (?, ?)",
-                        [$userId, $produkId]
-                    );
-                    $mergedCount++;
-                }
-
+                $mergedCount = $this->keranjangModel->mergeGuestCart((int) $user['id'], $guestCart);
                 if ($mergedCount > 0) {
                     flash('success', $mergedCount . ' produk dari keranjang tamu berhasil ditambahkan ke akun kamu.');
                 }
@@ -123,6 +95,18 @@ class AuthController extends BaseController
         $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $confirm  = $_POST['confirm_password'] ?? '';
+
+        if ($name === '' || $email === '') {
+            flash('error', 'Nama dan email harus diisi!');
+            $this->redirect('/auth/register');
+            return;
+        }
+
+        if (!validate_email($email)) {
+            flash('error', 'Format email tidak valid!');
+            $this->redirect('/auth/register');
+            return;
+        }
 
         if ($password !== $confirm) {
             flash('error', 'Password tidak sama!');

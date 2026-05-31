@@ -6,6 +6,7 @@ class CustomerBayarController extends BaseController
 {
     private $transaksiModel;
     private $userModel;
+    private MidtransService $midtrans;
 
     public function __construct()
     {
@@ -17,6 +18,7 @@ class CustomerBayarController extends BaseController
         
         $this->transaksiModel = new Transaksi();
         $this->userModel = new User();
+        $this->midtrans = new MidtransService();
     }
 
     public function index()
@@ -63,62 +65,20 @@ class CustomerBayarController extends BaseController
                 'id' => $item['produk_id'],
                 'price' => (int)$item['harga'],
                 'quantity' => 1,
-                'name' => $item['nama_produk']
+                'name' => substr($item['nama_produk'], 0, 50)
             ];
         }
-
-        $transaction_details = [
-            'order_id' => $order_id,
-            'gross_amount' => (int)$total
-        ];
 
         $customer_details = [
             'first_name' => $user_name,
             'email' => $user_email
         ];
 
-        $payload = [
-            'transaction_details' => $transaction_details,
-            'item_details' => $item_details,
-            'customer_details' => $customer_details
-        ];
-
-        // Call Midtrans Snap API
-        $isProduction = env('MIDTRANS_IS_PRODUCTION', 'false') === 'true';
-        $snap_url = $isProduction
-            ? 'https://app.midtrans.com/snap/v1'
-            : 'https://app.sandbox.midtrans.com/snap/v1';
-        $snap_js_url = $isProduction
-            ? 'https://app.midtrans.com/snap/snap.js'
-            : 'https://app.sandbox.midtrans.com/snap/snap.js';
-        $server_key = env('MIDTRANS_SERVER_KEY');
-        $client_key = env('MIDTRANS_CLIENT_KEY');
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $snap_url . '/transactions');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Basic ' . base64_encode($server_key . ':')
-        ]);
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($http_code !== 201) {
-            flash('error', 'Gagal menghubungi payment gateway');
-            $this->redirect('/customer/pembelian?msg=error');
-            return;
-        }
-
-        $result = json_decode($response, true);
-        $snap_token = $result['token'] ?? '';
+        // Request Snap token via the shared service
+        $snap_token = $this->midtrans->createSnapToken($order_id, (int)$total, $item_details, $customer_details);
 
         if (empty($snap_token)) {
-            flash('error', 'Gagal mendapatkan token pembayaran');
+            flash('error', 'Gagal menghubungi payment gateway');
             $this->redirect('/customer/pembelian?msg=error');
             return;
         }
@@ -128,8 +88,8 @@ class CustomerBayarController extends BaseController
             'items' => $items,
             'total' => $total,
             'snap_token' => $snap_token,
-            'snap_url' => $snap_js_url,
-            'client_key' => $client_key
+            'snap_url' => $this->midtrans->getSnapJsUrl(),
+            'client_key' => $this->midtrans->getClientKey()
         ], 'checkout');
     }
 }

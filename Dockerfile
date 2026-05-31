@@ -23,7 +23,9 @@ COPY . /var/www/html
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && mkdir -p /var/www/html/public/uploads \
-    && chown -R www-data:www-data /var/www/html/public/uploads
+    && mkdir -p /var/www/html/storage/uploads \
+    && chown -R www-data:www-data /var/www/html/public/uploads \
+    && chown -R www-data:www-data /var/www/html/storage
 
 # Allow PHP-FPM to read environment variables
 RUN echo "clear_env = no" >> /usr/local/etc/php-fpm.d/www.conf

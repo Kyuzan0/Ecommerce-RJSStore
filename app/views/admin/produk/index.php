@@ -161,7 +161,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                             <span class="text-xs text-gray-400">(<?= $r['total_rating'] ?>)</span>
                         </div>
                     </td>
-                    <td class="px-5 py-4"><a href="<?= url('/uploads/' . e($r['file_upload'])); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a></td>
+                    <td class="px-5 py-4"><a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a></td>
                     <td class="px-5 py-4 text-center">
                         <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['nama_produk']), ENT_QUOTES) ?>, <?= (int)$r['harga'] ?>, <?= htmlspecialchars(json_encode($r['tipe_produk'] ?? 'Lainnya'), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['deskripsi']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">

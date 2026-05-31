@@ -58,7 +58,7 @@ class AdminProfileController extends BaseController
                 'name' => $name,
                 'email' => $email
             ]);
-            $_SESSION['name'] = $name;
+            $_SESSION['user_name'] = $name;
             flash('success', 'Profil berhasil diperbarui.');
         }
     }

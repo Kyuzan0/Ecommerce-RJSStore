@@ -219,6 +219,67 @@ class CustomerController extends BaseController
         ], 'customer');
     }
 
+    /**
+     * Securely serve a purchased product file.
+     * Verifies the user has a successful transaction for the product before
+     * streaming the file from the private storage directory.
+     */
+    public function downloadFile($id)
+    {
+        $user_id = $this->auth->id();
+        $produk_id = (int) $id;
+
+        if ($produk_id <= 0) {
+            http_response_code(400);
+            echo 'Permintaan tidak valid.';
+            return;
+        }
+
+        // Verify ownership: a successful transaction for this product
+        $row = $this->db->fetchOne(
+            "SELECT p.file_upload, p.nama_produk
+             FROM transaksi t
+             JOIN produk p ON t.produk_id = p.id
+             WHERE t.user_id = ? AND t.produk_id = ? AND t.status = 'success'
+             LIMIT 1",
+            [$user_id, $produk_id]
+        );
+
+        if (!$row || empty($row['file_upload'])) {
+            http_response_code(403);
+            echo 'Anda tidak memiliki akses untuk mengunduh file ini.';
+            return;
+        }
+
+        // Resolve path safely (prevent directory traversal)
+        $fileName = basename($row['file_upload']);
+        $filePath = BASE_PATH . '/storage/uploads/' . $fileName;
+
+        if (!is_file($filePath)) {
+            http_response_code(404);
+            echo 'File tidak ditemukan.';
+            return;
+        }
+
+        // Stream the file
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $downloadName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $row['nama_produk']) . ($ext ? '.' . $ext : '');
+
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $downloadName . '"');
+        header('Content-Length: ' . filesize($filePath));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, no-store');
+
+        // Clear any output buffers before streaming
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        readfile($filePath);
+        exit;
+    }
+
     public function profile()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -274,8 +335,8 @@ class CustomerController extends BaseController
                 [$name, $email, $user_id]
             );
 
-            // Update session name
-            $_SESSION['name'] = $name;
+            // Update session name (layout reads $_SESSION['user_name'])
+            $_SESSION['user_name'] = $name;
 
             flash('success', 'Profile berhasil diperbarui');
         } elseif ($action === 'update_password') {
