@@ -142,7 +142,7 @@ class Transaksi extends BaseModel
     public function getDownloadable(int $userId, int $limit = 20, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            "SELECT p.id AS produk_id, p.nama_produk, p.harga, p.file_upload, p.tipe_produk, p.deskripsi, MAX(t.tanggal) AS tanggal
+            "SELECT p.id AS produk_id, p.nama_produk, p.harga, p.file_upload, p.tipe_produk, p.account_info, p.deskripsi, MAX(t.tanggal) AS tanggal
              FROM transaksi t
              JOIN produk p ON t.produk_id = p.id
              WHERE t.user_id = ? AND t.status = 'success'

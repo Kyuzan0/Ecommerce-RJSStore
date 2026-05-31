@@ -137,6 +137,25 @@ class AdminProdukController extends BaseController
         $tipe = $_POST['tipe_produk'] ?? 'Lainnya';
         if (!array_key_exists($tipe, tipe_produk_list())) $tipe = 'Lainnya';
 
+        // Account-type products store credentials instead of a file
+        if ($tipe === 'Akun') {
+            $account_info = trim($_POST['account_info'] ?? '');
+            if ($account_info === '') {
+                flash('error', 'Informasi akun wajib diisi untuk produk tipe Akun.');
+                return;
+            }
+            $this->produkModel->create([
+                'nama_produk' => $nama,
+                'harga' => $harga,
+                'deskripsi' => $deskripsi,
+                'tipe_produk' => $tipe,
+                'file_upload' => null,
+                'account_info' => $account_info,
+            ]);
+            flash('success', 'Produk akun berhasil ditambahkan!');
+            return;
+        }
+
         $file_name = $_FILES['file_upload']['name'] ?? '';
         $file_tmp = $_FILES['file_upload']['tmp_name'] ?? '';
 
@@ -175,6 +194,24 @@ class AdminProdukController extends BaseController
         $tipe = $_POST['tipe_produk'] ?? 'Lainnya';
         if (!array_key_exists($tipe, tipe_produk_list())) $tipe = 'Lainnya';
 
+        // Account-type products: update credentials, no file required
+        if ($tipe === 'Akun') {
+            $account_info = trim($_POST['account_info'] ?? '');
+            if ($account_info === '') {
+                flash('error', 'Informasi akun wajib diisi untuk produk tipe Akun.');
+                return;
+            }
+            $this->produkModel->update($id, [
+                'nama_produk' => $nama,
+                'harga' => $harga,
+                'deskripsi' => $deskripsi,
+                'tipe_produk' => $tipe,
+                'account_info' => $account_info,
+            ]);
+            flash('success', 'Produk akun berhasil diupdate!');
+            return;
+        }
+
         $file_name = $_FILES['file_upload']['name'] ?? '';
 
         if ($file_name != "") {
@@ -201,14 +238,16 @@ class AdminProdukController extends BaseController
                 'harga' => $harga,
                 'deskripsi' => $deskripsi,
                 'tipe_produk' => $tipe,
-                'file_upload' => $nama_file_db
+                'file_upload' => $nama_file_db,
+                'account_info' => null,
             ]);
         } else {
             $this->produkModel->update($id, [
                 'nama_produk' => $nama,
                 'harga' => $harga,
                 'deskripsi' => $deskripsi,
-                'tipe_produk' => $tipe
+                'tipe_produk' => $tipe,
+                'account_info' => null,
             ]);
         }
         flash('success', 'Produk berhasil diupdate!');

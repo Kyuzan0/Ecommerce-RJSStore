@@ -46,9 +46,31 @@
                 <p class="text-sm text-gray-500 mb-4">
                     Dibeli: <?= format_tanggal($item['tanggal']) ?>
                 </p>
-                
-                <!-- Download Button -->
-                <?php if (!empty($item['file_upload'])): ?>
+
+                <?php if (($item['tipe_produk'] ?? '') === 'Akun' && !empty($item['account_info'])): ?>
+                    <!-- Account Credentials -->
+                    <button type="button"
+                            onclick="toggleAkun(<?= (int)$item['produk_id'] ?>)"
+                            class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-semibold transition-colors">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                            </svg>
+                            Lihat Akun
+                        </div>
+                    </button>
+                    <div id="akun-<?= (int)$item['produk_id'] ?>" class="hidden mt-3">
+                        <div class="bg-gray-900 rounded-lg p-3 relative">
+                            <pre id="akun-text-<?= (int)$item['produk_id'] ?>" class="text-xs text-green-300 whitespace-pre-wrap break-words font-mono leading-relaxed"><?= e($item['account_info']) ?></pre>
+                        </div>
+                        <button type="button"
+                                onclick="copyAkun(<?= (int)$item['produk_id'] ?>)"
+                                class="mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm py-2 rounded-lg font-medium transition-colors">
+                            Salin Informasi Akun
+                        </button>
+                    </div>
+                <?php elseif (!empty($item['file_upload'])): ?>
+                    <!-- Download Button -->
                     <a href="<?= url('/customer/download-file/' . (int)$item['produk_id']) ?>" 
                        class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-semibold transition-colors">
                         <div class="flex items-center justify-center">
@@ -71,3 +93,22 @@
     <!-- Pagination -->
     <?= pagination_render($paging) ?>
 <?php endif; ?>
+
+<script>
+function toggleAkun(id) {
+    var box = document.getElementById('akun-' + id);
+    if (box) box.classList.toggle('hidden');
+}
+function copyAkun(id) {
+    var el = document.getElementById('akun-text-' + id);
+    if (!el) return;
+    var text = el.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        if (window.showToast) {
+            showToast('success', 'Informasi akun disalin ke clipboard');
+        } else {
+            alert('Informasi akun disalin!');
+        }
+    });
+}
+</script>

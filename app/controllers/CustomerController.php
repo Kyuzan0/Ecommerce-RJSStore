@@ -200,10 +200,10 @@ class CustomerController extends BaseController
     {
         $user_id = $this->auth->id();
 
-        // Pagination
+        // Pagination — include both file-based and account-based products
         $paging = paginate(
             $this->db,
-            "SELECT COUNT(*) as c FROM transaksi t JOIN produk p ON t.produk_id = p.id WHERE t.user_id = ? AND t.status = 'success' AND p.file_upload IS NOT NULL AND p.file_upload != ''",
+            "SELECT COUNT(DISTINCT p.id) as c FROM transaksi t JOIN produk p ON t.produk_id = p.id WHERE t.user_id = ? AND t.status = 'success' AND ((p.file_upload IS NOT NULL AND p.file_upload != '') OR (p.account_info IS NOT NULL AND p.account_info != ''))",
             [$user_id],
             12
         );

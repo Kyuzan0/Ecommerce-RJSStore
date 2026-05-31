@@ -11,7 +11,7 @@
         </a>
         <?php endif; ?>
     </form>
-    <button onclick="openModal('tambah')" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition shrink-0" style="background:#42B549">
+    <button onclick="openModal('tambah'); toggleAkunFields('tambah');" class="inline-flex items-center gap-2 px-5 py-2.5 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition shrink-0" style="background:#42B549">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         Tambah Produk
     </button>
@@ -48,13 +48,18 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="tambah-harga-raw" value="0"><input type="text" id="tambah-harga-display" placeholder="0" required oninput="formatHargaInput(this, 'tambah-harga-raw')"></div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
-                        <select name="tipe_produk" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                        <select name="tipe_produk" id="tambah-tipe" onchange="toggleAkunFields('tambah')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
                             <?php foreach (tipe_produk_list() as $key => $cfg): ?>
                             <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload" required></div>
+                    <div id="tambah-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1" id="tambah-file-hint">Wajib untuk produk non-akun</p></div>
+                </div>
+                <div id="tambah-akun-wrap" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Informasi Akun</label>
+                    <textarea name="account_info" placeholder="Contoh:&#10;Email: akun@email.com&#10;Password: rahasia123&#10;Catatan: jangan ganti password" rows="4"></textarea>
+                    <p class="text-xs text-gray-400 mt-1">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -89,13 +94,18 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Harga (Rp)</label><input type="hidden" name="harga" id="edit-harga-raw" value="0"><input type="text" id="edit-harga-display" required oninput="formatHargaInput(this, 'edit-harga-raw')"></div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5">Tipe Produk</label>
-                        <select name="tipe_produk" id="edit-tipe" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
+                        <select name="tipe_produk" id="edit-tipe" onchange="toggleAkunFields('edit')" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s">
                             <?php foreach (tipe_produk_list() as $key => $cfg): ?>
                             <option value="<?= e($key) ?>"><?= e($cfg['label']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
+                    <div id="edit-file-wrap"><label class="block text-xs font-semibold text-gray-500 mb-1.5">File Produk</label><input type="file" name="file_upload"><p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ganti file</p></div>
+                </div>
+                <div id="edit-akun-wrap" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Informasi Akun</label>
+                    <textarea name="account_info" id="edit-account-info" placeholder="Email: akun@email.com&#10;Password: rahasia123" rows="4"></textarea>
+                    <p class="text-xs text-gray-400 mt-1">Kredensial ini hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
                 </div>
                 <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -161,9 +171,17 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                             <span class="text-xs text-gray-400">(<?= $r['total_rating'] ?>)</span>
                         </div>
                     </td>
-                    <td class="px-5 py-4"><a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a></td>
+                    <td class="px-5 py-4">
+                        <?php if (($r['tipe_produk'] ?? '') === 'Akun'): ?>
+                            <span class="text-xs font-medium text-gray-500">Info Akun</span>
+                        <?php elseif (!empty($r['file_upload'])): ?>
+                            <a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a>
+                        <?php else: ?>
+                            <span class="text-xs text-gray-400">-</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="px-5 py-4 text-center">
-                        <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['nama_produk']), ENT_QUOTES) ?>, <?= (int)$r['harga'] ?>, <?= htmlspecialchars(json_encode($r['tipe_produk'] ?? 'Lainnya'), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['deskripsi']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
+                        <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['nama_produk']), ENT_QUOTES) ?>, <?= (int)$r['harga'] ?>, <?= htmlspecialchars(json_encode($r['tipe_produk'] ?? 'Lainnya'), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['deskripsi']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['account_info'] ?? ''), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
                             <?= csrf_field() ?>
                             <input type="hidden" name="action" value="hapus">
@@ -209,15 +227,33 @@ function closeModal(type) {
         document.body.style.overflow = '';
     }, 200);
 }
-function openEdit(id, nama, harga, tipe, deskripsi) {
+function openEdit(id, nama, harga, tipe, deskripsi, accountInfo) {
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-nama').value = nama;
     document.getElementById('edit-harga-raw').value = harga;
     document.getElementById('edit-harga-display').value = formatHargaValue(harga);
     document.getElementById('edit-tipe').value = tipe;
     document.getElementById('edit-deskripsi').value = deskripsi;
+    document.getElementById('edit-account-info').value = accountInfo || '';
     document.getElementById('edit-title').textContent = nama;
+    toggleAkunFields('edit');
     openModal('edit');
+}
+
+// Toggle between file upload and account credentials based on product type
+function toggleAkunFields(prefix) {
+    var tipe = document.getElementById(prefix + '-tipe').value;
+    var akunWrap = document.getElementById(prefix + '-akun-wrap');
+    var fileWrap = document.getElementById(prefix + '-file-wrap');
+    var isAkun = (tipe === 'Akun');
+
+    if (isAkun) {
+        akunWrap.classList.remove('hidden');
+        fileWrap.classList.add('hidden');
+    } else {
+        akunWrap.classList.add('hidden');
+        fileWrap.classList.remove('hidden');
+    }
 }
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
