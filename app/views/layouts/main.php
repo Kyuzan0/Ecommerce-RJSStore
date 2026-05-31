@@ -9,14 +9,37 @@
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= e($ga_id) ?>');</script>
     <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class'}</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <?php if (isset($extra_head)) echo $extra_head; ?>
     <style>
         body { font-family: 'Inter', sans-serif; background:#F5F5F5; }
+        .dark body, .dark .bg-white { background-color: #1a1a2e; }
+        .dark body { background: #0f0f1a; color: #e2e8f0; }
+        .dark .bg-white { background-color: #1e1e32; }
+        .dark .bg-gray-50, .dark .bg-gray-100 { background-color: #252540; }
+        .dark .text-gray-800, .dark .text-gray-900 { color: #f1f5f9; }
+        .dark .text-gray-700 { color: #e2e8f0; }
+        .dark .text-gray-600 { color: #cbd5e1; }
+        .dark .text-gray-500 { color: #94a3b8; }
+        .dark .text-gray-400 { color: #64748b; }
+        .dark .border-gray-200, .dark .border-gray-100 { border-color: #2d2d4a; }
+        .dark .hover\:bg-gray-100:hover { background-color: #2d2d4a; }
+        .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .dark input, .dark textarea, .dark select { background-color: #252540; border-color: #3d3d5c; color: #e2e8f0; }
+        .dark input::placeholder, .dark textarea::placeholder { color: #64748b; }
         .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .product-card { transition: all 0.2s; }
         <?php if (isset($extra_css)) echo $extra_css; ?>
     </style>
+    <script>
+        (function(){
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -65,6 +88,11 @@
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
                             Settings Profile
                         </a>
+                        <a href="javascript:void(0)" onclick="toggleDarkMode()" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                            <svg class="w-4 h-4 text-gray-400 dark-icon-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                            <svg class="w-4 h-4 text-yellow-500 dark-icon-sun hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <span class="dark-label-text">Mode Gelap</span>
+                        </a>
                         <div class="border-t border-gray-100 my-1"></div>
                         <a href="javascript:void(0)" onclick="openLogoutModal()" class="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/></svg>
@@ -74,6 +102,10 @@
                 </div>
                 <script>document.addEventListener('click',function(e){var d=document.getElementById('profileDropdown');var m=document.getElementById('profileMenu');if(d&&!d.contains(e.target)){m.classList.add('hidden')}});</script>
             <?php elseif (!$this->auth->check()): ?>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-500" title="Mode Gelap">
+                    <svg class="w-5 h-5 dark-icon-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg class="w-5 h-5 dark-icon-sun hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                </button>
                 <a href="<?= url('/auth/login') ?>" class="text-sm font-medium text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition">Masuk</a>
                 <a href="<?= url('/auth/register') ?>" class="text-sm font-semibold text-white px-4 py-2 rounded-lg transition hover:opacity-90" style="background:#42B549">Daftar</a>
             <?php endif; ?>
@@ -95,5 +127,21 @@
 
 <?php include BASE_PATH . '/app/views/partials/toast.php'; ?>
 <?php include BASE_PATH . '/app/views/partials/logout_modal.php'; ?>
+<script>
+function toggleDarkMode() {
+    var html = document.documentElement;
+    html.classList.toggle('dark');
+    var isDark = html.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateDarkIcons();
+}
+function updateDarkIcons() {
+    var isDark = document.documentElement.classList.contains('dark');
+    document.querySelectorAll('.dark-icon-moon').forEach(function(el) { el.style.display = isDark ? 'none' : 'block'; });
+    document.querySelectorAll('.dark-icon-sun').forEach(function(el) { el.style.display = isDark ? 'block' : 'none'; });
+    document.querySelectorAll('.dark-label-text').forEach(function(el) { el.textContent = isDark ? 'Mode Terang' : 'Mode Gelap'; });
+}
+updateDarkIcons();
+</script>
 </body>
 </html>
