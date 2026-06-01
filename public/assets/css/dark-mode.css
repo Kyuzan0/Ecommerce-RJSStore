@@ -584,7 +584,7 @@ button[disabled], a.cursor-not-allowed,
 /* ------------------------------------------------------------
    11. DROPDOWN MENUS, MODALS, BACKDROPS
    ------------------------------------------------------------ */
-#profileMenu, #cartDropdown, [id^="stok-dd-menu-"] {
+#profileMenu, #cartDropdown {
     background: var(--ds-surface) !important;
     border-color: var(--ds-border) !important;
     box-shadow: var(--ds-shadow-soft) !important;

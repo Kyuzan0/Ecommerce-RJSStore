@@ -183,6 +183,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <?php if (count($products) == 0): ?>
                 <tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Tidak ada produk ditemukan.</td></tr>
                 <?php endif;
+                $stokModel = new AkunStok();
                 foreach($products as $i => $r){ ?>
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-3 py-3 text-center"><input type="checkbox" name="produk_ids[]" value="<?= $r['id'] ?>" class="row-checkbox w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600"></td>
@@ -211,16 +212,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </td>
                     <td class="px-5 py-4 text-center">
                         <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
-                        <div class="relative inline-block" id="stok-dd-<?= $r['id'] ?>">
-                            <button type="button" onclick="toggleStokDropdown(<?= $r['id'] ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
-                            <div id="stok-dd-menu-<?= $r['id'] ?>" class="hidden absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
-                                <?php foreach ($r['varian'] as $v): ?>
-                                <button type="button" onclick="openStokModal(<?= (int)$v['id'] ?>, '<?= e($r['nama_produk']) ?>', '<?= e($v['durasi'] . (!empty($v['paket']) ? ' - ' . $v['paket'] : '')) ?>'); toggleStokDropdown(<?= $r['id'] ?>)" class="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition">
-                                    <?= e($v['durasi'] . (!empty($v['paket']) ? ' - ' . $v['paket'] : '')) ?>
-                                </button>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
+                        <button type="button" onclick='openStokModalProduk(<?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(array_map(function($v) use ($stokModel){ return ["id"=>(int)$v["id"],"label"=>$v["durasi"].(!empty($v["paket"])?" - ".$v["paket"]:""),"stok"=>$stokModel->countAvailable((int)$v["id"])]; }, $r["varian"])), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
                         <?php endif; ?>
                         <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
@@ -263,16 +255,19 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         $stokModel = new AkunStok();
                         $stokCount = $stokModel->countAvailable((int) $v['id']);
                     ?>
-                    <a href="<?= url('/admin-produk/stok/' . (int)$v['id']) ?>" class="flex items-center justify-between hover:underline <?= $stokCount > 0 ? 'text-green-600' : 'text-red-500' ?>">
+                    <div class="flex items-center justify-between <?= $stokCount > 0 ? 'text-green-600' : 'text-red-500' ?>">
                         <span><?= e($v['durasi'] . (!empty($v['paket']) ? ' ' . $v['paket'] : '')) ?></span>
                         <span class="font-medium"><?= $stokCount ?> stok</span>
-                    </a>
+                    </div>
                     <?php endforeach; ?>
                 </div>
             <?php elseif (!empty($r['file_upload'])): ?>
                 <a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="block text-xs font-medium hover:underline mb-3" style="color:#1976D2">Lihat File →</a>
             <?php endif; ?>
             <div class="flex gap-2 pt-1">
+                <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
+                <button type="button" onclick='openStokModalProduk(<?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(array_map(function($v) use ($stokModel){ return ["id"=>(int)$v["id"],"label"=>$v["durasi"].(!empty($v["paket"])?" - ".$v["paket"]:""),"stok"=>$stokModel->countAvailable((int)$v["id"])]; }, $r["varian"])), ENT_QUOTES) ?>)' class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
+                <?php endif; ?>
                 <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                 <form method="POST" class="flex-1" onsubmit="return confirm('Hapus produk ini?')">
                     <?= csrf_field() ?>
@@ -552,16 +547,25 @@ function bulkDelete() {
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-                <div>
-                    <h2 class="font-bold text-gray-800" id="stok-modal-title">Kelola Stok</h2>
-                    <p class="text-xs text-gray-500" id="stok-modal-subtitle"></p>
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-2 h-6 rounded-full flex-shrink-0" style="background:#1565C0"></div>
+                    <div class="min-w-0">
+                        <h2 class="font-bold text-gray-800 truncate">Kelola Stok: <span id="stok-modal-title" style="color:#1565C0"></span></h2>
+                        <p class="text-xs text-gray-500" id="stok-modal-subtitle">Pilih varian untuk mengelola stok</p>
+                    </div>
                 </div>
-                <button onclick="closeModal('stok')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                <button onclick="closeModal('stok')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
             <div class="p-6 overflow-y-auto flex-1">
+                <!-- Variant switcher -->
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">Varian Akun</label>
+                    <select id="stok-varian-switch" onchange="onStokVarianChange()" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-green-500" style="transition:border 0.15s"></select>
+                </div>
+
                 <!-- Add stock tabs -->
                 <div class="flex gap-2 mb-4">
                     <button type="button" id="stok-tab-single" onclick="switchStokTab('single')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-100 text-green-700">Satu Akun</button>
@@ -593,13 +597,57 @@ function bulkDelete() {
 
 <script>
 var STOK_VARIAN_ID = 0;
+var STOK_VARIANTS = [];
+var STOK_PRODUK_NAME = '';
 var STOK_API_BASE = '<?= url("/api/admin/stok") ?>';
 
-function openStokModal(varianId, produkName, varianLabel) {
-    STOK_VARIAN_ID = varianId;
+// Open the stock modal for a product. Renders a variant switcher inside the
+// modal so the admin can jump between variants without closing it.
+function openStokModalProduk(produkName, variants) {
+    STOK_PRODUK_NAME = produkName;
+    STOK_VARIANTS = Array.isArray(variants) ? variants : [];
     document.getElementById('stok-modal-title').textContent = produkName;
-    document.getElementById('stok-modal-subtitle').textContent = varianLabel;
+
+    renderStokVarianOptions();
+
+    if (STOK_VARIANTS.length > 0) {
+        STOK_VARIAN_ID = STOK_VARIANTS[0].id;
+        document.getElementById('stok-varian-switch').value = STOK_VARIAN_ID;
+        document.getElementById('stok-modal-subtitle').textContent = STOK_VARIANTS[0].label;
+    } else {
+        STOK_VARIAN_ID = 0;
+        document.getElementById('stok-modal-subtitle').textContent = 'Belum ada varian';
+    }
+
+    switchStokTab('single');
     openModal('stok');
+    loadStokList();
+}
+
+// (Re)build the variant <option> list, including the available stock count.
+function renderStokVarianOptions() {
+    var sel = document.getElementById('stok-varian-switch');
+    var current = sel.value;
+    sel.innerHTML = '';
+    STOK_VARIANTS.forEach(function(v) {
+        var opt = document.createElement('option');
+        opt.value = v.id;
+        var stok = (v.stok != null) ? v.stok : 0;
+        opt.textContent = v.label + '  (' + stok + ' stok)';
+        sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+}
+
+function onStokVarianChange() {
+    var sel = document.getElementById('stok-varian-switch');
+    STOK_VARIAN_ID = parseInt(sel.value, 10) || 0;
+    var v = STOK_VARIANTS.find(function(x) { return x.id == STOK_VARIAN_ID; });
+    document.getElementById('stok-modal-subtitle').textContent = v ? v.label : '';
+    document.getElementById('stok-email').value = '';
+    document.getElementById('stok-pass').value = '';
+    var bulk = document.getElementById('stok-bulk');
+    if (bulk) bulk.value = '';
     loadStokList();
 }
 
@@ -612,6 +660,10 @@ function loadStokList() {
         .then(function(data) {
             if (!data.success) { container.innerHTML = '<p class="p-4 text-red-500 text-sm">Gagal memuat.</p>'; return; }
             document.getElementById('stok-badge').textContent = 'Tersedia: ' + data.available + ' / ' + data.total;
+
+            // Keep the dropdown count in sync with the latest available stock.
+            var cur = STOK_VARIANTS.find(function(x) { return x.id == STOK_VARIAN_ID; });
+            if (cur) { cur.stok = data.available; renderStokVarianOptions(); document.getElementById('stok-varian-switch').value = STOK_VARIAN_ID; }
 
             if (data.stocks.length === 0) {
                 container.innerHTML = '<p class="p-4 text-center text-gray-400 text-sm">Belum ada stok.</p>';
@@ -692,17 +744,6 @@ function deleteStok(id) {
             if (data.success) loadStokList();
         });
 }
-
-function toggleStokDropdown(produkId) {
-    var menu = document.getElementById('stok-dd-menu-' + produkId);
-    if (menu) menu.classList.toggle('hidden');
-}
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-    document.querySelectorAll('[id^="stok-dd-menu-"]').forEach(function(m) {
-        if (!m.parentElement.contains(e.target)) m.classList.add('hidden');
-    });
-});
 
 function switchStokTab(tab) {
     var single = document.getElementById('stok-form-single');
