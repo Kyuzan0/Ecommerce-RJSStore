@@ -71,7 +71,10 @@ class AuthController extends BaseController
 
         // Authentication failed
         // Log failed attempt (use admin_id=0 since no one is logged in)
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $ip = !empty($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP']
+            : (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0])
+            : (!empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP']
+            : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0')));
         $this->db->execute(
             "INSERT INTO audit_log (admin_id, action, target_type, detail, ip_address) VALUES (0, 'login_failed', 'auth', ?, ?)",
             ['email: ' . $email, $ip]
