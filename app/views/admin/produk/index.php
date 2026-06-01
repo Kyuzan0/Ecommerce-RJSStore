@@ -72,7 +72,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                             <button type="button" onclick="addVarianRow('tambah')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E8F5E9; color:#2E7D32">+ Tambah Varian</button>
                         </div>
                         <div id="tambah-varian-list" class="space-y-3"></div>
-                        <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                        <p class="text-xs text-gray-400 mt-2">Atur durasi & harga per varian. Kredensial akun dikelola di halaman Stok setelah produk dibuat.</p>
                     </div>
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" placeholder="Deskripsi produk..." required rows="3" class="w-full"></textarea></div>
                 </div>
@@ -132,7 +132,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                             <button type="button" onclick="addVarianRow('edit')" class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:#E3F2FD; color:#1565C0">+ Tambah Varian</button>
                         </div>
                         <div id="edit-varian-list" class="space-y-3"></div>
-                        <p class="text-xs text-gray-400 mt-2">Pilih layanan agar durasi & paket muncul otomatis. Kredensial hanya ditampilkan ke pembeli setelah pembayaran berhasil.</p>
+                        <p class="text-xs text-gray-400 mt-2">Atur durasi & harga per varian. Kredensial akun dikelola di halaman Stok.</p>
                     </div>
                     <div><label class="block text-xs font-semibold text-gray-500 mb-1.5">Deskripsi</label><textarea name="deskripsi" id="edit-deskripsi" required rows="3" class="w-full"></textarea></div>
                 </div>
@@ -202,16 +202,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     </td>
                     <td class="px-5 py-4">
                         <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
-                            <div class="space-y-1">
-                                <?php foreach ($r['varian'] as $v):
-                                    $stokModel = new AkunStok();
-                                    $stokCount = $stokModel->countAvailable((int) $v['id']);
-                                ?>
-                                <a href="<?= url('/admin-produk/stok/' . (int)$v['id']) ?>" class="block text-xs hover:underline <?= $stokCount > 0 ? 'text-green-600' : 'text-red-500' ?>">
-                                    <?= e($v['durasi'] . (!empty($v['paket']) ? ' ' . $v['paket'] : '')) ?>: <?= $stokCount ?> stok
-                                </a>
-                                <?php endforeach; ?>
-                            </div>
+                            <span class="text-xs text-gray-500"><?= count($r['varian']) ?> varian</span>
                         <?php elseif (!empty($r['file_upload'])): ?>
                             <a href="<?= url('/admin-produk/file/' . (int)$r['id']); ?>" target="_blank" class="text-xs font-medium hover:underline" style="color:#1976D2">Lihat File</a>
                         <?php else: ?>
@@ -219,6 +210,18 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <?php endif; ?>
                     </td>
                     <td class="px-5 py-4 text-center">
+                        <?php if (($r['tipe_produk'] ?? '') === 'Akun' && !empty($r['varian'])): ?>
+                        <div class="relative inline-block" id="stok-dd-<?= $r['id'] ?>">
+                            <button type="button" onclick="toggleStokDropdown(<?= $r['id'] ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
+                            <div id="stok-dd-menu-<?= $r['id'] ?>" class="hidden absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                                <?php foreach ($r['varian'] as $v): ?>
+                                <button type="button" onclick="openStokModal(<?= (int)$v['id'] ?>, '<?= e($r['nama_produk']) ?>', '<?= e($v['durasi'] . (!empty($v['paket']) ? ' - ' . $v['paket'] : '')) ?>'); toggleStokDropdown(<?= $r['id'] ?>)" class="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition">
+                                    <?= e($v['durasi'] . (!empty($v['paket']) ? ' - ' . $v['paket'] : '')) ?>
+                                </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                         <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
                             <?= csrf_field() ?>
@@ -346,31 +349,16 @@ function openEdit(id, nama, harga, tipe, deskripsi, variants) {
     list.innerHTML = '';
     if (Array.isArray(variants) && variants.length > 0) {
         variants.forEach(function(v) {
-            var creds = parseAccountInfo(v.account_info || '');
             addVarianRow('edit', {
                 durasi: v.durasi || '',
                 paket: v.paket || '',
-                harga: v.harga || 0,
-                email: creds.email,
-                password: creds.password
+                harga: v.harga || 0
             });
         });
     }
 
     toggleAkunFields('edit');
     openModal('edit');
-}
-
-// Parse "Email: x\nPassword: y" into {email, password}
-function parseAccountInfo(text) {
-    var email = '', password = '';
-    String(text).split(/\r?\n/).forEach(function(line) {
-        var m = line.match(/^\s*Email\s*:\s*(.*)$/i);
-        if (m) { email = m[1].trim(); return; }
-        var p = line.match(/^\s*Password\s*:\s*(.*)$/i);
-        if (p) { password = p[1].trim(); }
-    });
-    return { email: email, password: password };
 }
 
 // Build one variant editor row.
@@ -396,16 +384,12 @@ function addVarianRow(prefix, data) {
     }
 
     var row = document.createElement('div');
-    row.className = 'varian-row border border-gray-200 rounded-xl p-3 grid grid-cols-2 gap-3 relative';
+    row.className = 'varian-row border border-gray-200 rounded-xl p-3 grid grid-cols-3 gap-3 relative';
     row.innerHTML =
         '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Durasi</label>' + durasiField + '</div>' +
         '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Paket (opsional)</label>' + paketField + '</div>' +
         '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Harga (Rp)</label>' +
         '<input type="text" name="varian_harga[]" placeholder="0" value="' + hargaVal + '" oninput="this.value=this.value.replace(/\\D/g,\'\')===\'\'?\'\':Number(this.value.replace(/\\D/g,\'\')).toLocaleString(\'id-ID\')"></div>' +
-        '<div><label class="block text-[11px] font-semibold text-gray-400 mb-1">Email / Username</label>' +
-        '<input type="text" name="varian_email[]" placeholder="akun@email.com" value="' + escapeAttr(data.email) + '"></div>' +
-        '<div class="col-span-2"><label class="block text-[11px] font-semibold text-gray-400 mb-1">Password</label>' +
-        '<input type="text" name="varian_password[]" placeholder="password akun" value="' + escapeAttr(data.password) + '"></div>' +
         '<button type="button" onclick="this.closest(\'.varian-row\').remove()" class="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white text-xs hover:bg-red-600" title="Hapus varian">&times;</button>';
     list.appendChild(row);
 }
@@ -559,5 +543,180 @@ function bulkDelete() {
         container.appendChild(input);
     });
     document.getElementById('bulk-delete-form').submit();
+}
+</script>
+
+<!-- Modal Kelola Stok -->
+<div id="modal-stok" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('stok')"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-2xl pointer-events-auto modal-content max-h-[90vh] flex flex-col overflow-hidden" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+                <div>
+                    <h2 class="font-bold text-gray-800" id="stok-modal-title">Kelola Stok</h2>
+                    <p class="text-xs text-gray-500" id="stok-modal-subtitle"></p>
+                </div>
+                <button onclick="closeModal('stok')" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1">
+                <!-- Add stock tabs -->
+                <div class="flex gap-2 mb-4">
+                    <button type="button" id="stok-tab-single" onclick="switchStokTab('single')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-100 text-green-700">Satu Akun</button>
+                    <button type="button" id="stok-tab-bulk" onclick="switchStokTab('bulk')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600">Bulk Paste</button>
+                    <span id="stok-badge" class="ml-auto text-xs font-bold px-2 py-1 rounded-lg" style="background:#E8F5E9; color:#2E7D32"></span>
+                </div>
+
+                <!-- Single form -->
+                <div id="stok-form-single" class="flex gap-2 mb-4">
+                    <input type="text" id="stok-email" placeholder="Email / Username" class="flex-1 text-sm">
+                    <input type="text" id="stok-pass" placeholder="Password" class="flex-1 text-sm">
+                    <button type="button" onclick="addSingleStok()" class="px-4 py-2 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition flex-shrink-0" style="background:#42B549">+</button>
+                </div>
+
+                <!-- Bulk form -->
+                <div id="stok-form-bulk" class="mb-4 hidden">
+                    <textarea id="stok-bulk" rows="4" placeholder="email:password (satu per baris)" class="text-xs font-mono"></textarea>
+                    <button type="button" onclick="addBulkStok()" class="mt-2 w-full py-2 text-white text-xs font-semibold rounded-lg hover:opacity-90 transition" style="background:#1976D2">Tambah Bulk</button>
+                </div>
+
+                <!-- Stock list -->
+                <div id="stok-list" class="border border-gray-100 rounded-xl overflow-hidden">
+                    <div id="stok-loading" class="p-6 text-center text-gray-400 text-sm">Memuat...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var STOK_VARIAN_ID = 0;
+var STOK_API_BASE = '<?= url("/api/admin/stok") ?>';
+
+function openStokModal(varianId, produkName, varianLabel) {
+    STOK_VARIAN_ID = varianId;
+    document.getElementById('stok-modal-title').textContent = produkName;
+    document.getElementById('stok-modal-subtitle').textContent = varianLabel;
+    openModal('stok');
+    loadStokList();
+}
+
+function loadStokList() {
+    var container = document.getElementById('stok-list');
+    container.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm">Memuat...</div>';
+
+    fetch(STOK_API_BASE + '/' + STOK_VARIAN_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success) { container.innerHTML = '<p class="p-4 text-red-500 text-sm">Gagal memuat.</p>'; return; }
+            document.getElementById('stok-badge').textContent = 'Tersedia: ' + data.available + ' / ' + data.total;
+
+            if (data.stocks.length === 0) {
+                container.innerHTML = '<p class="p-4 text-center text-gray-400 text-sm">Belum ada stok.</p>';
+                return;
+            }
+
+            var html = '<table class="w-full text-xs"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left">Email</th><th class="px-3 py-2 text-left">Password</th><th class="px-3 py-2 text-center">Status</th><th class="px-3 py-2 text-center">Aksi</th></tr></thead><tbody>';
+            data.stocks.forEach(function(s) {
+                var statusBadge = s.status === 'available'
+                    ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-green-700">Tersedia</span>'
+                    : '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-700">Terjual</span>';
+                var aksi = s.status === 'available'
+                    ? '<button onclick="deleteStok(' + s.id + ')" class="text-[10px] text-red-500 hover:text-red-700">Hapus</button>'
+                    : '<span class="text-gray-300">—</span>';
+                html += '<tr class="border-t border-gray-50"><td class="px-3 py-2 font-mono">' + escapeAttr(s.account_email) + '</td><td class="px-3 py-2 font-mono">' + escapeAttr(s.account_password) + '</td><td class="px-3 py-2 text-center">' + statusBadge + '</td><td class="px-3 py-2 text-center">' + aksi + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(function() { container.innerHTML = '<p class="p-4 text-red-500 text-sm">Error.</p>'; });
+}
+
+function addSingleStok() {
+    var email = document.getElementById('stok-email').value.trim();
+    var pass = document.getElementById('stok-pass').value.trim();
+    if (!email || !pass) return;
+
+    var fd = new FormData();
+    fd.append('varian_id', STOK_VARIAN_ID);
+    fd.append('mode', 'single');
+    fd.append('account_email', email);
+    fd.append('account_password', pass);
+
+    fetch(STOK_API_BASE + '/add', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('stok-email').value = '';
+                document.getElementById('stok-pass').value = '';
+                loadStokList();
+                if (typeof window.showToast === 'function') window.showToast('success', data.message);
+            } else {
+                if (typeof window.showToast === 'function') window.showToast('error', data.message);
+            }
+        });
+}
+
+function addBulkStok() {
+    var bulk = document.getElementById('stok-bulk').value.trim();
+    if (!bulk) return;
+
+    var fd = new FormData();
+    fd.append('varian_id', STOK_VARIAN_ID);
+    fd.append('mode', 'bulk');
+    fd.append('bulk_data', bulk);
+
+    fetch(STOK_API_BASE + '/add', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('stok-bulk').value = '';
+                loadStokList();
+                if (typeof window.showToast === 'function') window.showToast('success', data.message);
+            } else {
+                if (typeof window.showToast === 'function') window.showToast('error', data.message);
+            }
+        });
+}
+
+function deleteStok(id) {
+    if (!confirm('Hapus stok ini?')) return;
+    var fd = new FormData();
+    fd.append('stok_id', id);
+
+    fetch(STOK_API_BASE + '/delete', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) loadStokList();
+        });
+}
+
+function toggleStokDropdown(produkId) {
+    var menu = document.getElementById('stok-dd-menu-' + produkId);
+    if (menu) menu.classList.toggle('hidden');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    document.querySelectorAll('[id^="stok-dd-menu-"]').forEach(function(m) {
+        if (!m.parentElement.contains(e.target)) m.classList.add('hidden');
+    });
+});
+
+function switchStokTab(tab) {
+    var single = document.getElementById('stok-form-single');
+    var bulk = document.getElementById('stok-form-bulk');
+    var tabS = document.getElementById('stok-tab-single');
+    var tabB = document.getElementById('stok-tab-bulk');
+    if (tab === 'single') {
+        single.classList.remove('hidden'); bulk.classList.add('hidden');
+        tabS.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-100 text-green-700';
+        tabB.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600';
+    } else {
+        single.classList.add('hidden'); bulk.classList.remove('hidden');
+        tabB.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-100 text-blue-700';
+        tabS.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600';
+    }
 }
 </script>

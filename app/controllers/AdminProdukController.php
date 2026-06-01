@@ -288,8 +288,6 @@ class AdminProdukController extends BaseController
         $durasiArr = $_POST['varian_durasi'] ?? [];
         $paketArr = $_POST['varian_paket'] ?? [];
         $hargaArr = $_POST['varian_harga'] ?? [];
-        $emailArr = $_POST['varian_email'] ?? [];
-        $passArr = $_POST['varian_password'] ?? [];
 
         if (!is_array($durasiArr)) {
             return [];
@@ -300,15 +298,13 @@ class AdminProdukController extends BaseController
             $durasi = trim((string) $durasi);
             $paket = trim((string) ($paketArr[$i] ?? ''));
             $harga = (int) preg_replace('/\D/', '', (string) ($hargaArr[$i] ?? '0'));
-            $email = trim((string) ($emailArr[$i] ?? ''));
-            $pass = trim((string) ($passArr[$i] ?? ''));
 
             // Ignore the "type manually" placeholder value if it slips through
             if ($durasi === '__custom__') $durasi = '';
             if ($paket === '__custom__') $paket = '';
 
-            // Skip incomplete rows
-            if ($durasi === '' || $email === '' || $pass === '') {
+            // Skip rows without durasi
+            if ($durasi === '') {
                 continue;
             }
 
@@ -316,7 +312,7 @@ class AdminProdukController extends BaseController
                 'durasi'       => $durasi,
                 'paket'        => $paket !== '' ? $paket : null,
                 'harga'        => $harga,
-                'account_info' => "Email: {$email}\nPassword: {$pass}",
+                'account_info' => null,
             ];
         }
 
@@ -454,6 +450,76 @@ class AdminProdukController extends BaseController
     }
 
     /**
+     * API: Get stock list for a variant (JSON).
+     */
+    public function apiStok($id)
+    {
+        $varianId = (int) $id;
+        $stokModel = new AkunStok();
+        $stocks = $stokModel->getByVarian($varianId);
+        $available = $stokModel->countAvailable($varianId);
+        $this->json([
+            'success'   => true,
+            'stocks'    => $stocks,
+            'available' => $available,
+            'total'     => count($stocks),
+        ]);
+    }
+
+    /**
+     * API: Add stock (single or bulk) — JSON response.
+     */
+    public function apiStokAdd()
+    {
+        $this->requirePost();
+        $varianId = (int) ($_POST['varian_id'] ?? 0);
+        $mode = $_POST['mode'] ?? 'single';
+
+        if ($varianId <= 0) {
+            $this->json(['success' => false, 'message' => 'Varian tidak valid.']);
+            return;
+        }
+
+        $stokModel = new AkunStok();
+
+        if ($mode === 'bulk') {
+            $bulkText = trim($_POST['bulk_data'] ?? '');
+            $items = $this->parseBulkStok($bulkText);
+            if (empty($items)) {
+                $this->json(['success' => false, 'message' => 'Format tidak valid. Gunakan email:password per baris.']);
+                return;
+            }
+            $count = $stokModel->addBulk($varianId, $items);
+            $this->json(['success' => true, 'message' => $count . ' stok berhasil ditambahkan.']);
+        } else {
+            $email = trim($_POST['account_email'] ?? '');
+            $pass = trim($_POST['account_password'] ?? '');
+            if ($email === '' || $pass === '') {
+                $this->json(['success' => false, 'message' => 'Email dan password wajib diisi.']);
+                return;
+            }
+            $stokModel->addStock($varianId, $email, $pass);
+            $this->json(['success' => true, 'message' => '1 stok berhasil ditambahkan.']);
+        }
+    }
+
+    /**
+     * API: Delete a stock item — JSON response.
+     */
+    public function apiStokDelete()
+    {
+        $this->requirePost();
+        $stokId = (int) ($_POST['stok_id'] ?? 0);
+        if ($stokId <= 0) {
+            $this->json(['success' => false, 'message' => 'ID tidak valid.']);
+            return;
+        }
+        $stokModel = new AkunStok();
+        $stokModel->deleteIfAvailable($stokId);
+        $this->json(['success' => true, 'message' => 'Stok berhasil dihapus.']);
+    }
+
+    /**
      * Manage stock for a product variant (admin page).
      * GET: show stock list + add form
      * POST: add stock (single or bulk)
@@ -514,16 +580,25 @@ class AdminProdukController extends BaseController
         $label = $varian['durasi'];
         if (!empty($varian['paket'])) $label .= ' - ' . $varian['paket'];
 
+        // Get all variants of the same product for the switcher dropdown
+        $allVariants = $this->varianModel->getByProduk((int) $varian['produk_id']);
+        foreach ($allVariants as &$av) {
+            $av['label'] = $av['durasi'] . (!empty($av['paket']) ? ' - ' . $av['paket'] : '');
+            $av['stok_count'] = $stokModel->countAvailable((int) $av['id']);
+        }
+        unset($av);
+
         $extra_css = 'input[type=text],textarea { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none; transition:border 0.15s; } input:focus,textarea:focus { border-color:#42B549; box-shadow:0 0 0 3px rgba(66,181,73,0.12); }';
 
         $this->view('admin/produk/stok', [
-            'varian'      => $varian,
+            'varian'       => $varian,
             'varian_label' => $label,
-            'stocks'      => $stocks,
-            'available'   => $available,
-            'active_page' => 'produk',
-            'page_title'  => 'Kelola Stok - ' . $varian['nama_produk'],
-            'extra_css'   => $extra_css,
+            'all_variants' => $allVariants,
+            'stocks'       => $stocks,
+            'available'    => $available,
+            'active_page'  => 'produk',
+            'page_title'   => 'Kelola Stok - ' . $varian['nama_produk'],
+            'extra_css'    => $extra_css,
         ], 'admin');
     }
 

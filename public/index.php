@@ -63,6 +63,9 @@ $router->get('customer/download-file/:id', 'CustomerController', 'downloadFile')
 $router->get('admin-produk/file/:id', 'AdminProdukController', 'file');
 $router->get('admin-produk/stok/:id', 'AdminProdukController', 'stok');
 $router->post('admin-produk/stok/:id', 'AdminProdukController', 'stok');
+$router->get('api/admin/stok/:id', 'AdminProdukController', 'apiStok');
+$router->post('api/admin/stok/add', 'AdminProdukController', 'apiStokAdd');
+$router->post('api/admin/stok/delete', 'AdminProdukController', 'apiStokDelete');
 
 // Chat routes
 $router->get('customer/chat', 'ChatController', 'index');
