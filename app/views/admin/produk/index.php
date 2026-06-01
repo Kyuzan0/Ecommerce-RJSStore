@@ -684,7 +684,8 @@ function loadStokList() {
                 var aksi = s.status === 'available'
                     ? '<button onclick="deleteStok(' + s.id + ')" class="text-[10px] font-semibold text-red-500 hover:text-red-700 whitespace-nowrap">Hapus</button>'
                     : '<span class="text-gray-300">—</span>';
-                html += '<tr class="border-t border-gray-50"><td class="px-3 py-2 font-mono truncate" style="max-width:180px" title="' + escapeAttr(s.account_email) + '">' + escapeAttr(s.account_email) + '</td><td class="px-3 py-2 font-mono truncate" style="max-width:140px" title="' + escapeAttr(s.account_password) + '">' + escapeAttr(s.account_password) + '</td><td class="px-3 py-2 text-center">' + statusBadge + '</td><td class="px-3 py-2 text-center">' + aksi + '</td></tr>';
+                var masked = '••••••••';
+                html += '<tr class="border-t border-gray-50"><td class="px-3 py-2 font-mono truncate" style="max-width:180px" title="' + escapeAttr(s.account_email) + '">' + escapeAttr(s.account_email) + '</td><td class="px-3 py-2 font-mono truncate" style="max-width:140px"><span class="stok-pass-mask">' + masked + '</span><span class="stok-pass-real hidden">' + escapeAttr(s.account_password) + '</span> <button type="button" onclick="togglePassStok(this)" class="text-[10px] text-blue-500 hover:text-blue-700 ml-1" title="Lihat/Sembunyikan">👁</button></td><td class="px-3 py-2 text-center">' + statusBadge + '</td><td class="px-3 py-2 text-center">' + aksi + '</td></tr>';
             });
             html += '</tbody></table></div>';
             container.innerHTML = html;
@@ -764,6 +765,21 @@ function deleteAllStok() {
                 if (typeof window.showToast === 'function') window.showToast('success', data.message);
             }
         });
+}
+
+function togglePassStok(btn) {
+    var td = btn.parentElement;
+    var mask = td.querySelector('.stok-pass-mask');
+    var real = td.querySelector('.stok-pass-real');
+    if (real.classList.contains('hidden')) {
+        real.classList.remove('hidden');
+        mask.classList.add('hidden');
+        btn.textContent = '🙈';
+    } else {
+        real.classList.add('hidden');
+        mask.classList.remove('hidden');
+        btn.textContent = '👁';
+    }
 }
 
 function switchStokTab(tab) {
