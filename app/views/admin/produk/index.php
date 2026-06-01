@@ -670,17 +670,23 @@ function loadStokList() {
                 return;
             }
 
-            var html = '<table class="w-full text-xs"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left">Email</th><th class="px-3 py-2 text-left">Password</th><th class="px-3 py-2 text-center">Status</th><th class="px-3 py-2 text-center">Aksi</th></tr></thead><tbody>';
+            var hasAvailable = data.stocks.some(function(s) { return s.status === 'available'; });
+            var header = '';
+            if (hasAvailable) {
+                header = '<div class="flex justify-end px-3 py-2 border-b border-gray-100"><button onclick="deleteAllStok()" class="text-[11px] font-semibold text-red-500 hover:text-red-700">Hapus Semua Tersedia</button></div>';
+            }
+
+            var html = header + '<div class="overflow-x-auto"><table class="w-full text-xs" style="min-width:100%"><thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left" style="max-width:180px">Email</th><th class="px-3 py-2 text-left" style="max-width:140px">Password</th><th class="px-3 py-2 text-center whitespace-nowrap w-16">Status</th><th class="px-3 py-2 text-center whitespace-nowrap w-14">Aksi</th></tr></thead><tbody>';
             data.stocks.forEach(function(s) {
                 var statusBadge = s.status === 'available'
                     ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-50 text-green-700">Tersedia</span>'
                     : '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-700">Terjual</span>';
                 var aksi = s.status === 'available'
-                    ? '<button onclick="deleteStok(' + s.id + ')" class="text-[10px] text-red-500 hover:text-red-700">Hapus</button>'
+                    ? '<button onclick="deleteStok(' + s.id + ')" class="text-[10px] font-semibold text-red-500 hover:text-red-700 whitespace-nowrap">Hapus</button>'
                     : '<span class="text-gray-300">—</span>';
-                html += '<tr class="border-t border-gray-50"><td class="px-3 py-2 font-mono">' + escapeAttr(s.account_email) + '</td><td class="px-3 py-2 font-mono">' + escapeAttr(s.account_password) + '</td><td class="px-3 py-2 text-center">' + statusBadge + '</td><td class="px-3 py-2 text-center">' + aksi + '</td></tr>';
+                html += '<tr class="border-t border-gray-50"><td class="px-3 py-2 font-mono truncate" style="max-width:180px" title="' + escapeAttr(s.account_email) + '">' + escapeAttr(s.account_email) + '</td><td class="px-3 py-2 font-mono truncate" style="max-width:140px" title="' + escapeAttr(s.account_password) + '">' + escapeAttr(s.account_password) + '</td><td class="px-3 py-2 text-center">' + statusBadge + '</td><td class="px-3 py-2 text-center">' + aksi + '</td></tr>';
             });
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         })
         .catch(function() { container.innerHTML = '<p class="p-4 text-red-500 text-sm">Error.</p>'; });
@@ -742,6 +748,21 @@ function deleteStok(id) {
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success) loadStokList();
+        });
+}
+
+function deleteAllStok() {
+    if (!confirm('Hapus SEMUA stok tersedia untuk varian ini?')) return;
+    var fd = new FormData();
+    fd.append('varian_id', STOK_VARIAN_ID);
+
+    fetch(STOK_API_BASE + '/delete-all', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                loadStokList();
+                if (typeof window.showToast === 'function') window.showToast('success', data.message);
+            }
         });
 }
 

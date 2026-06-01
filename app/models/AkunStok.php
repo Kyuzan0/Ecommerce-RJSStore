@@ -132,4 +132,18 @@ class AkunStok extends BaseModel
             [$id]
         );
     }
+
+    /**
+     * Delete ALL available stock for a variant.
+     * Returns the number of deleted rows.
+     */
+    public function deleteAllAvailable(int $varianId): int
+    {
+        $count = $this->countAvailable($varianId);
+        $this->db->execute(
+            "DELETE FROM akun_stok WHERE varian_id = ? AND status = 'available'",
+            [$varianId]
+        );
+        return $count;
+    }
 }

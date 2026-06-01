@@ -520,6 +520,22 @@ class AdminProdukController extends BaseController
     }
 
     /**
+     * API: Delete ALL available stock for a variant — JSON response.
+     */
+    public function apiStokDeleteAll()
+    {
+        $this->requirePost();
+        $varianId = (int) ($_POST['varian_id'] ?? 0);
+        if ($varianId <= 0) {
+            $this->json(['success' => false, 'message' => 'Varian tidak valid.']);
+            return;
+        }
+        $stokModel = new AkunStok();
+        $count = $stokModel->deleteAllAvailable($varianId);
+        $this->json(['success' => true, 'message' => $count . ' stok berhasil dihapus.']);
+    }
+
+    /**
      * Manage stock for a product variant (admin page).
      * GET: show stock list + add form
      * POST: add stock (single or bulk)
