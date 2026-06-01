@@ -138,6 +138,15 @@ class AuthController extends BaseController
 
         $id = $this->userModel->createUser($name, $email, $password);
 
+        // Record registration IP
+        if ($id) {
+            $regIp = !empty($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP']
+                : (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0])
+                : (!empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP']
+                : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0')));
+            $this->db->execute("UPDATE users SET register_ip = ? WHERE id = ?", [$regIp, $id]);
+        }
+
         if ($id) {
             flash('success', 'Registrasi berhasil! Silakan login.');
             $this->redirect('/auth/login');

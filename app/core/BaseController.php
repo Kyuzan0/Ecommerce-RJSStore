@@ -9,6 +9,18 @@ class BaseController
     {
         $this->db   = Database::getInstance();
         $this->auth = new Auth();
+
+        // Track last activity for online status
+        if ($this->auth->check()) {
+            $ip = !empty($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP']
+                : (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0])
+                : (!empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP']
+                : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0')));
+            $this->db->execute(
+                "UPDATE users SET last_active_at = NOW(), last_ip = ? WHERE id = ?",
+                [$ip, $this->auth->id()]
+            );
+        }
     }
 
     protected function view(string $viewPath, array $data = [], string $layout = 'main'): void

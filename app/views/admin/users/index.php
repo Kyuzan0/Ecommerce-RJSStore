@@ -135,13 +135,15 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengguna</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Info</th>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Transaksi</th>
                 <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
             <?php if (count($users) == 0): ?>
-            <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
+            <tr><td colspan="9" class="px-6 py-8 text-center text-gray-500">Tidak ada pengguna ditemukan.</td></tr>
             <?php endif;
             foreach($users as $i => $r){ ?>
             <tr class="hover:bg-gray-50 transition">
@@ -166,6 +168,23 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <?php else: ?>
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#E8F5E9; color:#2E7D32">CUSTOMER</span>
                     <?php endif; ?>
+                </td>
+                <td class="px-5 py-4 text-center">
+                    <?php
+                    $isOnline = !empty($r['last_active_at']) && strtotime($r['last_active_at']) > (time() - 300); // 5 menit
+                    ?>
+                    <?php if ($isOnline): ?>
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>Online</span>
+                    <?php else: ?>
+                        <span class="text-xs text-gray-400">Offline</span>
+                    <?php endif; ?>
+                </td>
+                <td class="px-5 py-4">
+                    <div class="text-[11px] text-gray-500 space-y-0.5">
+                        <p>Daftar: <?= !empty($r['created_at']) ? date('d M Y H:i', strtotime($r['created_at'])) : '-' ?></p>
+                        <p>IP Daftar: <span class="font-mono"><?= e($r['register_ip'] ?? '-') ?></span></p>
+                        <p>IP Terakhir: <span class="font-mono"><?= e($r['last_ip'] ?? '-') ?></span></p>
+                    </div>
                 </td>
                 <td class="px-5 py-4">
                     <span class="text-sm font-semibold text-gray-700"><?= (int) $r['jumlah_transaksi'] ?></span>
