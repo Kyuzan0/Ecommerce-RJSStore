@@ -106,65 +106,75 @@ class CheckoutController extends BaseController
         $userId   = $this->auth->id();
         $orderRef = $_GET['order_id'] ?? $_SESSION['active_order_ref'] ?? '';
 
-        // Clean up the session reference
-        if (isset($_SESSION['active_order_ref'])) {
-            unset($_SESSION['active_order_ref']);
-        }
-
         if (empty($orderRef)) {
             flash('error', 'Referensi pembayaran tidak valid.');
             $this->redirect('/customer/pembelian');
             return;
         }
 
-        // Strip retry suffix (e.g. -r1234567) to get the original order_ref or ID in database
-        $dbOrderRef = preg_replace('/-r\d+$/', '', $orderRef);
+        // Check if this is the AJAX request to verify status
+        $action = $_GET['action'] ?? '';
+        if ($action === 'verify') {
+            // Clean up the session reference now that we are verifying
+            if (isset($_SESSION['active_order_ref'])) {
+                unset($_SESSION['active_order_ref']);
+            }
 
-        // Ensure the order belongs to the current user
-        if (strpos($dbOrderRef, 'ORD-') === 0) {
-            $owned = $this->db->fetchOne(
-                "SELECT id FROM transaksi WHERE order_ref = ? AND user_id = ? LIMIT 1",
-                [$dbOrderRef, $userId]
-            );
-        } else {
-            $owned = $this->db->fetchOne(
-                "SELECT id FROM transaksi WHERE id = ? AND user_id = ? LIMIT 1",
-                [(int) $dbOrderRef, $userId]
-            );
-        }
+            // Strip retry suffix (e.g. -r1234567) to get the original order_ref or ID in database
+            $dbOrderRef = preg_replace('/-r\d+$/', '', $orderRef);
 
-        if (!$owned) {
-            flash('error', 'Transaksi tidak ditemukan.');
-            $this->redirect('/customer/pembelian');
+            // Ensure the order belongs to the current user
+            if (strpos($dbOrderRef, 'ORD-') === 0) {
+                $owned = $this->db->fetchOne(
+                    "SELECT id FROM transaksi WHERE order_ref = ? AND user_id = ? LIMIT 1",
+                    [$dbOrderRef, $userId]
+                );
+            } else {
+                $owned = $this->db->fetchOne(
+                    "SELECT id FROM transaksi WHERE id = ? AND user_id = ? LIMIT 1",
+                    [(int) $dbOrderRef, $userId]
+                );
+            }
+
+            if (!$owned) {
+                $this->json(['success' => false, 'message' => 'Transaksi tidak ditemukan.']);
+                return;
+            }
+
+            // Verify the real status with Midtrans (using the raw orderRef with suffix, since Midtrans knows it as orderRef)
+            $statusPayload = $this->midtrans->getTransactionStatus($orderRef);
+            $status = $statusPayload ? $this->midtrans->mapStatus($statusPayload) : null;
+
+            if ($status === 'success') {
+                if (strpos($dbOrderRef, 'ORD-') === 0) {
+                    $this->transaksiModel->updateStatusByRef($dbOrderRef, 'success');
+                } else {
+                    $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'success');
+                }
+                flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
+            } elseif ($status === 'pending') {
+                flash('info', 'Pembayaran Anda sedang diproses. Status akan diperbarui otomatis setelah pembayaran dikonfirmasi.');
+            } elseif ($status === 'failed') {
+                if (strpos($dbOrderRef, 'ORD-') === 0) {
+                    $this->transaksiModel->updateStatusByRef($dbOrderRef, 'failed');
+                } else {
+                    $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'failed');
+                }
+                flash('error', 'Pembayaran gagal atau dibatalkan.');
+            } else {
+                // Could not verify (network/Midtrans issue) — leave status untouched.
+                flash('info', 'Status pembayaran sedang diverifikasi. Silakan cek kembali beberapa saat lagi.');
+            }
+
+            $this->json(['success' => true]);
             return;
         }
 
-        // Verify the real status with Midtrans (using the raw orderRef with suffix, since Midtrans knows it as orderRef)
-        $statusPayload = $this->midtrans->getTransactionStatus($orderRef);
-        $status = $statusPayload ? $this->midtrans->mapStatus($statusPayload) : null;
-
-        if ($status === 'success') {
-            if (strpos($dbOrderRef, 'ORD-') === 0) {
-                $this->transaksiModel->updateStatusByRef($dbOrderRef, 'success');
-            } else {
-                $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'success');
-            }
-            flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
-        } elseif ($status === 'pending') {
-            flash('info', 'Pembayaran Anda sedang diproses. Status akan diperbarui otomatis setelah pembayaran dikonfirmasi.');
-        } elseif ($status === 'failed') {
-            if (strpos($dbOrderRef, 'ORD-') === 0) {
-                $this->transaksiModel->updateStatusByRef($dbOrderRef, 'failed');
-            } else {
-                $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'failed');
-            }
-            flash('error', 'Pembayaran gagal atau dibatalkan.');
-        } else {
-            // Could not verify (network/Midtrans issue) — leave status untouched.
-            flash('info', 'Status pembayaran sedang diverifikasi. Silakan cek kembali beberapa saat lagi.');
-        }
-
-        $this->redirect('/customer/pembelian');
+        // Render the loading page
+        $this->view('checkout/callback_loading', [
+            'page_title' => 'Memverifikasi Pembayaran - RJSStore',
+            'order_ref'  => $orderRef,
+        ], 'checkout');
     }
 
     /**
