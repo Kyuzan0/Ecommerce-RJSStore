@@ -47,8 +47,21 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(verifyUrl)
             .then(response => response.json())
             .then(data => {
-                // Redirect back to purchases list - flash message handles user feedback
-                window.location.href = redirectUrl;
+                if (data.success && data.status === 'success') {
+                    // Send Google Analytics 4 Ecommerce Purchase Event
+                    if (typeof gtag === 'function') {
+                        gtag("event", "purchase", {
+                            transaction_id: data.transaction_id,
+                            value: parseFloat(data.value),
+                            currency: "IDR",
+                            items: data.items
+                        });
+                    }
+                }
+                // Redirect back to purchases list after a brief delay to allow GA to dispatch
+                setTimeout(function() {
+                    window.location.href = redirectUrl;
+                }, 400);
             })
             .catch(error => {
                 console.error('Verification error:', error);

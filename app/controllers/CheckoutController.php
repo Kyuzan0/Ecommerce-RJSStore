@@ -145,6 +145,9 @@ class CheckoutController extends BaseController
             $statusPayload = $this->midtrans->getTransactionStatus($orderRef);
             $status = $statusPayload ? $this->midtrans->mapStatus($statusPayload) : null;
 
+            $itemsData = [];
+            $totalValue = 0;
+
             if ($status === 'success') {
                 if (strpos($dbOrderRef, 'ORD-') === 0) {
                     $this->transaksiModel->updateStatusByRef($dbOrderRef, 'success');
@@ -152,6 +155,19 @@ class CheckoutController extends BaseController
                     $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'success');
                 }
                 flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
+
+                // Fetch purchased items details for Google Analytics
+                $items = $this->transaksiModel->getByOrderRef($dbOrderRef, $userId);
+                foreach ($items as $item) {
+                    $price = (int)$item['harga'];
+                    $totalValue += $price;
+                    $itemsData[] = [
+                        'item_id'   => (string)$item['produk_id'],
+                        'item_name' => $item['nama_produk'],
+                        'price'     => $price,
+                        'quantity'  => 1
+                    ];
+                }
             } elseif ($status === 'pending') {
                 flash('info', 'Pembayaran Anda sedang diproses. Status akan diperbarui otomatis setelah pembayaran dikonfirmasi.');
             } elseif ($status === 'failed') {
@@ -166,7 +182,13 @@ class CheckoutController extends BaseController
                 flash('info', 'Status pembayaran sedang diverifikasi. Silakan cek kembali beberapa saat lagi.');
             }
 
-            $this->json(['success' => true]);
+            $this->json([
+                'success'        => true,
+                'status'         => $status,
+                'transaction_id' => $dbOrderRef,
+                'value'          => $totalValue,
+                'items'          => $itemsData
+            ]);
             return;
         }
 
