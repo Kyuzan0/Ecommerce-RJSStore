@@ -6,7 +6,7 @@
     <title><?= e($page_title ?? 'Admin') ?> - RJSStore</title>
     <?php $ga_id = env('GA_MEASUREMENT_ID', ''); if ($ga_id): ?>
     <script async src="https://www.googletagmanager.com/gtag/js?id=<?= e($ga_id) ?>"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= e($ga_id) ?>');</script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= e($ga_id) ?>', { 'cookie_domain': window.location.hostname, 'cookie_flags': 'SameSite=None;Secure' });</script>
     <?php endif; ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class'}</script>
