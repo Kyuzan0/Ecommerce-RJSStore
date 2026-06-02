@@ -22,10 +22,10 @@ $initial_cart_count = $initial_cart_count ?? 0;
         <span id="cartBadge" class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-white text-xs font-bold rounded-full <?= $initial_cart_count > 0 ? '' : 'hidden' ?>" style="background:#E65100"><?= $initial_cart_count ?></span>
     </button>
 
-    <div id="cartDropdown" class="hidden absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] sm:max-w-none bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden" style="max-width: calc(100vw - 2rem);">
+    <div id="cartDropdown" class="hidden fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 mt-0 sm:mt-2 w-auto sm:w-80 max-h-[80vh] bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden flex flex-col">
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-bold text-gray-800 text-sm">Keranjang Belanja</h3>
-            <span id="cartItemCount" class="text-xs text-gray-400"><span id="cartCountText"><?= $initial_cart_count ?></span> item</span>
+            <h3 class="font-bold text-gray-800 dark:text-white text-sm">Keranjang Belanja</h3>
+            <span id="cartItemCount" class="text-xs text-gray-400 dark:text-gray-300"><span id="cartCountText"><?= $initial_cart_count ?></span> item</span>
         </div>
 
         <div id="cartItemsList" class="max-h-72 overflow-y-auto">
@@ -38,7 +38,7 @@ $initial_cart_count = $initial_cart_count ?? 0;
 
         <div id="cartFooter" class="border-t border-gray-100 px-4 py-3 <?= $initial_cart_count > 0 ? '' : 'hidden' ?>">
             <div class="flex justify-between items-center mb-3">
-                <span class="text-sm font-medium text-gray-600">Subtotal</span>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Subtotal</span>
                 <span id="cartSubtotal" class="font-bold text-base" style="color:#42B549">Rp 0</span>
             </div>
             <button id="cartCheckoutBtn" class="w-full text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition cursor-pointer" style="background:#42B549">
@@ -114,20 +114,20 @@ $initial_cart_count = $initial_cart_count ?? 0;
         let html = '';
         cart.items.forEach(function(item) {
             var varianId = item.varian_id ? item.varian_id : '';
-            html += '<div class="px-4 py-3 flex items-start gap-3 border-b border-gray-50 hover:bg-gray-50 transition" data-produk-id="' + item.produk_id + '">';
+            html += '<div class="px-4 py-3 flex items-start gap-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition" data-produk-id="' + item.produk_id + '">';
             html += '  <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#E8F5E9">';
             html += '    <svg class="w-5 h-5" style="color:#42B549" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>';
             html += '  </div>';
             html += '  <div class="flex-1 min-w-0">';
-            html += '    <p class="text-sm font-semibold text-gray-800 truncate">' + escapeHtml(item.nama_produk) + '</p>';
+            html += '    <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">' + escapeHtml(item.nama_produk) + '</p>';
             if (item.varian_label) {
-                html += '    <p class="text-xs text-gray-500 mt-0.5">' + escapeHtml(item.varian_label) + '</p>';
+                html += '    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + escapeHtml(item.varian_label) + '</p>';
             } else {
-                html += '    <p class="text-xs text-gray-400 mt-0.5">' + escapeHtml(item.tipe_produk || 'Lainnya') + '</p>';
+                html += '    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">' + escapeHtml(item.tipe_produk || 'Lainnya') + '</p>';
             }
             html += '    <p class="text-sm font-bold mt-1" style="color:#42B549">' + item.harga_formatted + '</p>';
             html += '  </div>';
-            html += '  <button onclick="window._cartRemove(' + item.produk_id + ', \'' + varianId + '\')" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition flex-shrink-0" title="Hapus">';
+            html += '  <button onclick="window._cartRemove(' + item.produk_id + ', \'' + varianId + '\')" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition flex-shrink-0" title="Hapus">';
             html += '    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
             html += '  </button>';
             html += '</div>';

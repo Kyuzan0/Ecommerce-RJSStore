@@ -107,8 +107,8 @@
 
                             <?php if ($item['tipe_produk'] === 'Akun'): ?>
                                 <div id="akun-detail-<?= $item['id'] ?>" class="hidden mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm">
-                                    <p class="text-blue-800"><span class="font-semibold">Email:</span> <?= e($item['account_email'] ?? '-') ?></p>
-                                    <p class="text-blue-800"><span class="font-semibold">Password:</span> <?= e($item['account_password'] ?? '-') ?></p>
+                                    <p class="text-blue-800"><span class="font-semibold">Email:</span> <?= e($item['account_email'] ? decrypt_value($item['account_email']) : '-') ?></p>
+                                    <p class="text-blue-800"><span class="font-semibold">Password:</span> <?= e($item['account_password'] ? decrypt_value($item['account_password']) : '-') ?></p>
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
