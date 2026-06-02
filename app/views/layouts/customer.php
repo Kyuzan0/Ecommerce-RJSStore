@@ -52,6 +52,7 @@
             </div>
             <span class="text-lg md:text-xl font-bold text-gray-800">RJS<span style="color:#42B549">Store</span></span>
         </div>
+        <?php if (in_array($active_page ?? '', ['dashboard', 'produk'], true)): ?>
         <div class="flex-1 max-w-xl ds-hide-sm">
             <form action="<?= url('/customer/produk') ?>" method="GET" class="flex bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                 <input type="text" name="search" placeholder="Cari produk di RJSStore..." class="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none border-0">
@@ -60,6 +61,7 @@
                 </button>
             </form>
         </div>
+        <?php endif; ?>
         <div class="flex items-center gap-2 md:gap-3 ml-auto">
             <?php
             $initial_cart_count = $initial_cart_count ?? 0;
@@ -97,6 +99,7 @@
         </div>
     </div>
     <!-- Mobile search row -->
+    <?php if (in_array($active_page ?? '', ['dashboard', 'produk'], true)): ?>
     <div class="px-4 md:hidden pb-3">
         <form action="<?= url('/customer/produk') ?>" method="GET" class="flex bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
             <input type="text" name="search" placeholder="Cari produk..." class="flex-1 px-4 py-2.5 bg-transparent text-sm outline-none border-0">
@@ -105,6 +108,7 @@
             </button>
         </form>
     </div>
+    <?php endif; ?>
 </header>
 <script>document.addEventListener('click',function(e){var d=document.getElementById('profileDropdown');var m=document.getElementById('profileMenu');if(d&&!d.contains(e.target)){m.classList.add('hidden')}});</script>
 
