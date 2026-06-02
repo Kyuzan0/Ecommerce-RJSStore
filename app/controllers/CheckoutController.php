@@ -123,8 +123,19 @@ class CheckoutController extends BaseController
             // Strip retry suffix (e.g. -r1234567) to get the original order_ref or ID in database
             $dbOrderRef = preg_replace('/-r\d+$/', '', $orderRef);
 
-            // Ensure the order belongs to the current user
+            $numericId = 0;
+            $isOrderRef = false;
+
             if (strpos($dbOrderRef, 'ORD-') === 0) {
+                $isOrderRef = true;
+            } elseif (strpos($dbOrderRef, 'TRX-') === 0) {
+                $numericId = (int)substr($dbOrderRef, 4);
+            } else {
+                $numericId = (int)$dbOrderRef;
+            }
+
+            // Ensure the order belongs to the current user
+            if ($isOrderRef) {
                 $owned = $this->db->fetchOne(
                     "SELECT id FROM transaksi WHERE order_ref = ? AND user_id = ? LIMIT 1",
                     [$dbOrderRef, $userId]
@@ -132,7 +143,7 @@ class CheckoutController extends BaseController
             } else {
                 $owned = $this->db->fetchOne(
                     "SELECT id FROM transaksi WHERE id = ? AND user_id = ? LIMIT 1",
-                    [(int) $dbOrderRef, $userId]
+                    [$numericId, $userId]
                 );
             }
 
@@ -149,32 +160,60 @@ class CheckoutController extends BaseController
             $totalValue = 0;
 
             if ($status === 'success') {
-                if (strpos($dbOrderRef, 'ORD-') === 0) {
+                if ($isOrderRef) {
                     $this->transaksiModel->updateStatusByRef($dbOrderRef, 'success');
                 } else {
-                    $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'success');
+                    $this->transaksiModel->updateStatusById($numericId, 'success');
                 }
                 flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
 
                 // Fetch purchased items details for Google Analytics
-                $items = $this->transaksiModel->getByOrderRef($dbOrderRef, $userId);
+                if ($isOrderRef) {
+                    $items = $this->transaksiModel->getByOrderRef($dbOrderRef, $userId);
+                } else {
+                    $items = $this->db->fetchAll(
+                        "SELECT t.*, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, v.durasi, v.paket
+                         FROM transaksi t
+                         JOIN produk p ON t.produk_id = p.id
+                         LEFT JOIN produk_varian v ON t.varian_id = v.id
+                         WHERE t.id = ? AND t.user_id = ?",
+                        [$numericId, $userId]
+                    );
+                }
+
                 foreach ($items as $item) {
                     $price = (int)$item['harga'];
                     $totalValue += $price;
-                    $itemsData[] = [
+                    
+                    $itemVariant = null;
+                    if (!empty($item['durasi'])) {
+                        $variantParts = [$item['durasi']];
+                        if (!empty($item['paket'])) {
+                            $variantParts[] = $item['paket'];
+                        }
+                        $itemVariant = implode(' ', $variantParts);
+                    }
+
+                    $itemData = [
                         'item_id'   => (string)$item['produk_id'],
                         'item_name' => $item['nama_produk'],
                         'price'     => $price,
                         'quantity'  => 1
                     ];
+
+                    if ($itemVariant !== null) {
+                        $itemData['item_variant'] = $itemVariant;
+                    }
+
+                    $itemsData[] = $itemData;
                 }
             } elseif ($status === 'pending') {
                 flash('info', 'Pembayaran Anda sedang diproses. Status akan diperbarui otomatis setelah pembayaran dikonfirmasi.');
             } elseif ($status === 'failed') {
-                if (strpos($dbOrderRef, 'ORD-') === 0) {
+                if ($isOrderRef) {
                     $this->transaksiModel->updateStatusByRef($dbOrderRef, 'failed');
                 } else {
-                    $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'failed');
+                    $this->transaksiModel->updateStatusById($numericId, 'failed');
                 }
                 flash('error', 'Pembayaran gagal atau dibatalkan.');
             } else {

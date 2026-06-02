@@ -42,36 +42,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const verifyUrl = '<?= url("/customer/checkout/callback") ?>?action=verify&order_id=' + encodeURIComponent(orderId);
     const redirectUrl = '<?= url("/customer/pembelian") ?>';
 
+    console.log("%c[GA4 Debug] Initializing payment verification page...", "color: #3B82F6; font-weight: bold; font-size: 11px;");
+    console.log("%c[GA4 Debug] Target Order Reference: " + orderId, "color: #6B7280;");
+    console.log("%c[GA4 Debug] Checking gtag status: " + (typeof gtag === 'function' ? '✅ Loaded' : '❌ NOT Loaded / Blocked'), "color: " + (typeof gtag === 'function' ? '#10B981' : '#EF4444') + "; font-weight: bold;");
+
     // Small delay to simulate smooth loading transitions
     setTimeout(function() {
         fetch(verifyUrl)
             .then(response => response.json())
             .then(data => {
+                console.log("%c[GA4 Debug] Verification Response received:", "color: #10B981; font-weight: bold;", data);
+                
                 if (data.success && data.status === 'success') {
                     // Send Google Analytics 4 Ecommerce Purchase Event
                     if (typeof gtag === 'function') {
-                        gtag("event", "purchase", {
+                        const purchasePayload = {
                             transaction_id: data.transaction_id,
                             affiliation: "RJSStore",
                             value: parseFloat(data.value),
                             tax: 0,
                             shipping: 0,
                             currency: "IDR",
-                            items: data.items,
+                            items: data.items
+                        };
+
+                        console.log("%c[GA4 Debug] Dispatching GA4 purchase event...", "color: #8B5CF6; font-weight: bold;");
+                        console.log("%c[GA4 Debug] Event Payload:", "color: #8B5CF6;", purchasePayload);
+
+                        gtag("event", "purchase", {
+                            ...purchasePayload,
                             event_callback: function() {
+                                console.log("%c[GA4 Debug] GA4 purchase event successfully dispatched. Redirecting...", "color: #10B981; font-weight: bold;");
                                 window.location.href = redirectUrl;
                             },
                             event_timeout: 2000 // Safeguard in case tracker is blocked/delayed
                         });
                     } else {
+                        console.warn("%c[GA4 Debug] gtag is not defined. Skipping tracking and redirecting...", "color: #F59E0B; font-weight: bold;");
                         window.location.href = redirectUrl;
                     }
                 } else {
+                    console.log("%c[GA4 Debug] Verification success: " + data.success + ", status: " + data.status + ". Redirecting...", "color: #F59E0B;");
                     window.location.href = redirectUrl;
                 }
             })
             .catch(error => {
-                console.error('Verification error:', error);
+                console.error('%c[GA4 Debug] Verification fetch error:', 'color: #EF4444; font-weight: bold;', error);
                 window.location.href = redirectUrl;
             });
     }, 1500);
