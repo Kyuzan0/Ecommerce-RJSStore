@@ -6,7 +6,7 @@
             <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-3">Selamat Datang di RJSStore</h1>
             <p class="text-green-100 text-sm md:text-base mb-5">Temukan berbagai produk digital berkualitas dengan harga terbaik. Download langsung setelah pembayaran!</p>
             <?php if (!$this->auth->check()): ?>
-            <a href="<?= url('/auth/register') ?>" class="inline-flex items-center gap-2 bg-white text-green-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 transition">
+            <a href="<?= url('/auth/register') ?>" class="inline-flex items-center gap-2 bg-white text-green-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:opacity-90 hover:shadow-lg transition">
                 Mulai Belanja
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
@@ -21,36 +21,81 @@
 
 <!-- ULASAN PELANGGAN -->
 <?php if (!empty($ulasan_terbaru) && empty($search) && ($paging['page'] ?? 1) == 1): ?>
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg sm:text-xl font-bold text-gray-800">Ulasan Pelanggan</h2>
-        <span class="text-xs sm:text-sm text-gray-400 hidden sm:block">Dari pembeli terverifikasi</span>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <?php foreach ($ulasan_terbaru as $ulasan): ?>
-        <div class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md transition">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:#42B549">
-                    <?= strtoupper(substr($ulasan['nama_user'], 0, 1)) ?>
-                </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-gray-800 truncate"><?= e($ulasan['nama_user']) ?></p>
-                    <p class="text-xs text-gray-400 truncate"><?= e($ulasan['nama_produk']) ?></p>
-                </div>
+        <div class="flex items-center gap-4">
+            <span class="text-xs sm:text-sm text-gray-400 hidden sm:block">Dari pembeli terverifikasi</span>
+            <div class="flex items-center gap-2">
+                <button class="swiper-button-prev-custom w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button class="swiper-button-next-custom w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
             </div>
-            <div class="flex items-center gap-1">
-                <?php for ($i = 1; $i <= 5; $i++): ?>
-                <svg class="w-4 h-4 <?= $i <= $ulasan['rating'] ? 'text-yellow-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-                <?php endfor; ?>
-                <span class="text-xs text-gray-400 ml-1"><?= format_tanggal($ulasan['tanggal']) ?></span>
-            </div>
-            <p class="text-sm text-gray-600 line-clamp-3"><?= e($ulasan['ulasan']) ?></p>
         </div>
-        <?php endforeach; ?>
+    </div>
+    
+    <!-- Swiper Container -->
+    <div class="swiper ulasanSwiper pb-4">
+        <div class="swiper-wrapper">
+            <?php foreach ($ulasan_terbaru as $ulasan): ?>
+            <div class="swiper-slide h-auto">
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md transition h-full">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:#42B549">
+                            <?= strtoupper(substr($ulasan['nama_user'], 0, 1)) ?>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-800 truncate"><?= e($ulasan['nama_user']) ?></p>
+                            <p class="text-xs text-gray-400 truncate"><?= e($ulasan['nama_produk']) ?></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <svg class="w-4 h-4 <?= $i <= $ulasan['rating'] ? 'text-yellow-400' : 'text-gray-200' ?>" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <?php endfor; ?>
+                        <span class="text-xs text-gray-400 ml-1"><?= format_tanggal($ulasan['tanggal']) ?></span>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-3"><?= e($ulasan['ulasan']) ?></p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
     </div>
 </div>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.querySelector('.ulasanSwiper')) {
+        new Swiper('.ulasanSwiper', {
+            slidesPerView: 1,
+            spaceBetween: 16,
+            loop: true,
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+            breakpoints: {
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            }
+        });
+    }
+});
+</script>
 <?php endif; ?>
 
 <!-- MAIN CONTENT -->

@@ -1,6 +1,6 @@
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+<div class="flex flex-row items-center justify-between gap-3 mb-5">
     <h1 class="text-xl font-bold text-gray-800">Laporan Penjualan</h1>
-    <div class="relative" id="exportDropdown">
+    <div class="relative shrink-0" id="exportDropdown">
         <button type="button" onclick="document.getElementById('exportMenu').classList.toggle('hidden')"
                 class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl hover:opacity-90 transition shadow-sm"
                 style="background:#42B549">
@@ -33,21 +33,66 @@ document.addEventListener('click', function(e) {
 </script>
 
 <!-- Date Range Filter -->
-<form method="GET" action="<?= url('/admin-laporan') ?>" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="min-w-0">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Tanggal Mulai</label>
-            <input type="date" name="start_date" value="<?= e($start_date ?? '') ?>"
-                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition">
+<!-- Date Range Filter -->
+<form method="GET" action="<?= url('/admin-laporan') ?>" class="bg-white p-2.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm mb-6 flex flex-row gap-2 sm:gap-3 items-center md:items-end">
+    <!-- Tanggal Mulai -->
+    <div class="relative flex-1 min-w-0">
+        <label class="hidden md:flex items-center gap-1 text-[10px] sm:text-xs font-medium text-gray-500 mb-1 truncate">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Tanggal Mulai</span>
+        </label>
+        <div class="relative w-full">
+            <div class="md:hidden flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-700 min-w-0">
+                <span id="start_date_label" class="truncate"><?= $start_date ? date('d/m/Y', strtotime($start_date)) : 'Tgl Mulai' ?></span>
+                <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <input type="date" name="start_date" id="start_date_input" value="<?= e($start_date ?? '') ?>"
+                   onchange="if(this.value){let d=this.value.split('-');document.getElementById('start_date_label').textContent=d[2]+'/'+d[1]+'/'+d[0]}else{document.getElementById('start_date_label').textContent='Tgl Mulai'}"
+                   class="w-full md:px-3 md:py-2 text-sm border-gray-200 md:border md:rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition
+                          absolute inset-0 opacity-0 md:static md:opacity-100 cursor-pointer md:cursor-text">
         </div>
-        <div class="min-w-0">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Tanggal Akhir</label>
-            <input type="date" name="end_date" value="<?= e($end_date ?? '') ?>"
-                   class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition">
+    </div>
+
+    <!-- Tanggal Akhir -->
+    <div class="relative flex-1 min-w-0">
+        <label class="hidden md:flex items-center gap-1 text-[10px] sm:text-xs font-medium text-gray-500 mb-1 truncate">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Tanggal Akhir</span>
+        </label>
+        <div class="relative w-full">
+            <div class="md:hidden flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-700 min-w-0">
+                <span id="end_date_label" class="truncate"><?= $end_date ? date('d/m/Y', strtotime($end_date)) : 'Tgl Akhir' ?></span>
+                <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <input type="date" name="end_date" id="end_date_input" value="<?= e($end_date ?? '') ?>"
+                   onchange="if(this.value){let d=this.value.split('-');document.getElementById('end_date_label').textContent=d[2]+'/'+d[1]+'/'+d[0]}else{document.getElementById('end_date_label').textContent='Tgl Akhir'}"
+                   class="w-full md:px-3 md:py-2 text-sm border-gray-200 md:border md:rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition
+                          absolute inset-0 opacity-0 md:static md:opacity-100 cursor-pointer md:cursor-text">
         </div>
-        <div class="min-w-0">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
-            <select name="status" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition bg-white">
+    </div>
+
+    <!-- Status -->
+    <div class="relative flex-1 min-w-0">
+        <label class="hidden md:flex items-center gap-1 text-[10px] sm:text-xs font-medium text-gray-500 mb-1 truncate">
+            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Status</span>
+        </label>
+        <div class="relative w-full">
+            <div class="md:hidden flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-700 min-w-0">
+                <span id="status_label" class="truncate">
+                    <?php
+                    if (($status_filter ?? '') === 'success') echo 'Success';
+                    elseif (($status_filter ?? '') === 'pending') echo 'Pending';
+                    elseif (($status_filter ?? '') === 'failed') echo 'Failed';
+                    else echo 'Status';
+                    ?>
+                </span>
+                <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <select name="status" id="status_input"
+                    onchange="document.getElementById('status_label').textContent = this.options[this.selectedIndex].text"
+                    class="w-full md:px-3 md:py-2 text-sm border border-gray-200 md:border md:rounded-xl focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition bg-white
+                           absolute inset-0 opacity-0 md:static md:opacity-100 cursor-pointer md:cursor-default">
                 <option value="">Semua Status</option>
                 <option value="success" <?= ($status_filter ?? '') === 'success' ? 'selected' : '' ?>>Success</option>
                 <option value="pending" <?= ($status_filter ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
@@ -55,13 +100,16 @@ document.addEventListener('click', function(e) {
             </select>
         </div>
     </div>
-    <div class="ds-form-actions mt-3">
+
+    <!-- Buttons -->
+    <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
         <?php if ($start_date || $end_date || $status_filter): ?>
-        <a href="<?= url('/admin-laporan') ?>" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition text-center">Reset</a>
+        <a href="<?= url('/admin-laporan') ?>" class="w-8 h-8 sm:w-[38px] sm:h-[38px] text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition flex items-center justify-center" title="Reset">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </a>
         <?php endif; ?>
-        <button type="submit" class="px-5 py-2 text-sm font-semibold text-white rounded-xl hover:opacity-90 transition shadow-sm" style="background:#42B549">
-            <svg class="w-4 h-4 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-            Filter
+        <button type="submit" class="w-8 h-8 sm:w-[38px] sm:h-[38px] text-white rounded-xl hover:opacity-90 transition shadow-sm flex items-center justify-center" style="background:#42B549" title="Filter">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
         </button>
     </div>
 </form>
@@ -388,7 +436,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: pendapatanBulananArr,
         backgroundColor: chartColors.blue.border,
         borderRadius: 8,
-        borderSkipped: false
+        borderSkipped: false,
+        maxBarThickness: 40
     }];
 
     <?php if ($has_comparison): ?>
@@ -397,7 +446,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: <?= $prev_bulanan_arr ?>,
         backgroundColor: 'rgba(156, 163, 175, 0.4)',
         borderRadius: 8,
-        borderSkipped: false
+        borderSkipped: false,
+        maxBarThickness: 40
     });
     <?php endif; ?>
 

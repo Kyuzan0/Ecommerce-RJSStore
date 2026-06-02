@@ -147,14 +147,16 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
 
 <!-- Bulk Delete Toast -->
 <div id="bulk-action-bar" class="ds-bulkbar-wrap hidden" style="opacity:0; transition:opacity 0.2s">
-    <div class="flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl shadow-lg border border-gray-200 bg-white">
-        <span class="text-sm font-semibold text-gray-700"><span id="selected-count">0</span> produk dipilih</span>
+    <div class="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-2xl shadow-lg border border-gray-200 bg-white w-full sm:w-auto">
+        <span class="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap"><span id="selected-count">0</span> produk dipilih</span>
         <div class="hidden sm:block w-px h-5 bg-gray-200"></div>
-        <button type="button" onclick="deselectAll()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer">Batal Pilih</button>
-        <button type="button" onclick="bulkDelete()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition cursor-pointer hover:opacity-90" style="background:#C62828">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            Hapus Terpilih
-        </button>
+        <div class="flex items-center gap-1.5 ml-auto sm:ml-0">
+            <button type="button" onclick="deselectAll()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer whitespace-nowrap">Batal<span class="hidden sm:inline"> Pilih</span></button>
+            <button type="button" onclick="bulkDelete()" class="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg text-white transition cursor-pointer hover:opacity-90 whitespace-nowrap" style="background:#C62828">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span>Hapus<span class="hidden sm:inline"> Terpilih</span></span>
+            </button>
+        </div>
     </div>
 </div>
 
