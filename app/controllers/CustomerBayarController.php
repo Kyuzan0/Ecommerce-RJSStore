@@ -91,6 +91,9 @@ class CustomerBayarController extends BaseController
             return;
         }
 
+        // Store active order reference in session for callback fallback
+        $_SESSION['active_order_ref'] = $order_id;
+
         // Render payment page
         $this->view('customer/bayar', [
             'items' => $items,

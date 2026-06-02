@@ -73,6 +73,9 @@ class CheckoutController extends BaseController
 
             // Clear cart on successful token generation
             $this->keranjangModel->clearByUser($userId);
+
+            // Store active order reference in session for callback fallback
+            $_SESSION['active_order_ref'] = $orderRef;
         }
 
         // Midtrans Snap JS URL
@@ -101,7 +104,12 @@ class CheckoutController extends BaseController
     public function callback(): void
     {
         $userId   = $this->auth->id();
-        $orderRef = $_GET['order_id'] ?? '';
+        $orderRef = $_GET['order_id'] ?? $_SESSION['active_order_ref'] ?? '';
+
+        // Clean up the session reference
+        if (isset($_SESSION['active_order_ref'])) {
+            unset($_SESSION['active_order_ref']);
+        }
 
         if (empty($orderRef)) {
             flash('error', 'Referensi pembayaran tidak valid.');
