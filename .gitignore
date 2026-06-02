@@ -6,7 +6,7 @@ uploads/*
 !uploads/.gitkeep
 
 # Database dumps
-database/*.sql
+database/
 
 # OS files
 .DS_Store

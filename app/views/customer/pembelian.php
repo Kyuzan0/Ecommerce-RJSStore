@@ -77,20 +77,39 @@
                         <?php endif; ?>
                         <p class="text-sm text-gray-700 mt-1 font-medium"><?= rupiah($item['harga']) ?></p>
 
-                        <!-- Rating Display -->
+                        <!-- Action Buttons & Rating Display -->
                         <?php if ($group['status'] === 'success'): ?>
-                            <?php if (!empty($item['rating'])): ?>
-                                <div class="flex items-center mt-1.5">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <svg class="w-4 h-4 <?= $i <= $item['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    <?php endfor; ?>
+                            <div class="mt-3 flex flex-wrap items-center gap-3">
+                                <?php if ($item['tipe_produk'] === 'Akun'): ?>
+                                    <button type="button" onclick="document.getElementById('akun-detail-<?= $item['id'] ?>').classList.toggle('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+                                        Lihat Akun
+                                    </button>
+                                <?php else: ?>
+                                    <a href="<?= url('/customer/download-file/' . $item['id']) ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+                                        Download
+                                    </a>
+                                <?php endif; ?>
+
+                                <?php if (!empty($item['rating'])): ?>
+                                    <div class="flex items-center">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <svg class="w-4 h-4 <?= $i <= $item['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        <?php endfor; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <a href="<?= url('/customer/rating/' . $item['id']) ?>" class="text-xs sm:text-sm text-green-600 hover:text-green-700 font-medium">
+                                        Beri Nilai
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if ($item['tipe_produk'] === 'Akun'): ?>
+                                <div id="akun-detail-<?= $item['id'] ?>" class="hidden mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm">
+                                    <p class="text-blue-800"><span class="font-semibold">Email:</span> <?= e($item['account_email'] ?? '-') ?></p>
+                                    <p class="text-blue-800"><span class="font-semibold">Password:</span> <?= e($item['account_password'] ?? '-') ?></p>
                                 </div>
-                            <?php else: ?>
-                                <a href="<?= url('/customer/rating/' . $item['id']) ?>" class="text-xs sm:text-sm text-green-600 hover:text-green-700 mt-1.5 inline-block font-medium">
-                                    Beri Nilai
-                                </a>
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
@@ -118,11 +137,6 @@
                         <a href="<?= $payment_url ?>"
                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
                             Bayar Sekarang
-                        </a>
-                    <?php elseif ($group['status'] === 'success'): ?>
-                        <a href="<?= url('/customer/download') ?>"
-                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors">
-                            Download
                         </a>
                     <?php endif; ?>
                 </div>

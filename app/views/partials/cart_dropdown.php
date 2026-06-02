@@ -22,7 +22,7 @@ $initial_cart_count = $initial_cart_count ?? 0;
         <span id="cartBadge" class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-white text-xs font-bold rounded-full <?= $initial_cart_count > 0 ? '' : 'hidden' ?>" style="background:#E65100"><?= $initial_cart_count ?></span>
     </button>
 
-    <div id="cartDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+    <div id="cartDropdown" class="hidden absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] sm:max-w-none bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden" style="max-width: calc(100vw - 2rem);">
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h3 class="font-bold text-gray-800 text-sm">Keranjang Belanja</h3>
             <span id="cartItemCount" class="text-xs text-gray-400"><span id="cartCountText"><?= $initial_cart_count ?></span> item</span>
