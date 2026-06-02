@@ -25,19 +25,65 @@
     </div>
 
     <script type="text/javascript">
-        function triggerSnap() {
-            window.snap.pay('<?= e($snap_token) ?>', {
-                onSuccess: function(result){
-                    var orderId = result.order_id || '<?= e($order_ref) ?>';
-                    window.location.href = '<?= url("/customer/checkout/callback") ?>?order_id=' + encodeURIComponent(orderId);
-                },
-                onPending: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>'; },
-                onError: function(result){ window.location.href = '<?= url("/customer/pembelian") ?>?msg=error'; },
-                onClose: function(){ window.location.href = '<?= url("/customer/pembelian") ?>'; }
-            });
-        }
-        window.onload = triggerSnap;
-        document.getElementById('pay-button').onclick = triggerSnap;
+        document.addEventListener('DOMContentLoaded', function() {
+            const snapToken = '<?= e($snap_token) ?>';
+            const snapUrl = '<?= e($snap_url) ?>';
+            const isSandbox = snapUrl.includes('sandbox');
+            const redirectUrl = isSandbox 
+                ? `https://app.sandbox.midtrans.com/snap/v2/vtweb/${snapToken}`
+                : `https://app.midtrans.com/snap/v2/vtweb/${snapToken}`;
+
+            const callbackBase = '<?= url("/customer/checkout/callback") ?>';
+            const errorUrl = '<?= url("/customer/pembelian?msg=error") ?>';
+            const orderId = '<?= e($order_ref) ?>';
+
+            let pollingInterval = null;
+
+            function startPolling() {
+                if (pollingInterval) return;
+                pollingInterval = setInterval(function() {
+                    fetch('<?= url("/api/transaksi/status") ?>?ref=' + encodeURIComponent(orderId))
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (data.status === 'success') {
+                                    clearInterval(pollingInterval);
+                                    window.location.href = callbackBase + '?order_id=' + encodeURIComponent(orderId);
+                                } else if (data.status === 'failed') {
+                                    clearInterval(pollingInterval);
+                                    window.location.href = errorUrl;
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Status poll error:', err));
+                }, 2000);
+            }
+
+            function openPayment() {
+                const win = window.open(redirectUrl, '_blank');
+                
+                // Show status message
+                const payButton = document.getElementById('pay-button');
+                payButton.textContent = 'Buka Ulang Pembayaran';
+                
+                let statusMsg = document.getElementById('payment-status-message');
+                if (!statusMsg) {
+                    statusMsg = document.createElement('p');
+                    statusMsg.id = 'payment-status-message';
+                    statusMsg.className = 'text-sm text-gray-500 mt-3 text-center animate-pulse';
+                    statusMsg.innerHTML = '<span class="inline-block w-2.5 h-2.5 bg-yellow-500 rounded-full mr-2"></span>Menunggu pembayaran...';
+                    payButton.parentNode.insertBefore(statusMsg, payButton.nextSibling);
+                }
+                
+                startPolling();
+            }
+
+            // Auto-open on page load
+            openPayment();
+
+            // Bind button click
+            document.getElementById('pay-button').onclick = openPayment;
+        });
     </script>
 
     <?php else: ?>

@@ -55,6 +55,7 @@ $router->get('customer/checkout/callback', 'CheckoutController', 'callback');
 
 // Customer routes (bayar and rating use separate controllers)
 $router->get('customer/bayar', 'CustomerBayarController', 'index');
+$router->get('api/transaksi/status', 'CustomerBayarController', 'apiStatus');
 $router->get('customer/rating/:id', 'CustomerRatingController', 'index');
 $router->post('customer/rating/:id', 'CustomerRatingController', 'index');
 

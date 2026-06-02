@@ -96,8 +96,42 @@ class CustomerBayarController extends BaseController
             'items' => $items,
             'total' => $total,
             'snap_token' => $snap_token,
+            'order_id' => $order_id,
             'snap_url' => $this->midtrans->getSnapJsUrl(),
             'client_key' => $this->midtrans->getClientKey()
         ], 'checkout');
+    }
+
+    public function apiStatus()
+    {
+        header('Content-Type: application/json');
+        
+        $user_id = $this->auth->id();
+        $order_ref = $_GET['ref'] ?? '';
+        $transaksi_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        
+        if (!empty($order_ref)) {
+            // Strip retry suffix if any
+            $dbOrderRef = preg_replace('/-r\d+$/', '', $order_ref);
+            $row = $this->db->fetchOne(
+                "SELECT status FROM transaksi WHERE order_ref = ? AND user_id = ? LIMIT 1",
+                [$dbOrderRef, $user_id]
+            );
+        } elseif ($transaksi_id > 0) {
+            $row = $this->db->fetchOne(
+                "SELECT status FROM transaksi WHERE id = ? AND user_id = ? LIMIT 1",
+                [(int)$transaksi_id, $user_id]
+            );
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
+            return;
+        }
+        
+        if (!$row) {
+            echo json_encode(['success' => false, 'message' => 'Transaksi tidak ditemukan']);
+            return;
+        }
+        
+        echo json_encode(['success' => true, 'status' => $row['status']]);
     }
 }
