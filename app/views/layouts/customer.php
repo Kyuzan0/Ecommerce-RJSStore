@@ -95,8 +95,8 @@
 
 <div class="app-shell__overlay" onclick="document.body.classList.remove('aside-open')"></div>
 
-<div class="app-shell__body flex flex-1 lg:overflow-hidden">
-    <aside class="app-shell__aside flex-shrink-0 flex flex-col pt-4 pb-6 px-3 overflow-y-auto border-r">
+<div class="app-shell__body flex flex-1 lg:overflow-hidden relative">
+    <aside class="app-shell__aside flex-shrink-0 flex flex-col pt-4 pb-6 px-3 overflow-y-auto border-r lg:w-[240px]" style="min-width: 240px !important;">
         <div class="mb-4 px-3"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</p></div>
         <nav class="flex flex-col gap-1 flex-1" onclick="if(window.innerWidth<1024)document.body.classList.remove('aside-open')">
             <a href="<?= url('/customer/dashboard') ?>" class="sidebar-link <?= ($active_page ?? '') === 'dashboard' ? 'active' : '' ?>"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>Dashboard</a>
