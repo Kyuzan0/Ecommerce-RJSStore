@@ -22,6 +22,21 @@
             }
         })();
     </script>
+    <style>
+        /* Force sidebar visible on desktop - prevents Tailwind CDN override */
+        @media (min-width: 1024px) {
+            .app-shell__aside {
+                display: flex !important;
+                position: static !important;
+                transform: none !important;
+                width: 240px !important;
+                min-width: 240px !important;
+                flex-shrink: 0 !important;
+            }
+            .app-shell__overlay { display: none !important; }
+            .app-shell__menu-toggle { display: none !important; }
+        }
+    </style>
 </head>
 <body class="app-shell min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
 
