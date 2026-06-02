@@ -87,7 +87,7 @@
         <div class="mt-5 mb-3 px-3"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pengaturan</p></div>
         <nav class="flex flex-col gap-1 flex-1" onclick="if(window.innerWidth<1024)document.body.classList.remove('aside-open')">
             <a href="<?= url('/admin-preset') ?>" class="sidebar-link <?= ($active_page ?? '') === 'preset' ? 'active' : '' ?>"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>Preset Akun</a>
-            <a href="<?= url('/admin-audit') ?>" class="sidebar-link <?= ($active_page ?? '') === 'audit' ? 'active' : '' ?>"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Audit Log</a>
+            <a href="<?= url('/admin-activity-log') ?>" class="sidebar-link <?= ($active_page ?? '') === 'activity_log' ? 'active' : '' ?>"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Log Aktivitas</a>
         </nav>
 
         <div class="px-1 mt-4 pt-4 border-t border-gray-100">

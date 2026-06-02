@@ -54,6 +54,8 @@ class CheckoutController extends BaseController
                 return;
             }
 
+            ActivityLog::log('checkout', 'transaksi', null, 'Customer created order ' . $orderRef);
+
             // Get actual user email (bug fix: was hardcoded 'customer@example.com')
             $user = (new User())->find($userId);
             $userEmail = $user['email'] ?? 'customer@example.com';

@@ -105,7 +105,7 @@ class AdminUserController extends BaseController
                 'password' => password_hash($password, PASSWORD_DEFAULT),
                 'role' => $role
             ]);
-            AuditLog::log('tambah_user', 'user', null, $name . ' (' . $email . ') role:' . $role);
+            ActivityLog::log('tambah_user', 'user', null, $name . ' (' . $email . ') role:' . $role);
             flash('success', 'Pengguna berhasil ditambahkan!');
         }
     }
@@ -135,7 +135,7 @@ class AdminUserController extends BaseController
                 $data['password'] = password_hash($password, PASSWORD_DEFAULT);
             }
             $this->userModel->update($id, $data);
-            AuditLog::log('update_user', 'user', $id, $name . ' (' . $email . ')' . ($password !== '' ? ' [password changed]' : ''));
+            ActivityLog::log('update_user', 'user', $id, $name . ' (' . $email . ')' . ($password !== '' ? ' [password changed]' : ''));
             flash('success', 'Pengguna berhasil diupdate!');
         }
     }
@@ -146,7 +146,7 @@ class AdminUserController extends BaseController
         if ($id != $this->auth->id()) {
             $user = $this->userModel->find($id);
             $this->userModel->delete($id);
-            AuditLog::log('hapus_user', 'user', $id, ($user['name'] ?? '') . ' (' . ($user['email'] ?? '') . ')');
+            ActivityLog::log('hapus_user', 'user', $id, ($user['name'] ?? '') . ' (' . ($user['email'] ?? '') . ')');
             flash('success', 'Pengguna berhasil dihapus.');
         } else {
             flash('error', 'Tidak bisa menghapus akun sendiri.');

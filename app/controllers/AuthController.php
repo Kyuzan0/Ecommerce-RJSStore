@@ -46,6 +46,7 @@ class AuthController extends BaseController
             $redirectNext       = $_POST['redirect_next'] ?? $_GET['next'] ?? null;
 
             $this->auth->login($user);
+            ActivityLog::log('login', 'auth', (int) $user['id'], ucfirst($user['role']) . ' login successful');
 
             // Merge guest cart into DB for customers
             if ($user['role'] === 'customer' && !empty($guestCart)) {
@@ -61,7 +62,6 @@ class AuthController extends BaseController
             } elseif ($redirectAfterLogin) {
                 $this->redirect('/' . ltrim($redirectAfterLogin, '/'));
             } elseif ($user['role'] === 'admin') {
-                AuditLog::log('login', 'auth', (int) $user['id'], 'Admin login successful');
                 $this->redirect('/admin-dashboard');
             } else {
                 $this->redirect('/customer/dashboard');
@@ -70,15 +70,8 @@ class AuthController extends BaseController
         }
 
         // Authentication failed
-        // Log failed attempt (use admin_id=0 since no one is logged in)
-        $ip = !empty($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP']
-            : (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0])
-            : (!empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP']
-            : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0')));
-        $this->db->execute(
-            "INSERT INTO audit_log (admin_id, action, target_type, detail, ip_address) VALUES (0, 'login_failed', 'auth', ?, ?)",
-            ['email: ' . $email, $ip]
-        );
+        // Log failed attempt
+        ActivityLog::log('login_failed', 'auth', null, 'Failed login attempt with email: ' . $email);
         $next      = $_POST['redirect_next'] ?? '';
         $nextParam = $next ? '?next=' . urlencode($next) : '';
         flash('error', 'Email atau password salah!');
@@ -145,6 +138,7 @@ class AuthController extends BaseController
                 : (!empty($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP']
                 : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0')));
             $this->db->execute("UPDATE users SET register_ip = ? WHERE id = ?", [$regIp, $id]);
+            ActivityLog::log('register', 'auth', $id, 'Customer registered: ' . $name . ' (' . $email . ')', $id);
         }
 
         if ($id) {

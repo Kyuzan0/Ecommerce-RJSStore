@@ -101,6 +101,8 @@ class CustomerRatingController extends BaseController
         // Update rating
         $this->transaksiModel->setRating($transaksi_id, $user_id, $rating, $ulasan);
 
+        ActivityLog::log('rating_produk', 'transaksi', $transaksi_id, 'Customer submitted rating ' . $rating . ' stars');
+
         flash('success', 'Terima kasih atas rating Anda!');
         $this->redirect('/customer/pembelian');
     }

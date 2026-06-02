@@ -1,22 +1,22 @@
 <?php
 
-class AuditLog extends BaseModel
+class ActivityLog extends BaseModel
 {
-    protected string $table = 'audit_log';
+    protected string $table = 'activity_log';
 
     /**
-     * Record an admin action.
+     * Record a user/system action.
      */
-    public static function log(string $action, ?string $targetType = null, ?int $targetId = null, ?string $detail = null): void
+    public static function log(string $action, ?string $targetType = null, ?int $targetId = null, ?string $detail = null, ?int $forceUserId = null): void
     {
-        $adminId = $_SESSION['user_id'] ?? 0;
-        if ($adminId <= 0 && $action !== 'login_failed') return;
+        $userId = $forceUserId ?? ($_SESSION['user_id'] ?? 0);
+        if ($userId <= 0 && !in_array($action, ['login_failed', 'register'])) return;
 
         $ip = self::getRealIp();
         $db = Database::getInstance();
         $db->execute(
-            "INSERT INTO audit_log (admin_id, action, target_type, target_id, detail, ip_address) VALUES (?, ?, ?, ?, ?, ?)",
-            [$adminId, $action, $targetType, $targetId, $detail, $ip]
+            "INSERT INTO activity_log (user_id, action, target_type, target_id, detail, ip_address) VALUES (?, ?, ?, ?, ?, ?)",
+            [$userId, $action, $targetType, $targetId, $detail, $ip]
         );
     }
 
@@ -49,9 +49,9 @@ class AuditLog extends BaseModel
     public function getRecent(int $limit = 50, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            "SELECT a.*, COALESCE(u.name, 'System') AS admin_name
-             FROM audit_log a
-             LEFT JOIN users u ON a.admin_id = u.id
+            "SELECT a.*, COALESCE(u.name, 'System') AS user_name, u.role AS user_role
+             FROM activity_log a
+             LEFT JOIN users u ON a.user_id = u.id
              ORDER BY a.created_at DESC
              LIMIT {$limit} OFFSET {$offset}"
         );
@@ -59,7 +59,7 @@ class AuditLog extends BaseModel
 
     public function countAll(): int
     {
-        $row = $this->db->fetchOne("SELECT COUNT(*) AS total FROM audit_log");
+        $row = $this->db->fetchOne("SELECT COUNT(*) AS total FROM activity_log");
         return $row ? (int) $row['total'] : 0;
     }
 }

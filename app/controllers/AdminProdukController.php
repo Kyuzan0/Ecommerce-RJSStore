@@ -167,7 +167,7 @@ class AdminProdukController extends BaseController
             ]);
             $this->varianModel->replaceForProduk((int) $newId, $variants);
             flash('success', 'Produk akun berhasil ditambahkan!');
-            AuditLog::log('tambah_produk', 'produk', (int) $newId, $nama . ' (Akun)');
+            ActivityLog::log('tambah_produk', 'produk', (int) $newId, $nama . ' (Akun)');
             return;
         }
 
@@ -196,7 +196,7 @@ class AdminProdukController extends BaseController
                 'thumbnail' => $this->handleThumbnail(),
             ]);
             flash('success', 'Produk berhasil ditambahkan!');
-            AuditLog::log('tambah_produk', 'produk', null, $nama);
+            ActivityLog::log('tambah_produk', 'produk', null, $nama);
         } else {
             flash('error', 'File produk wajib diupload.');
         }
@@ -422,7 +422,7 @@ class AdminProdukController extends BaseController
         }
         $this->produkModel->delete($id);
         flash('success', 'Produk berhasil dihapus.');
-        AuditLog::log('hapus_produk', 'produk', $id);
+        ActivityLog::log('hapus_produk', 'produk', $id);
     }
 
     private function handleHapusBulk()

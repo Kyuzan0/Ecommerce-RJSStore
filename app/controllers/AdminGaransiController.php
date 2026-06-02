@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../core/BaseController.php';
 require_once __DIR__ . '/../models/GaransiKlaim.php';
-require_once __DIR__ . '/../models/AuditLog.php';
+require_once __DIR__ . '/../models/ActivityLog.php';
 
 class AdminGaransiController extends BaseController
 {
@@ -59,7 +59,7 @@ class AdminGaransiController extends BaseController
             Notifikasi::send((int) $klaim['user_id'], 'Klaim Garansi ' . ucfirst($status), $msg, $status === 'approved' ? 'success' : 'warning');
         }
 
-        AuditLog::log('resolve_garansi', 'garansi_klaim', $id, $status . ': ' . $adminNote);
+        ActivityLog::log('resolve_garansi', 'garansi_klaim', $id, $status . ': ' . $adminNote);
         flash('success', 'Klaim berhasil di-' . ($status === 'approved' ? 'setujui' : 'tolak') . '.');
         $this->redirect('/admin-garansi');
     }

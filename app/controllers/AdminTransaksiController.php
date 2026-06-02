@@ -109,7 +109,7 @@ class AdminTransaksiController extends BaseController
         }
 
         $this->transaksiModel->updateStatusById($id, $new_status);
-        AuditLog::log('update_status_transaksi', 'transaksi', $id, 'status → ' . $new_status);
+        ActivityLog::log('update_status_transaksi', 'transaksi', $id, 'status → ' . $new_status);
         flash('success', 'Status transaksi berhasil diperbarui.');
     }
 
