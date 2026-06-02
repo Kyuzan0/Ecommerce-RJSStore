@@ -74,6 +74,11 @@ class MidtransService
             ],
             'item_details'     => $items,
             'customer_details' => $customer,
+            'callbacks' => [
+                'finish'   => url('customer/checkout/callback'),
+                'unfinish' => url('customer/checkout/callback'),
+                'error'    => url('customer/checkout/callback'),
+            ],
         ];
 
         $response = $this->request('POST', $this->getSnapApiUrl() . '/transactions', $payload);
