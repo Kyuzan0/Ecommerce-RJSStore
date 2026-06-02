@@ -107,16 +107,19 @@ class CheckoutController extends BaseController
             return;
         }
 
+        // Strip retry suffix (e.g. -r1234567) to get the original order_ref or ID in database
+        $dbOrderRef = preg_replace('/-r\d+$/', '', $orderRef);
+
         // Ensure the order belongs to the current user
-        if (strpos($orderRef, 'ORD-') === 0) {
+        if (strpos($dbOrderRef, 'ORD-') === 0) {
             $owned = $this->db->fetchOne(
                 "SELECT id FROM transaksi WHERE order_ref = ? AND user_id = ? LIMIT 1",
-                [$orderRef, $userId]
+                [$dbOrderRef, $userId]
             );
         } else {
             $owned = $this->db->fetchOne(
                 "SELECT id FROM transaksi WHERE id = ? AND user_id = ? LIMIT 1",
-                [(int) $orderRef, $userId]
+                [(int) $dbOrderRef, $userId]
             );
         }
 
@@ -126,24 +129,24 @@ class CheckoutController extends BaseController
             return;
         }
 
-        // Verify the real status with Midtrans (server-to-server)
+        // Verify the real status with Midtrans (using the raw orderRef with suffix, since Midtrans knows it as orderRef)
         $statusPayload = $this->midtrans->getTransactionStatus($orderRef);
         $status = $statusPayload ? $this->midtrans->mapStatus($statusPayload) : null;
 
         if ($status === 'success') {
-            if (strpos($orderRef, 'ORD-') === 0) {
-                $this->transaksiModel->updateStatusByRef($orderRef, 'success');
+            if (strpos($dbOrderRef, 'ORD-') === 0) {
+                $this->transaksiModel->updateStatusByRef($dbOrderRef, 'success');
             } else {
-                $this->transaksiModel->updateStatusById((int) $orderRef, 'success');
+                $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'success');
             }
             flash('success', 'Pembayaran berhasil! Terima kasih atas pembelian Anda.');
         } elseif ($status === 'pending') {
             flash('info', 'Pembayaran Anda sedang diproses. Status akan diperbarui otomatis setelah pembayaran dikonfirmasi.');
         } elseif ($status === 'failed') {
-            if (strpos($orderRef, 'ORD-') === 0) {
-                $this->transaksiModel->updateStatusByRef($orderRef, 'failed');
+            if (strpos($dbOrderRef, 'ORD-') === 0) {
+                $this->transaksiModel->updateStatusByRef($dbOrderRef, 'failed');
             } else {
-                $this->transaksiModel->updateStatusById((int) $orderRef, 'failed');
+                $this->transaksiModel->updateStatusById((int) $dbOrderRef, 'failed');
             }
             flash('error', 'Pembayaran gagal atau dibatalkan.');
         } else {

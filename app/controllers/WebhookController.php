@@ -46,11 +46,14 @@ class WebhookController extends BaseController
             return;
         }
 
+        // Strip retry suffix (e.g. -r1234567) to get the original order_ref or ID in database
+        $db_order_ref = preg_replace('/-r\d+$/', '', $order_id);
+
         // Update by order_ref (ORD-*) or legacy single ID
-        if (strpos($order_id, 'ORD-') === 0) {
-            $this->transaksi->updateStatusByRef($order_id, $status);
+        if (strpos($db_order_ref, 'ORD-') === 0) {
+            $this->transaksi->updateStatusByRef($db_order_ref, $status);
         } else {
-            $this->transaksi->updateStatusById((int) $order_id, $status);
+            $this->transaksi->updateStatusById((int) $db_order_ref, $status);
         }
 
         $this->json(['status' => 'ok']);

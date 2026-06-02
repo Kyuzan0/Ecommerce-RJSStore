@@ -56,8 +56,8 @@ class CustomerBayarController extends BaseController
         $user_email = $user['email'];
         $user_name = $user['name'];
 
-        // Build Midtrans payload
-        $order_id = $items[0]['order_ref'] ?? 'TRX-' . $items[0]['id'];
+        // Build Midtrans payload with unique retry suffix to avoid duplicate order ID error on Midtrans
+        $order_id = ($items[0]['order_ref'] ?? 'TRX-' . $items[0]['id']) . '-r' . time();
         
         $item_details = [];
         foreach ($items as $item) {
