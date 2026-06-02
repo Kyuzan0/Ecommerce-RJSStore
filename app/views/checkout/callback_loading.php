@@ -42,9 +42,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const verifyUrl = '<?= url("/customer/checkout/callback") ?>?action=verify&order_id=' + encodeURIComponent(orderId);
     const redirectUrl = '<?= url("/customer/pembelian") ?>';
 
+    // Parse debug mode query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDebugMode = urlParams.get('debug') === '1' || urlParams.get('debug') === 'true';
+
     console.log("%c[GA4 Debug] Initializing payment verification page...", "color: #3B82F6; font-weight: bold; font-size: 11px;");
     console.log("%c[GA4 Debug] Target Order Reference: " + orderId, "color: #6B7280;");
     console.log("%c[GA4 Debug] Checking gtag status: " + (typeof gtag === 'function' ? '✅ Loaded' : '❌ NOT Loaded / Blocked'), "color: " + (typeof gtag === 'function' ? '#10B981' : '#EF4444') + "; font-weight: bold;");
+
+    if (isDebugMode) {
+        console.log("%c[GA4 Debug] Debug Mode active: Auto-redirect disabled.", "color: #3B82F6; font-weight: bold;");
+        
+        // Update status indicator text
+        const statusText = document.querySelector('span.text-xs');
+        if (statusText) {
+            statusText.textContent = "Debug Mode Aktif";
+        }
+        
+        // Append a manual redirection button
+        const cardContainer = document.querySelector('.relative.bg-white\\/70, .relative.bg-white\\/70\\/60');
+        const fallbackContainer = cardContainer || document.querySelector('.backdrop-blur-xl');
+        if (fallbackContainer) {
+            const btn = document.createElement('a');
+            btn.href = redirectUrl;
+            btn.className = "mt-6 inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/25";
+            btn.textContent = "Lanjutkan ke Pembelian";
+            btn.style.display = "inline-block";
+            fallbackContainer.appendChild(btn);
+        }
+    }
 
     // Small delay to simulate smooth loading transitions
     setTimeout(function() {
@@ -63,7 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             tax: 0,
                             shipping: 0,
                             currency: "IDR",
-                            items: data.items
+                            items: data.items,
+                            debug_mode: true
                         };
 
                         console.log("%c[GA4 Debug] Dispatching GA4 purchase event...", "color: #8B5CF6; font-weight: bold;");
@@ -72,23 +99,36 @@ document.addEventListener('DOMContentLoaded', function() {
                         gtag("event", "purchase", {
                             ...purchasePayload,
                             event_callback: function() {
-                                console.log("%c[GA4 Debug] GA4 purchase event successfully dispatched. Redirecting...", "color: #10B981; font-weight: bold;");
-                                window.location.href = redirectUrl;
+                                console.log("%c[GA4 Debug] GA4 purchase event successfully dispatched.", "color: #10B981; font-weight: bold;");
+                                if (!isDebugMode) {
+                                    window.location.href = redirectUrl;
+                                }
                             },
                             event_timeout: 2000 // Safeguard in case tracker is blocked/delayed
                         });
+
+                        // Fallback redirect for debug mode since event_callback will run but not redirect
+                        if (isDebugMode) {
+                            console.log("%c[GA4 Debug] Event sent to gtag queue. Auto-redirect bypassed.", "color: #3B82F6;");
+                        }
                     } else {
-                        console.warn("%c[GA4 Debug] gtag is not defined. Skipping tracking and redirecting...", "color: #F59E0B; font-weight: bold;");
-                        window.location.href = redirectUrl;
+                        console.warn("%c[GA4 Debug] gtag is not defined. Skipping tracking...", "color: #F59E0B; font-weight: bold;");
+                        if (!isDebugMode) {
+                            window.location.href = redirectUrl;
+                        }
                     }
                 } else {
-                    console.log("%c[GA4 Debug] Verification success: " + data.success + ", status: " + data.status + ". Redirecting...", "color: #F59E0B;");
-                    window.location.href = redirectUrl;
+                    console.log("%c[GA4 Debug] Verification success: " + data.success + ", status: " + data.status + ".", "color: #F59E0B;");
+                    if (!isDebugMode) {
+                        window.location.href = redirectUrl;
+                    }
                 }
             })
             .catch(error => {
                 console.error('%c[GA4 Debug] Verification fetch error:', 'color: #EF4444; font-weight: bold;', error);
-                window.location.href = redirectUrl;
+                if (!isDebugMode) {
+                    window.location.href = redirectUrl;
+                }
             });
     }, 1500);
 });
