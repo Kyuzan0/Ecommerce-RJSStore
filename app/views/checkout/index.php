@@ -60,22 +60,7 @@
             }
 
             function openPayment() {
-                const win = window.open(redirectUrl, '_blank');
-                
-                // Show status message
-                const payButton = document.getElementById('pay-button');
-                payButton.textContent = 'Buka Ulang Pembayaran';
-                
-                let statusMsg = document.getElementById('payment-status-message');
-                if (!statusMsg) {
-                    statusMsg = document.createElement('p');
-                    statusMsg.id = 'payment-status-message';
-                    statusMsg.className = 'text-sm text-gray-500 mt-3 text-center animate-pulse';
-                    statusMsg.innerHTML = '<span class="inline-block w-2.5 h-2.5 bg-yellow-500 rounded-full mr-2"></span>Menunggu pembayaran...';
-                    payButton.parentNode.insertBefore(statusMsg, payButton.nextSibling);
-                }
-                
-                startPolling();
+                window.location.href = redirectUrl;
             }
 
             // Auto-open on page load
