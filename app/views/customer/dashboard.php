@@ -158,11 +158,11 @@
         <?php foreach ($latest_products as $prod): ?>
         <a href="<?= url('/customer/produk/' . $prod['id']) ?>" class="group block rounded-xl border border-gray-100 hover:border-green-300 hover:shadow-md transition overflow-hidden">
             <!-- Product Image / Placeholder -->
-            <div class="aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative">
+            <div class="aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative">
                 <?php if (!empty($prod['thumbnail'])): ?>
                     <img src="<?= url('/uploads/thumbnails/' . $prod['thumbnail']) ?>" alt="<?= e($prod['nama_produk']) ?>" class="w-full h-full object-cover">
                 <?php else: ?>
-                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 <?php endif; ?>
                 <?php if (in_array($prod['id'], $purchased_produk_ids)): ?>
                     <span class="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Dimiliki</span>

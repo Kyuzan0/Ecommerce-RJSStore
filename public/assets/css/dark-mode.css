@@ -460,6 +460,11 @@ main > * { min-width: 0; max-width: 100%; }
 }
 
 @media (min-width: 1024px) {
+    .app-shell__aside {
+        transform: none !important;
+        position: static !important;
+        display: flex !important;
+    }
     .app-shell__overlay { display: none !important; }
     .app-shell__menu-toggle { display: none !important; }
 }
