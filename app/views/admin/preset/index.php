@@ -27,7 +27,7 @@
                 <button onclick='openEditPreset(<?= $preset["id"] ?>, <?= htmlspecialchars(json_encode($preset["nama_layanan"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(implode(", ", $preset["durasi_arr"])), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(implode(", ", $preset["paket_arr"])), ENT_QUOTES) ?>)' class="p-1.5 rounded-lg hover:bg-yellow-50 text-yellow-600 transition" title="Edit">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </button>
-                <form method="POST" class="inline" onsubmit="return confirm('Hapus preset ini?')">
+                <form method="POST" class="inline" data-confirm="Hapus preset ini?">
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="hapus">
                     <input type="hidden" name="preset_id" value="<?= $preset['id'] ?>">

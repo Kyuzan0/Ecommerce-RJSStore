@@ -227,17 +227,17 @@ function bulkDelete() {
     var checked = document.querySelectorAll('.row-checkbox:checked');
     var count = checked.length;
     if (count === 0) return;
-    if (!confirm('Hapus ' + count + ' transaksi yang dipilih? Tindakan ini tidak dapat dibatalkan.')) return;
-
-    var container = document.getElementById('bulk-delete-ids');
-    container.innerHTML = '';
-    checked.forEach(function(cb) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'transaksi_ids[]';
-        input.value = cb.value;
-        container.appendChild(input);
+    window.showCustomConfirm('Konfirmasi Hapus', 'Hapus ' + count + ' transaksi yang dipilih? Tindakan ini tidak dapat dibatalkan.', function() {
+        var container = document.getElementById('bulk-delete-ids');
+        container.innerHTML = '';
+        checked.forEach(function(cb) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'transaksi_ids[]';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+        document.getElementById('bulk-delete-form').submit();
     });
-    document.getElementById('bulk-delete-form').submit();
 }
 </script>

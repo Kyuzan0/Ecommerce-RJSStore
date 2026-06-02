@@ -217,7 +217,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <button type="button" onclick='openStokModalProduk(<?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(array_map(function($v) use ($stokModel){ return ["id"=>(int)$v["id"],"label"=>$v["durasi"].(!empty($v["paket"])?" - ".$v["paket"]:""),"stok"=>$stokModel->countAvailable((int)$v["id"])]; }, $r["varian"])), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
                         <?php endif; ?>
                         <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
-                        <form method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
+                        <form method="POST" class="inline" data-confirm="Hapus produk ini?">
                             <?= csrf_field() ?>
                             <input type="hidden" name="action" value="hapus">
                             <input type="hidden" name="produk_id" value="<?= $r['id'] ?>">
@@ -271,7 +271,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <button type="button" onclick='openStokModalProduk(<?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(array_map(function($v) use ($stokModel){ return ["id"=>(int)$v["id"],"label"=>$v["durasi"].(!empty($v["paket"])?" - ".$v["paket"]:""),"stok"=>$stokModel->countAvailable((int)$v["id"])]; }, $r["varian"])), ENT_QUOTES) ?>)' class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#E3F2FD; color:#1565C0">Stok</button>
                 <?php endif; ?>
                 <button onclick='openEdit(<?= $r["id"] ?>, <?= htmlspecialchars(json_encode($r["nama_produk"]), ENT_QUOTES) ?>, <?= (int)$r["harga"] ?>, <?= htmlspecialchars(json_encode($r["tipe_produk"] ?? "Lainnya"), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["deskripsi"]), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r["varian"] ?? []), ENT_QUOTES) ?>)' class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
-                <form method="POST" class="flex-1" onsubmit="return confirm('Hapus produk ini?')">
+                <form method="POST" class="flex-1" data-confirm="Hapus produk ini?">
                     <?= csrf_field() ?>
                     <input type="hidden" name="action" value="hapus">
                     <input type="hidden" name="produk_id" value="<?= $r['id'] ?>">
@@ -528,18 +528,18 @@ function bulkDelete() {
     var checked = document.querySelectorAll('.row-checkbox:checked');
     var count = checked.length;
     if (count === 0) return;
-    if (!confirm('Hapus ' + count + ' produk yang dipilih? Tindakan ini tidak dapat dibatalkan.')) return;
-
-    var container = document.getElementById('bulk-delete-ids');
-    container.innerHTML = '';
-    checked.forEach(function(cb) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'produk_ids[]';
-        input.value = cb.value;
-        container.appendChild(input);
+    window.showCustomConfirm('Konfirmasi Hapus', 'Hapus ' + count + ' produk yang dipilih? Tindakan ini tidak dapat dibatalkan.', function() {
+        var container = document.getElementById('bulk-delete-ids');
+        container.innerHTML = '';
+        checked.forEach(function(cb) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'produk_ids[]';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+        document.getElementById('bulk-delete-form').submit();
     });
-    document.getElementById('bulk-delete-form').submit();
 }
 </script>
 
@@ -743,30 +743,32 @@ function addBulkStok() {
 }
 
 function deleteStok(id) {
-    if (!confirm('Hapus stok ini?')) return;
-    var fd = new FormData();
-    fd.append('stok_id', id);
+    window.showCustomConfirm('Konfirmasi Hapus', 'Hapus stok ini?', function() {
+        var fd = new FormData();
+        fd.append('stok_id', id);
 
-    fetch(STOK_API_BASE + '/delete', { method: 'POST', body: fd })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.success) loadStokList();
-        });
+        fetch(STOK_API_BASE + '/delete', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) loadStokList();
+            });
+    });
 }
 
 function deleteAllStok() {
-    if (!confirm('Hapus SEMUA stok tersedia untuk varian ini?')) return;
-    var fd = new FormData();
-    fd.append('varian_id', STOK_VARIAN_ID);
+    window.showCustomConfirm('Konfirmasi Hapus', 'Hapus SEMUA stok tersedia untuk varian ini?', function() {
+        var fd = new FormData();
+        fd.append('varian_id', STOK_VARIAN_ID);
 
-    fetch(STOK_API_BASE + '/delete-all', { method: 'POST', body: fd })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.success) {
-                loadStokList();
-                if (typeof window.showToast === 'function') window.showToast('success', data.message);
-            }
-        });
+        fetch(STOK_API_BASE + '/delete-all', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    loadStokList();
+                    if (typeof window.showToast === 'function') window.showToast('success', data.message);
+                }
+            });
+    });
 }
 
 function togglePassStok(btn) {

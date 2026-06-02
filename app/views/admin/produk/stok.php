@@ -61,7 +61,7 @@
                     </td>
                     <td class="px-4 py-3 text-center">
                         <?php if ($stok['status'] === 'available'): ?>
-                        <form method="POST" class="inline" onsubmit="return confirm('Hapus stok ini?')">
+                        <form method="POST" class="inline" data-confirm="Hapus stok ini?">
                             <?= csrf_field() ?>
                             <input type="hidden" name="action" value="hapus_stok">
                             <input type="hidden" name="stok_id" value="<?= $stok['id'] ?>">

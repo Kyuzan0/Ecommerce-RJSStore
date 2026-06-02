@@ -159,5 +159,6 @@ function updateDarkIcons() {
 updateDarkIcons();
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.body.classList.remove('aside-open'); });
 </script>
+<?php include BASE_PATH . '/app/views/partials/confirm_modal.php'; ?>
 </body>
 </html>

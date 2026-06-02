@@ -59,7 +59,7 @@
                     <input type="hidden" name="produk_id" value="<?= $item['produk_id'] ?>">
                     <input type="hidden" name="varian_id" value="<?= $item['varian_id'] ?? '' ?>">
                     <button type="submit"
-                            onclick="return confirm('Hapus produk dari keranjang?')"
+                            data-confirm="Hapus produk dari keranjang?"
                             aria-label="Hapus dari keranjang"
                             class="w-10 h-10 inline-flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
                 <?= csrf_field() ?>
                 <input type="hidden" name="action" value="kosongkan">
                 <button type="submit"
-                        onclick="return confirm('Kosongkan semua item di keranjang?')"
+                        data-confirm="Kosongkan semua item di keranjang?"
                         class="text-red-500 hover:text-red-600 text-sm font-medium">
                     Kosongkan Keranjang
                 </button>

@@ -195,7 +195,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <td class="px-5 py-4 text-center">
                     <?php if($r['id'] != $this->auth->id()){ ?>
                         <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['email']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['role']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
-                        <form method="POST" class="inline" onsubmit="return confirm('Hapus user ini?')">
+                        <form method="POST" class="inline" data-confirm="Hapus user ini?">
                             <?= csrf_field() ?>
                             <input type="hidden" name="action" value="hapus_user">
                             <input type="hidden" name="user_id" value="<?= $r['id'] ?>">
@@ -242,7 +242,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
             <div class="flex gap-2 pt-3 border-t border-gray-100">
                 <?php if($r['id'] != $this->auth->id()): ?>
                     <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['email']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['role']), ENT_QUOTES) ?>)" class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
-                    <form method="POST" class="flex-1" onsubmit="return confirm('Hapus user ini?')">
+                    <form method="POST" class="flex-1" data-confirm="Hapus user ini?">
                         <?= csrf_field() ?>
                         <input type="hidden" name="action" value="hapus_user">
                         <input type="hidden" name="user_id" value="<?= $r['id'] ?>">
@@ -339,17 +339,17 @@ function bulkDelete() {
     var checked = document.querySelectorAll('.row-checkbox:checked');
     var count = checked.length;
     if (count === 0) return;
-    if (!confirm('Hapus ' + count + ' pengguna yang dipilih? Tindakan ini tidak dapat dibatalkan.')) return;
-
-    var container = document.getElementById('bulk-delete-ids');
-    container.innerHTML = '';
-    checked.forEach(function(cb) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'user_ids[]';
-        input.value = cb.value;
-        container.appendChild(input);
+    window.showCustomConfirm('Konfirmasi Hapus', 'Hapus ' + count + ' pengguna yang dipilih? Tindakan ini tidak dapat dibatalkan.', function() {
+        var container = document.getElementById('bulk-delete-ids');
+        container.innerHTML = '';
+        checked.forEach(function(cb) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'user_ids[]';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+        document.getElementById('bulk-delete-form').submit();
     });
-    document.getElementById('bulk-delete-form').submit();
 }
 </script>
