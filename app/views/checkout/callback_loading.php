@@ -52,16 +52,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (typeof gtag === 'function') {
                         gtag("event", "purchase", {
                             transaction_id: data.transaction_id,
+                            affiliation: "RJSStore",
                             value: parseFloat(data.value),
+                            tax: 0,
+                            shipping: 0,
                             currency: "IDR",
-                            items: data.items
+                            items: data.items,
+                            event_callback: function() {
+                                window.location.href = redirectUrl;
+                            },
+                            event_timeout: 2000 // Safeguard in case tracker is blocked/delayed
                         });
+                    } else {
+                        window.location.href = redirectUrl;
                     }
-                }
-                // Redirect back to purchases list after a brief delay to allow GA to dispatch
-                setTimeout(function() {
+                } else {
                     window.location.href = redirectUrl;
-                }, 400);
+                }
             })
             .catch(error => {
                 console.error('Verification error:', error);
