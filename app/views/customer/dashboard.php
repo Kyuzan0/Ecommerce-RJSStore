@@ -116,6 +116,8 @@
         <?php endif; ?>
     </div>
 
+    <!-- Koleksi Produk (1 col) -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
         <div class="flex items-center justify-between p-5 pb-0">
             <h2 class="text-sm font-bold text-gray-800">Koleksi Produk</h2>
             <a href="<?= url('/customer/download') ?>" class="text-xs font-medium hover:underline" style="color:#42B549">Semua →</a>
