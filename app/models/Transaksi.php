@@ -51,7 +51,12 @@ class Transaksi extends BaseModel
     public function getByUser(int $userId, ?string $status = null, int $limit = 20, int $offset = 0): array
     {
         $sql = "SELECT t.*, p.nama_produk, COALESCE(v.harga, p.harga) AS harga, p.file_upload, p.tipe_produk, v.durasi, v.paket,
-                       s.account_email, s.account_password
+                       s.account_email, s.account_password,
+                       COALESCE(
+                           CONCAT('Email: ', s.account_email, '\nPassword: ', s.account_password),
+                           v.account_info,
+                           p.account_info
+                       ) AS account_info
                 FROM transaksi t
                 JOIN produk p ON t.produk_id = p.id
                 LEFT JOIN produk_varian v ON t.varian_id = v.id

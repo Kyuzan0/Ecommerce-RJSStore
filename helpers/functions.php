@@ -462,3 +462,40 @@ function decrypt_value(string $ciphertext): string
 
     return $decrypted !== false ? $decrypted : $ciphertext; // Fallback to raw if decrypt fails
 }
+
+/**
+ * Decrypts structured or raw account info.
+ * E.g., parses:
+ * "Email: <encrypted_email>
+ * Password: <encrypted_password>"
+ * or a single encrypted string.
+ */
+function decrypt_account_info(string $account_info): string
+{
+    if (empty($account_info)) {
+        return '';
+    }
+
+    $lines = explode("\n", $account_info);
+    $decrypted_lines = [];
+
+    foreach ($lines as $line) {
+        $line = rtrim($line, "\r");
+        if ($line === '') {
+            $decrypted_lines[] = '';
+            continue;
+        }
+
+        if (strpos($line, ':') !== false) {
+            list($label, $value) = explode(':', $line, 2);
+            $trimmed_value = trim($value);
+            $decrypted_value = decrypt_value($trimmed_value);
+            $decrypted_lines[] = $label . ': ' . $decrypted_value;
+        } else {
+            $decrypted_lines[] = decrypt_value($line);
+        }
+    }
+
+    return implode("\n", $decrypted_lines);
+}
+

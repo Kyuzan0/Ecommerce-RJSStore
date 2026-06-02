@@ -67,17 +67,7 @@
                     </button>
                     <div id="akun-<?= $uid ?>" class="hidden mt-3">
                         <?php
-                        $decrypted_account_info = $item['account_info'];
-                        if (strpos($item['account_info'], ':') !== false) {
-                            list($encrypted_data, $iv) = array_pad(explode(':', $item['account_info'], 2), 2, null);
-                            if ($iv) {
-                                $key = 'RJSStoreSecretKey2026!@#';
-                                $decrypted = openssl_decrypt(base64_decode($encrypted_data), 'aes-256-cbc', $key, 0, base64_decode($iv));
-                                if ($decrypted !== false) {
-                                    $decrypted_account_info = $decrypted;
-                                }
-                            }
-                        }
+                        $decrypted_account_info = decrypt_account_info($item['account_info']);
                         ?>
                         <div class="bg-gray-900 rounded-lg p-3 relative">
                             <pre id="akun-text-<?= $uid ?>" class="text-xs text-green-300 whitespace-pre-wrap break-words font-mono leading-relaxed"><?= e($decrypted_account_info) ?></pre>
