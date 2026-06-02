@@ -116,10 +116,8 @@
         <?php endif; ?>
     </div>
 
-    <!-- Siap Download (1 col) -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
         <div class="flex items-center justify-between p-5 pb-0">
-            <h2 class="text-sm font-bold text-gray-800">Siap Download</h2>
+            <h2 class="text-sm font-bold text-gray-800">Koleksi Produk</h2>
             <a href="<?= url('/customer/download') ?>" class="text-xs font-medium hover:underline" style="color:#42B549">Semua →</a>
         </div>
         <?php if (!empty($downloadable_items)): ?>
@@ -221,8 +219,8 @@
                     <svg class="w-5 h-5" style="color:#7B1FA2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 </div>
                 <div class="flex-1">
-                    <span class="block text-sm font-bold text-gray-800">Download</span>
-                    <span class="block text-xs text-gray-500">Unduh produk digital</span>
+                    <span class="block text-sm font-bold text-gray-800">Koleksi Saya</span>
+                    <span class="block text-xs text-gray-500">Akses produk digital</span>
                 </div>
             </a>
         </div>

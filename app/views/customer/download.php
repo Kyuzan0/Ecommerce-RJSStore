@@ -3,14 +3,14 @@
     <ol class="flex items-center space-x-2 text-sm text-gray-600">
         <li><a href="<?= url('/customer/dashboard') ?>" class="hover:text-green-600">Dashboard</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li class="text-gray-800">Download</li>
+        <li class="text-gray-800">Koleksi</li>
     </ol>
 </nav>
 
 <!-- Page Header -->
 <div class="ds-page-header">
-    <h1 class="ds-page-title">Download Produk</h1>
-    <p class="ds-page-subtitle mt-1">Produk yang sudah Anda beli dapat diunduh di sini</p>
+    <h1 class="ds-page-title">Koleksi Produk</h1>
+    <p class="ds-page-subtitle mt-1">Akses semua produk digital dan akun yang telah Anda beli</p>
 </div>
 
 <?php if (empty($items)): ?>
@@ -19,14 +19,14 @@
         <svg class="w-14 h-14 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
         </svg>
-        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2">Belum ada produk untuk diunduh</h3>
-        <p class="text-sm text-gray-500 mb-6">Beli produk terlebih dahulu untuk dapat mengunduhnya</p>
+        <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2">Belum ada produk di koleksi Anda</h3>
+        <p class="text-sm text-gray-500 mb-6">Beli produk terlebih dahulu untuk dapat mengaksesnya di sini</p>
         <a href="<?= url('/customer/produk') ?>" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors">
             Lihat Produk
         </a>
     </div>
 <?php else: ?>
-    <!-- Download Grid -->
+    <!-- Collection Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <?php foreach ($items as $item): ?>
         <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
