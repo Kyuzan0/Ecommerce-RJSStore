@@ -80,7 +80,7 @@
                 <div class="flex items-center mb-2">
                     <?php
                     $avg_rating = $product['avg_rating'] ?? 0;
-                    $total_rating = $product['total_rating'] ?? 0;
+                    $total_rating = $product['total_rating'] ?? $product['total_reviews'] ?? 0;
                     for ($i = 1; $i <= 5; $i++):
                     ?>
                         <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 <?= $i <= $avg_rating ? 'text-yellow-400' : 'text-gray-300' ?>" fill="currentColor" viewBox="0 0 20 20">
@@ -140,35 +140,38 @@
                 <p class="text-sm text-gray-500 font-medium animate-pulse">Memuat detail produk...</p>
             </div>
 
-            <div id="mp-content" class="hidden h-full overflow-hidden md:grid md:grid-cols-2">
-                <div class="relative flex flex-col min-h-[320px] bg-white border-b md:border-b-0 md:border-r border-white/60 overflow-y-auto" id="mp-hero-bg" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)">
-                    <div class="relative z-10 flex-1 flex flex-col px-6 py-8 md:px-8 md:py-10">
-                        <div class="mb-6 inline-flex items-center justify-center p-4 rounded-3xl bg-white/90 shadow self-start" id="mp-icon-container">
+            <div id="mp-content" class="hidden h-full overflow-y-auto md:overflow-hidden md:grid md:grid-cols-2">
+                <div class="relative flex flex-col min-h-[320px] bg-white border-b md:border-b-0 md:border-r border-white/60 overflow-y-visible md:overflow-y-auto" id="mp-hero-bg" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)">
+                    <div class="relative z-10 flex-1 flex flex-col px-6 py-5 md:px-8 md:py-8">
+                        <div class="mb-4 inline-flex items-center justify-center p-4 rounded-3xl bg-white/90 shadow self-start" id="mp-icon-container">
                             <svg class="w-12 h-12" id="mp-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h5v2H8V9z"/></svg>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2 mb-4">
                             <span id="mp-type-badge" class="text-xs font-bold px-3 py-1 rounded-full border bg-white/70"></span>
-                            <div class="flex items-center gap-1.5 bg-white/70 px-3 py-1 rounded-full shadow-sm">
+                            <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200/60 dark:border-gray-700 px-3 py-1 rounded-full">
                                 <svg class="w-3.5 h-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <span id="mp-rating" class="text-xs font-bold text-gray-800"></span>
-                                <span id="mp-review-count" class="text-[10px] text-gray-500"></span>
+                                <span id="mp-rating" class="text-xs font-bold text-gray-850 dark:text-gray-100"></span>
+                                <span id="mp-review-count" class="text-[10px] text-gray-600 dark:text-gray-300 font-medium"></span>
                             </div>
                         </div>
 
-                        <h2 id="mp-title" class="font-extrabold text-2xl md:text-[2rem] text-gray-900 mb-3 leading-tight"></h2>
-                        <p id="mp-price" class="font-black text-3xl md:text-4xl mb-6" style="color:#42B549"></p>
+                        <h2 id="mp-title" class="font-extrabold text-xl md:text-2xl text-gray-900 mb-3 leading-tight"></h2>
+                        <p id="mp-price" class="font-black text-2xl md:text-3xl mb-4" style="color:#42B549"></p>
 
-                        <div id="mp-variants" class="hidden mb-6">
+                        <!-- Divider line directly under the price (more visible color in light & dark mode) -->
+                        <div class="w-full border-t border-gray-300 dark:border-white/20 my-4"></div>
+
+                        <div id="mp-variants" class="hidden mb-4">
                             <label class="block text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-2">Pilih Varian</label>
                             <select id="mp-variant-select" onchange="onVariantChange()" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-white outline-none focus:border-green-500 transition cursor-pointer">
                                 <option value="">— Pilih varian —</option>
                             </select>
                         </div>
 
-                        <div class="rounded-[1.75rem] bg-white/78 border border-white/70 shadow p-5 md:p-6 mb-6">
+                        <div class="mb-4">
                             <h4 class="text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-3">Informasi Produk</h4>
-                            <p id="mp-desc" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+                            <p id="mp-desc" class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line"></p>
                         </div>
 
                         <div class="mt-auto">
@@ -182,8 +185,8 @@
                         <p class="text-[11px] font-bold tracking-[0.24em] text-gray-400 uppercase mb-2">Ulasan Pelanggan</p>
                         <h4 class="text-xl font-bold text-gray-900">Apa kata pembeli</h4>
                     </div>
-                    <div class="flex-1 overflow-y-auto px-6 py-6 md:px-8 md:py-8" id="mp-body">
-                        <div id="mp-reviews" class="grid grid-cols-1 gap-4 min-h-[280px]"></div>
+                    <div class="flex-1 overflow-y-visible md:overflow-y-auto px-6 py-6 md:px-8 md:py-8" id="mp-body">
+                        <div id="mp-reviews" class="grid grid-cols-1 gap-4 items-start min-h-[280px]"></div>
                         <div id="mp-reviews-pagination" class="hidden flex items-center justify-between mt-5 pt-4 border-t border-gray-100/80">
                             <button type="button" id="mp-rev-prev" onclick="reviewsPage(-1)" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed">← Sebelumnya</button>
                             <span id="mp-rev-info" class="text-xs text-gray-500 font-medium"></span>
@@ -297,7 +300,7 @@ function renderReviewsPage() {
         for (var i = 1; i <= 5; i++) {
             stars += '<svg class="w-4 h-4 ' + (i <= rev.rating ? 'text-yellow-400' : 'text-gray-200') + '" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>';
         }
-        reviewsEl.innerHTML += '<div class="bg-gray-50 rounded-2xl p-5 border border-gray-100/50"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#42B549">' + escapeHtml(rev.initial) + '</div><div><p class="text-sm font-bold text-gray-800">' + escapeHtml(rev.nama_user) + '</p><span class="text-xs text-gray-400">' + escapeHtml(rev.tanggal) + '</span></div><div class="flex items-center gap-0.5 ml-auto">' + stars + '</div></div><p class="text-sm text-gray-600">' + escapeHtml(rev.ulasan) + '</p></div>';
+        reviewsEl.innerHTML += '<div class="bg-gray-50 rounded-2xl p-5 border border-gray-100/50"><div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background:#42B549">' + escapeHtml(rev.initial) + '</div><div><p class="text-sm font-bold text-gray-800">' + escapeHtml(rev.nama_user) + '</p><span class="text-xs text-gray-400">' + escapeHtml(rev.tanggal) + '</span></div><div class="flex items-center gap-0.5 ml-auto">' + stars + '</div></div><p class="text-sm text-gray-600">' + (rev.ulasan ? escapeHtml(rev.ulasan) : '<span class="text-gray-400 italic">Hanya memberikan rating</span>') + '</p></div>';
     });
 
     if (totalPages > 1) {

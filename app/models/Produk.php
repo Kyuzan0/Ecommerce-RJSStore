@@ -34,7 +34,8 @@ class Produk extends BaseModel
         return $this->db->fetchAll(
             "SELECT p.*,
                     COALESCE(r.avg_rating, 0) AS avg_rating,
-                    COALESCE(r.total_reviews, 0) AS total_reviews
+                    COALESCE(r.total_reviews, 0) AS total_reviews,
+                    COALESCE(r.total_reviews, 0) AS total_rating
              FROM produk p
              LEFT JOIN (
                  SELECT produk_id, AVG(rating) AS avg_rating, COUNT(id) AS total_reviews
@@ -79,7 +80,8 @@ class Produk extends BaseModel
         return $this->db->fetchOne(
             "SELECT p.*, 
                     COALESCE(r.avg_rating, 0) AS avg_rating, 
-                    COALESCE(r.total_reviews, 0) AS total_reviews
+                    COALESCE(r.total_reviews, 0) AS total_reviews,
+                    COALESCE(r.total_reviews, 0) AS total_rating
              FROM produk p
              LEFT JOIN (
                  SELECT produk_id, AVG(rating) AS avg_rating, COUNT(id) AS total_reviews
@@ -99,7 +101,7 @@ class Produk extends BaseModel
             "SELECT t.rating, t.ulasan, t.tanggal, u.name AS nama_user
              FROM transaksi t
              JOIN users u ON t.user_id = u.id
-             WHERE t.produk_id = ? AND t.rating > 0 AND t.ulasan != ''
+             WHERE t.produk_id = ? AND t.rating > 0
              ORDER BY t.tanggal DESC
              LIMIT {$limit}",
             [$produkId]
