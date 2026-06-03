@@ -41,10 +41,10 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 sticky top-0">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email / Username</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Password</th>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                    <th class="px-4 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Email / Username</th>
+                    <th class="px-4 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Password</th>
+                    <th class="px-4 py-1.5 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-1.5 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">

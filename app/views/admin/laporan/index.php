@@ -231,12 +231,12 @@ document.addEventListener('click', function(e) {
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-t border-gray-100 bg-gray-50/50">
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">#</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
-                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
-                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TERJUAL</th>
-                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TOTAL</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">#</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
+                    <th class="text-right px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
+                    <th class="text-right px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">TERJUAL</th>
+                    <th class="text-right px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">TOTAL</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -296,13 +296,13 @@ document.addEventListener('click', function(e) {
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-t border-gray-100 bg-gray-50/50">
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TANGGAL</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">ORDER REF</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PELANGGAN</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
-                    <th class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
-                    <th class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
-                    <th class="text-center px-4 sm:px-6 py-3 text-xs font-semibold text-gray-500 tracking-wide">STATUS</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">TANGGAL</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">ORDER REF</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">PELANGGAN</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">PRODUK</th>
+                    <th class="text-left px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">TIPE</th>
+                    <th class="text-right px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">HARGA</th>
+                    <th class="text-center px-4 sm:px-6 py-1.5 text-xs font-semibold text-gray-500 tracking-wide">STATUS</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
