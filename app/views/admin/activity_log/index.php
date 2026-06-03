@@ -70,6 +70,32 @@
     </form>
 </div>
 
+<!-- Security Status Bar (Flat, borderless) -->
+<div class="mb-6 p-4 rounded-xl flex items-center justify-between gap-3 transition-colors <?php echo $summary_stats['failed_login'] > 0 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'; ?>">
+    <div class="flex items-center gap-3">
+        <?php if ($summary_stats['failed_login'] > 0): ?>
+            <!-- Warning Shield Icon -->
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div class="text-xs font-semibold">
+                Status Keamanan: Terdeteksi <?= number_format($summary_stats['failed_login']) ?> kali percobaan login gagal di sistem log.
+            </div>
+        <?php else: ?>
+            <!-- Success Shield Icon -->
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <div class="text-xs font-semibold">
+                Status Keamanan: Sistem aman dan aktif. Tidak ada aktivitas mencurigakan yang terdeteksi hari ini.
+            </div>
+        <?php endif; ?>
+    </div>
+    <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full <?php echo $summary_stats['failed_login'] > 0 ? 'bg-rose-500/20' : 'bg-emerald-500/20'; ?>">
+        <?php echo $summary_stats['failed_login'] > 0 ? 'Perhatian' : 'Aman'; ?>
+    </span>
+</div>
+
 <?php if (empty($logs)): ?>
 <div class="p-12 text-center">
     <p class="text-gray-500 dark:text-gray-400">Belum ada aktivitas tercatat.</p>
@@ -80,12 +106,12 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 dark:bg-[#2C2C2C] sticky top-0 z-10 border-b border-gray-150 dark:border-gray-700">
                 <tr>
-                    <th class="w-[20%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
-                    <th class="w-[15%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengguna</th>
-                    <th class="w-[12%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                    <th class="w-[20%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
-                    <th class="w-[18%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
-                    <th class="w-[15%] px-5 py-[18px] text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
+                    <th class="w-[20%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
+                    <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengguna</th>
+                    <th class="w-[12%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                    <th class="w-[20%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                    <th class="w-[18%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
+                    <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -138,31 +164,31 @@
                     'detail'         => $log['detail'] ?? '-'
                 ]), ENT_QUOTES, 'UTF-8');
                 ?>
-                <tr onclick="openLogModal(<?= $logJson ?>)" class="hover:bg-gray-50 dark:hover:bg-gray-750/50 transition cursor-pointer">
+                 <tr onclick="openLogModal(<?= $logJson ?>)" class="hover:bg-gray-50 dark:hover:bg-gray-750/50 transition cursor-pointer">
                     <!-- Column 1: Waktu -->
-                    <td class="px-5 py-[18px] whitespace-nowrap text-xs text-gray-600 dark:text-gray-300 font-medium align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300 font-medium align-middle">
                         <?= e(date('d M Y H:i', strtotime($log['created_at']))) ?>
                     </td>
                     <!-- Column 2: Pengguna -->
-                    <td class="px-5 py-[18px] whitespace-nowrap text-sm font-semibold text-gray-800 dark:text-gray-150 align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap text-sm font-semibold text-gray-800 dark:text-gray-150 align-middle">
                         <?= e($log['user_name']) ?>
                     </td>
                     <!-- Column 3: Role -->
-                    <td class="px-5 py-[18px] whitespace-nowrap align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
                         <span class="ds-chip ds-chip--<?= $roleVariant ?> rounded-full">
                             <?= e(ucfirst($role)) ?>
                         </span>
                     </td>
                     <!-- Column 4: Aksi -->
-                    <td class="px-5 py-[18px] whitespace-nowrap align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
                         <span class="ds-chip ds-chip--<?= $badgeVariant ?>"><?= e($log['action']) ?></span>
                     </td>
                     <!-- Column 5: IP Address -->
-                    <td class="px-5 py-[18px] whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 font-mono align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 font-mono align-middle">
                         <?= e($log['ip_address'] ?? '-') ?>
                     </td>
                     <!-- Column 6: Severity -->
-                    <td class="px-5 py-[18px] whitespace-nowrap align-middle">
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
                         <span class="inline-flex items-center gap-1.5 font-semibold text-xs text-<?= $sev['color'] ?>-600 dark:text-<?= $sev['color'] ?>-400">
                             <span class="w-1.5 h-1.5 rounded-full <?= $sev['bg'] ?>"></span>
                             <?= $sev['label'] ?>
@@ -182,7 +208,7 @@
     unset($query_params['page']);
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
     ?>
-    <div class="border-t border-gray-150 dark:border-gray-750 pt-6 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="border-t border-gray-150 dark:border-gray-750 pt-4 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="text-xs text-gray-500 dark:text-gray-400">
             Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas
         </div>
