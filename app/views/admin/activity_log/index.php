@@ -75,16 +75,17 @@
     <p class="text-gray-500 dark:text-gray-400">Belum ada aktivitas tercatat.</p>
 </div>
 <?php else: ?>
-<div class="w-full">
-    <div class="max-h-[52vh] overflow-y-auto">
+<div class="w-full flex-1 flex flex-col min-h-0">
+    <div class="flex-1 overflow-y-auto pb-4">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10 border-b border-gray-100 dark:border-gray-750">
+            <thead class="bg-gray-50 dark:bg-[#2C2C2C] sticky top-0 z-10 border-b border-gray-150 dark:border-gray-700">
                 <tr>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu & IP</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengguna & Role</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi & Target</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Detail</th>
+                    <th class="w-[20%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
+                    <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengguna</th>
+                    <th class="w-[12%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                    <th class="w-[20%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aksi</th>
+                    <th class="w-[18%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
+                    <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -138,35 +139,34 @@
                 ]), ENT_QUOTES, 'UTF-8');
                 ?>
                 <tr onclick="openLogModal(<?= $logJson ?>)" class="hover:bg-gray-50 dark:hover:bg-gray-750/50 transition cursor-pointer">
-                    <!-- Column 1: Waktu & IP (Tertiary) -->
-                    <td class="px-5 py-3 whitespace-nowrap">
-                        <div class="text-xs text-gray-600 dark:text-gray-300 font-medium"><?= e(date('d M Y H:i', strtotime($log['created_at']))) ?></div>
-                        <div class="text-[10px] text-gray-400 dark:text-gray-500 font-mono mt-0.5"><?= e($log['ip_address'] ?? '-') ?></div>
+                    <!-- Column 1: Waktu -->
+                    <td class="px-5 py-3 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300 font-medium align-middle">
+                        <?= e(date('d M Y H:i', strtotime($log['created_at']))) ?>
                     </td>
-                    <!-- Column 2: Pengguna & Role (Primary) -->
-                    <td class="px-5 py-3 whitespace-nowrap">
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-150"><?= e($log['user_name']) ?></div>
-                        <span class="ds-chip ds-chip--<?= $roleVariant ?> rounded-full mt-1">
+                    <!-- Column 2: Pengguna -->
+                    <td class="px-5 py-3 whitespace-nowrap text-sm font-semibold text-gray-800 dark:text-gray-150 align-middle">
+                        <?= e($log['user_name']) ?>
+                    </td>
+                    <!-- Column 3: Role -->
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
+                        <span class="ds-chip ds-chip--<?= $roleVariant ?> rounded-full">
                             <?= e(ucfirst($role)) ?>
                         </span>
                     </td>
-                    <!-- Column 3: Aksi & Target (Primary/Secondary) -->
-                    <td class="px-5 py-3 whitespace-nowrap">
+                    <!-- Column 4: Aksi -->
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
                         <span class="ds-chip ds-chip--<?= $badgeVariant ?>"><?= e($log['action']) ?></span>
-                        <div class="text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-1">
-                            <?= e(($log['target_type'] ?? '') . ($log['target_id'] ? ' #' . $log['target_id'] : '')) ?>
-                        </div>
                     </td>
-                    <!-- Column 4: Severity -->
-                    <td class="px-5 py-3 whitespace-nowrap">
+                    <!-- Column 5: IP Address -->
+                    <td class="px-5 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 font-mono align-middle">
+                        <?= e($log['ip_address'] ?? '-') ?>
+                    </td>
+                    <!-- Column 6: Severity -->
+                    <td class="px-5 py-3 whitespace-nowrap align-middle">
                         <span class="inline-flex items-center gap-1.5 font-semibold text-xs text-<?= $sev['color'] ?>-600 dark:text-<?= $sev['color'] ?>-400">
                             <span class="w-1.5 h-1.5 rounded-full <?= $sev['bg'] ?>"></span>
                             <?= $sev['label'] ?>
                         </span>
-                    </td>
-                    <!-- Column 5: Detail -->
-                    <td class="px-5 py-3 text-xs text-gray-600 dark:text-gray-300 max-w-md truncate" title="<?= e($log['detail'] ?? '-') ?>">
-                        <?= e($log['detail'] ?? '-') ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
