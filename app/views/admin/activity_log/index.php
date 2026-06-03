@@ -101,10 +101,10 @@
     <p class="text-gray-500 dark:text-gray-400">Belum ada aktivitas tercatat.</p>
 </div>
 <?php else: ?>
-<div class="w-full flex flex-col mt-4">
-    <div class="overflow-x-auto pb-4">
+<div class="bg-white rounded-2xl border border-gray-100 flex-1 flex flex-col overflow-hidden mt-4 shadow-sm">
+    <div class="ds-table-wrap ds-table-wrap--wide">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 dark:bg-[#2C2C2C] sticky top-0 z-10 border-b border-gray-150 dark:border-gray-700">
+            <thead class="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
                 <tr>
                     <th class="w-[20%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
                     <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pengguna</th>
@@ -114,7 +114,7 @@
                     <th class="w-[15%] px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Severity</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-50">
                 <?php foreach ($logs as $log): ?>
                 <?php
                 // Get role details
@@ -208,7 +208,7 @@
     unset($query_params['page']);
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
     ?>
-    <div class="border-t border-gray-150 dark:border-gray-750 pt-4 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="border-t border-gray-100 px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
         <div class="text-xs text-gray-500 dark:text-gray-400">
             Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas
         </div>
