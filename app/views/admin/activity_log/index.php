@@ -1,84 +1,81 @@
 <!-- Page Header: Title, Stats, and Filters (All merged in 1 row, no cards) -->
-<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
     <!-- Title & Simple Stats -->
     <div class="flex flex-wrap items-center gap-3">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex-shrink-0">Log Aktivitas</h1>
         <div class="hidden sm:flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-l border-gray-200 dark:border-gray-700 pl-3">
             <span>Total Log: <strong class="text-gray-700 dark:text-gray-300"><?= number_format($summary_stats['total']) ?></strong></span>
             <span class="text-gray-350 dark:text-gray-700">•</span>
-            <span>Login: <strong class="text-emerald-600 dark:text-emerald-400"><?= number_format($summary_stats['login_today']) ?></strong></span>
+            <span>Login: <strong class="text-emerald-600 dark:text-emerald-450"><?= number_format($summary_stats['login_today']) ?></strong></span>
             <span class="text-gray-350 dark:text-gray-700">•</span>
-            <span>Checkout: <strong class="text-purple-600 dark:text-purple-400"><?= number_format($summary_stats['checkout_today']) ?></strong></span>
+            <span>Checkout: <strong class="text-purple-600 dark:text-purple-450"><?= number_format($summary_stats['checkout_today']) ?></strong></span>
             <span class="text-gray-350 dark:text-gray-700">•</span>
             <span>Failed: <strong class="text-rose-600 dark:text-rose-455"><?= number_format($summary_stats['failed_login']) ?></strong></span>
         </div>
     </div>
     
-    <!-- Search & Advanced Filter Form (Borderless & flat) -->
-    <form method="GET" action="<?= url('/admin-activity-log') ?>" class="flex-1 flex flex-col md:flex-row md:items-center justify-end gap-3 w-full">
+    <!-- Search & Advanced Filter Form (Borderless, flat, and 1 row) -->
+    <form method="GET" action="<?= url('/admin-activity-log') ?>" class="flex flex-row flex-wrap items-center gap-2 lg:justify-end w-full lg:w-auto">
         <!-- Search Global -->
-        <div class="relative w-full md:max-w-xs xl:max-w-sm">
-            <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Cari user, IP, aksi, target..." class="w-full pl-9 pr-8 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition dark:text-gray-200">
-            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <div class="relative w-44 sm:w-56">
+            <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Cari user, IP, aksi..." class="w-full pl-8 pr-7 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition dark:text-gray-200">
+            <div class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             <?php if ($filters['search'] !== ''): ?>
-                <a href="<?= url('/admin-activity-log') . '?' . http_build_query(array_merge($filters, ['search' => ''])) ?>" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-650">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <a href="<?= url('/admin-activity-log') . '?' . http_build_query(array_merge($filters, ['search' => ''])) ?>" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-650">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </a>
             <?php endif; ?>
         </div>
         
-        <!-- Dropdown Filters -->
-        <div class="flex flex-wrap items-center gap-2">
-            <!-- Role -->
-            <select name="role" onchange="this.form.submit()" class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-                <option value="">Role: Semua</option>
-                <option value="admin" <?= $filters['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
-                <option value="customer" <?= $filters['role'] === 'customer' ? 'selected' : '' ?>>Customer</option>
-                <option value="system" <?= $filters['role'] === 'system' ? 'selected' : '' ?>>System</option>
-            </select>
-            
-            <!-- Aksi (Action) -->
-            <select name="action" onchange="this.form.submit()" class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[130px]">
-                <option value="">Aksi: Semua</option>
-                <?php foreach ($distinct_actions as $act): ?>
-                    <option value="<?= e($act) ?>" <?= $filters['action'] === $act ? 'selected' : '' ?>><?= e($act) ?></option>
-                <?php endforeach; ?>
-            </select>
-            
-            <!-- Tanggal (Date) -->
-            <select name="date" onchange="this.form.submit()" class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-                <option value="">Tanggal: Semua</option>
-                <option value="today" <?= $filters['date'] === 'today' ? 'selected' : '' ?>>Hari Ini</option>
-                <option value="week" <?= $filters['date'] === 'week' ? 'selected' : '' ?>>7 Hari Terakhir</option>
-                <option value="month" <?= $filters['date'] === 'month' ? 'selected' : '' ?>>30 Hari Terakhir</option>
-            </select>
-            
-            <!-- IP -->
-            <select name="ip" onchange="this.form.submit()" class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[130px]">
-                <option value="">IP: Semua</option>
-                <?php foreach ($distinct_ips as $ip_addr): ?>
-                    <option value="<?= e($ip_addr) ?>" <?= $filters['ip'] === $ip_addr ? 'selected' : '' ?>><?= e($ip_addr) ?></option>
-                <?php endforeach; ?>
-            </select>
+        <!-- Role -->
+        <select name="role" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
+            <option value="">Role: Semua</option>
+            <option value="admin" <?= $filters['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
+            <option value="customer" <?= $filters['role'] === 'customer' ? 'selected' : '' ?>>Customer</option>
+            <option value="system" <?= $filters['role'] === 'system' ? 'selected' : '' ?>>System</option>
+        </select>
+        
+        <!-- Aksi (Action) -->
+        <select name="action" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[120px]">
+            <option value="">Aksi: Semua</option>
+            <?php foreach ($distinct_actions as $act): ?>
+                <option value="<?= e($act) ?>" <?= $filters['action'] === $act ? 'selected' : '' ?>><?= e($act) ?></option>
+            <?php endforeach; ?>
+        </select>
+        
+        <!-- Tanggal (Date) -->
+        <select name="date" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
+            <option value="">Tanggal: Semua</option>
+            <option value="today" <?= $filters['date'] === 'today' ? 'selected' : '' ?>>Hari Ini</option>
+            <option value="week" <?= $filters['date'] === 'week' ? 'selected' : '' ?>>7 Hari Terakhir</option>
+            <option value="month" <?= $filters['date'] === 'month' ? 'selected' : '' ?>>30 Hari Terakhir</option>
+        </select>
+        
+        <!-- IP -->
+        <select name="ip" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[120px]">
+            <option value="">IP: Semua</option>
+            <?php foreach ($distinct_ips as $ip_addr): ?>
+                <option value="<?= e($ip_addr) ?>" <?= $filters['ip'] === $ip_addr ? 'selected' : '' ?>><?= e($ip_addr) ?></option>
+            <?php endforeach; ?>
+        </select>
 
-            <!-- Reset Filter Button -->
-            <?php if (array_filter($filters) !== []): ?>
-                <a href="<?= url('/admin-activity-log') ?>" class="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline px-1.5">
-                    Reset
-                </a>
-            <?php endif; ?>
-        </div>
+        <!-- Reset Filter Button -->
+        <?php if (array_filter($filters) !== []): ?>
+            <a href="<?= url('/admin-activity-log') ?>" class="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline px-1">
+                Reset
+            </a>
+        <?php endif; ?>
     </form>
 </div>
 
 <?php if (empty($logs)): ?>
-<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
+<div class="p-12 text-center">
     <p class="text-gray-500 dark:text-gray-400">Belum ada aktivitas tercatat.</p>
 </div>
 <?php else: ?>
-<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+<div class="w-full">
     <div class="max-h-[52vh] overflow-y-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10 border-b border-gray-100 dark:border-gray-750">
@@ -185,7 +182,7 @@
     unset($query_params['page']);
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
     ?>
-    <div class="border-t border-gray-100 dark:border-gray-700 pt-4 pb-4 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto bg-gray-50/30 dark:bg-gray-900/30">
+    <div class="border-t border-gray-150 dark:border-gray-750 pt-4 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="text-xs text-gray-500 dark:text-gray-400">
             Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas
         </div>
