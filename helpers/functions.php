@@ -232,7 +232,7 @@ function pagination_render(array $paging): string
     $disabled_cls = 'px-3 py-2 rounded-lg text-sm font-medium text-gray-300 cursor-default';
     $dots_cls = 'px-2 py-2 text-gray-400 text-sm';
 
-    $html = '<div class="border-t border-gray-100 pt-4 pb-4 px-4 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">';
+    $html = '<div class="border-t border-gray-100 py-2 px-4 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">';
     
     // Group pagination status and limit dropdown on the left
     $html .= '<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 order-2 sm:order-1">';

@@ -171,14 +171,14 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
-                    <th class="px-3 py-3 text-center w-10"><input type="checkbox" id="select-all" class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600"></th>
-                    <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">No</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Info Produk</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Harga</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rating</th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">File</th>
-                    <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-3 py-1.5 text-center w-10"><input type="checkbox" id="select-all" class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer accent-green-600"></th>
+                    <th class="px-5 py-1.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">No</th>
+                    <th class="px-5 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Info Produk</th>
+                    <th class="px-5 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe</th>
+                    <th class="px-5 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Harga</th>
+                    <th class="px-5 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Rating</th>
+                    <th class="px-5 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">File</th>
+                    <th class="px-5 py-1.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">

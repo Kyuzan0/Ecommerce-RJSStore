@@ -208,7 +208,7 @@
     unset($query_params['page']);
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
     ?>
-    <div class="border-t border-gray-100 px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
+    <div class="border-t border-gray-100 px-5 py-2 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
             <span>Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas</span>
             <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
