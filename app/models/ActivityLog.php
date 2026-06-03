@@ -222,6 +222,38 @@ class ActivityLog extends BaseModel
     }
 
     /**
+     * Get the log counts for the last 7 days to show in the activity trend graph.
+     */
+    public function getActivityTrend(): array
+    {
+        $startDate = date('Y-m-d 00:00:00', strtotime('-6 days'));
+        $rows = $this->db->fetchAll(
+            "SELECT DATE(created_at) as log_date, COUNT(*) as total 
+             FROM activity_log 
+             WHERE created_at >= ? 
+             GROUP BY DATE(created_at) 
+             ORDER BY log_date ASC",
+            [$startDate]
+        );
+        
+        $indexed = [];
+        foreach ($rows as $row) {
+            $indexed[$row['log_date']] = (int)$row['total'];
+        }
+        
+        $trend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $trend[] = [
+                'date' => $date,
+                'label' => date('d M', strtotime($date)),
+                'count' => $indexed[$date] ?? 0
+            ];
+        }
+        return $trend;
+    }
+
+    /**
      * Determine severity level based on action name.
      */
     public static function getSeverity(string $action): array

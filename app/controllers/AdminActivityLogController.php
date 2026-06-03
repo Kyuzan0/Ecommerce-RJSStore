@@ -39,12 +39,13 @@ class AdminActivityLogController extends BaseController
         $distinct_actions = $this->activityModel->getDistinctActions();
         $distinct_ips = $this->activityModel->getDistinctIps();
         $summary_stats = $this->activityModel->getSummaryStats();
+        $activity_trend = $this->activityModel->getActivityTrend();
 
         // 3. Paginate
         $total_filtered = $this->activityModel->countAll($filters);
         
         $page = max(1, (int) ($_GET['page'] ?? 1));
-        $per_page = 30;
+        $per_page = 10;
         $total_pages = max(1, (int) ceil($total_filtered / $per_page));
         $page = min($page, $total_pages);
         $offset = ($page - 1) * $per_page;
@@ -73,6 +74,7 @@ class AdminActivityLogController extends BaseController
             'distinct_actions' => $distinct_actions,
             'distinct_ips'     => $distinct_ips,
             'summary_stats'    => $summary_stats,
+            'activity_trend'   => $activity_trend,
         ], 'admin');
     }
 }
