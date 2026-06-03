@@ -239,7 +239,7 @@
             <?php endif; ?>
             
             <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                Halaman <?= $page ?> dari <?= $total_pages ?>
+                Hal <?= $page ?> dari <?= $total_pages ?>
             </span>
             
             <?php if ($page < $total_pages): ?>

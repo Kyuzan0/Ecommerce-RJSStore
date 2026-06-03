@@ -221,6 +221,7 @@ function pagination_render(array $paging): string
 
     $page        = $paging['page'];
     $total_pages = $paging['total_pages'];
+    $isAdmin     = (strpos($_SERVER['REQUEST_URI'], '/admin-') !== false);
 
     $query_params = $_GET;
     unset($query_params['page']);
@@ -256,94 +257,110 @@ function pagination_render(array $paging): string
     }
     $html .= '</div>';
     
-    $html .= '<div class="flex items-center justify-center gap-1 order-1 sm:order-2">';
+    if ($isAdmin) {
+        $html .= '<div class="flex items-center gap-4 order-1 sm:order-2">';
+        if ($page > 1) {
+            $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all">◀ Sebelumnya</a>';
+        } else {
+            $html .= '<span class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 dark:text-gray-600 border border-gray-150 dark:border-gray-800 cursor-default">◀ Sebelumnya</span>';
+        }
 
-    // Prev arrow — always rendered for consistent width
-    if ($page > 1) {
-        $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="' . $link_cls . '">&laquo;</a>';
+        $html .= '<span class="text-xs font-semibold text-gray-600 dark:text-gray-400">Hal ' . $page . ' dari ' . $total_pages . '</span>';
+
+        if ($page < $total_pages) {
+            $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all">Berikutnya ▶</a>';
+        } else {
+            $html .= '<span class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 dark:text-gray-600 border border-gray-150 dark:border-gray-800 cursor-default">Berikutnya ▶</span>';
+        }
+        $html .= '</div>';
     } else {
-        $html .= '<span class="' . $disabled_cls . '">&laquo;</span>';
+        $html .= '<div class="flex items-center justify-center gap-1 order-1 sm:order-2">';
+
+        // Prev arrow — always rendered for consistent width
+        if ($page > 1) {
+            $html .= '<a href="' . $base . 'page=' . ($page - 1) . '" class="' . $link_cls . '">&laquo;</a>';
+        } else {
+            $html .= '<span class="' . $disabled_cls . '">&laquo;</span>';
+        }
+
+        // Fixed-width sliding window: always show exactly $max_visible page slots
+        // Slots: [1] [...] [a] [b] [c] [d] [e] [...] [last]
+        // The middle window is always 5 buttons; total slots = 9 (including 1, last, 2 ellipsis)
+        $max_visible = 5;
+
+        if ($total_pages <= $max_visible + 4) {
+            // Few pages — show all, no ellipsis needed
+            for ($i = 1; $i <= $total_pages; $i++) {
+                if ($i == $page) {
+                    $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
+                } else {
+                    $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
+                }
+            }
+        } else {
+            // Calculate the middle window boundaries
+            $half = (int) floor($max_visible / 2);
+            $win_start = $page - $half;
+            $win_end   = $page + $half;
+
+            // Clamp window to valid range
+            if ($win_start < 1) {
+                $win_start = 1;
+                $win_end   = $max_visible;
+            }
+            if ($win_end > $total_pages) {
+                $win_end   = $total_pages;
+                $win_start = $total_pages - $max_visible + 1;
+            }
+
+            $show_left_dots  = ($win_start > 2);
+            $show_right_dots = ($win_end < $total_pages - 1);
+
+            // First page
+            if ($win_start > 1) {
+                if (1 == $page) {
+                    $html .= '<span class="' . $active_cls . '" style="background:#42B549">1</span>';
+                } else {
+                    $html .= '<a href="' . $base . 'page=1" class="' . $link_cls . '">1</a>';
+                }
+            }
+
+            // Left ellipsis
+            if ($show_left_dots) {
+                $html .= '<span class="' . $dots_cls . '">...</span>';
+            }
+
+            // Middle window
+            for ($i = $win_start; $i <= $win_end; $i++) {
+                if ($i == $page) {
+                    $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
+                } else {
+                    $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
+                }
+            }
+
+            // Right ellipsis
+            if ($show_right_dots) {
+                $html .= '<span class="' . $dots_cls . '">...</span>';
+            }
+
+            // Last page
+            if ($win_end < $total_pages) {
+                if ($total_pages == $page) {
+                    $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $total_pages . '</span>';
+                } else {
+                    $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="' . $link_cls . '">' . $total_pages . '</a>';
+                }
+            }
+        }
+
+        // Next arrow — always rendered for consistent width
+        if ($page < $total_pages) {
+            $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="' . $link_cls . '">&raquo;</a>';
+        } else {
+            $html .= '<span class="' . $disabled_cls . '">&raquo;</span>';
+        }
     }
-
-    // Fixed-width sliding window: always show exactly $max_visible page slots
-    // Slots: [1] [...] [a] [b] [c] [d] [e] [...] [last]
-    // The middle window is always 5 buttons; total slots = 9 (including 1, last, 2 ellipsis)
-    $max_visible = 5;
-
-    if ($total_pages <= $max_visible + 4) {
-        // Few pages — show all, no ellipsis needed
-        for ($i = 1; $i <= $total_pages; $i++) {
-            if ($i == $page) {
-                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
-            } else {
-                $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
-            }
-        }
-    } else {
-        // Calculate the middle window boundaries
-        $half = (int) floor($max_visible / 2);
-        $win_start = $page - $half;
-        $win_end   = $page + $half;
-
-        // Clamp window to valid range
-        if ($win_start < 1) {
-            $win_start = 1;
-            $win_end   = $max_visible;
-        }
-        if ($win_end > $total_pages) {
-            $win_end   = $total_pages;
-            $win_start = $total_pages - $max_visible + 1;
-        }
-
-        $show_left_dots  = ($win_start > 2);
-        $show_right_dots = ($win_end < $total_pages - 1);
-
-        // First page
-        if ($win_start > 1) {
-            if (1 == $page) {
-                $html .= '<span class="' . $active_cls . '" style="background:#42B549">1</span>';
-            } else {
-                $html .= '<a href="' . $base . 'page=1" class="' . $link_cls . '">1</a>';
-            }
-        }
-
-        // Left ellipsis
-        if ($show_left_dots) {
-            $html .= '<span class="' . $dots_cls . '">...</span>';
-        }
-
-        // Middle window
-        for ($i = $win_start; $i <= $win_end; $i++) {
-            if ($i == $page) {
-                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $i . '</span>';
-            } else {
-                $html .= '<a href="' . $base . 'page=' . $i . '" class="' . $link_cls . '">' . $i . '</a>';
-            }
-        }
-
-        // Right ellipsis
-        if ($show_right_dots) {
-            $html .= '<span class="' . $dots_cls . '">...</span>';
-        }
-
-        // Last page
-        if ($win_end < $total_pages) {
-            if ($total_pages == $page) {
-                $html .= '<span class="' . $active_cls . '" style="background:#42B549">' . $total_pages . '</span>';
-            } else {
-                $html .= '<a href="' . $base . 'page=' . $total_pages . '" class="' . $link_cls . '">' . $total_pages . '</a>';
-            }
-        }
-    }
-
-    // Next arrow — always rendered for consistent width
-    if ($page < $total_pages) {
-        $html .= '<a href="' . $base . 'page=' . ($page + 1) . '" class="' . $link_cls . '">&raquo;</a>';
-    } else {
-        $html .= '<span class="' . $disabled_cls . '">&raquo;</span>';
-    }
-
-    $html .= '</div>';
     $html .= '</div>';
 
     return $html;
