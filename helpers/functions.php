@@ -225,7 +225,9 @@ function pagination_render(array $paging): string
     $disabled_cls = 'px-3 py-2 rounded-lg text-sm font-medium text-gray-300 cursor-default';
     $dots_cls = 'px-2 py-2 text-gray-400 text-sm';
 
-    $html = '<div class="border-t border-gray-100 pt-4 pb-1 mt-auto"><div class="flex items-center justify-center gap-1">';
+    $html = '<div class="border-t border-gray-100 pt-4 pb-4 px-4 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">';
+    $html .= '<p class="text-xs text-gray-400 order-2 sm:order-1">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
+    $html .= '<div class="flex items-center justify-center gap-1 order-1 sm:order-2">';
 
     // Prev arrow — always rendered for consistent width
     if ($page > 1) {
@@ -313,7 +315,6 @@ function pagination_render(array $paging): string
     }
 
     $html .= '</div>';
-    $html .= '<p class="text-center text-xs text-gray-400 mt-2 pb-4">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
     $html .= '</div>';
 
     return $html;
