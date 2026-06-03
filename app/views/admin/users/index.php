@@ -106,6 +106,72 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
     </div>
 </div>
 
+<!-- Modal Detail User -->
+<div id="modal-detail" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('detail')"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
+        <div class="ds-modal-shell bg-white shadow-xl border border-gray-100 max-w-md pointer-events-auto modal-content" style="transform:scale(0.95);opacity:0;transition:transform 0.25s cubic-bezier(0.21,1.02,0.73,1),opacity 0.2s">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-2 h-6 rounded-full flex-shrink-0 bg-blue-500"></div>
+                    <h2 class="font-bold text-gray-800 truncate">Detail Pengguna</h2>
+                </div>
+                <button onclick="closeModal('detail')" class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 text-sm text-gray-700">
+                <div class="flex items-center gap-4 pb-4 border-b border-gray-100">
+                    <div id="detail-avatar" class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+                        U
+                    </div>
+                    <div>
+                        <h3 id="detail-name" class="font-bold text-gray-800 text-base leading-tight"></h3>
+                        <p id="detail-email" class="text-xs text-gray-500 mt-0.5"></p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">Role</span>
+                        <span id="detail-role" class="text-xs font-bold px-2.5 py-1 rounded-full"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">Status Keamanan</span>
+                        <span id="detail-status" class="text-xs font-bold"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">Total Transaksi</span>
+                        <span class="text-xs font-bold text-gray-800"><span id="detail-transaksi">0</span> transaksi</span>
+                    </div>
+                    <hr class="border-gray-100">
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">Tanggal Daftar</span>
+                        <span id="detail-registered" class="text-xs font-medium text-gray-600"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">IP Daftar</span>
+                        <span id="detail-register-ip" class="text-xs font-mono text-gray-600"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">Aktivitas Terakhir</span>
+                        <span id="detail-last-active" class="text-xs font-medium text-gray-600"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs font-semibold text-gray-400 uppercase">IP Terakhir</span>
+                        <span id="detail-last-ip" class="text-xs font-mono text-gray-600"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ds-modal-footer flex-shrink-0">
+                <button type="button" onclick="closeModal('detail')" class="w-full px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Bulk Delete Toast -->
 <div id="bulk-action-bar" class="ds-bulkbar-wrap hidden" style="opacity:0; transition:opacity 0.2s">
     <div class="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-2xl shadow-lg border border-gray-200 bg-white w-full sm:w-auto">
@@ -181,18 +247,25 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                         <span class="text-xs text-gray-400">Offline</span>
                     <?php endif; ?>
                 </td>
-                <td class="px-5 py-4">
-                    <div class="text-[11px] text-gray-500 space-y-0.5">
-                        <p>Daftar: <?= !empty($r['created_at']) ? date('d M Y H:i', strtotime($r['created_at'])) : '-' ?></p>
-                        <p>IP Daftar: <span class="font-mono"><?= e($r['register_ip'] ?? '-') ?></span></p>
-                        <p>IP Terakhir: <span class="font-mono"><?= e($r['last_ip'] ?? '-') ?></span></p>
-                    </div>
+                <td class="px-5 py-4 font-mono text-xs text-gray-500">
+                    <?= e($r['last_ip'] ?? '-') ?>
                 </td>
                 <td class="px-5 py-4">
                     <span class="text-sm font-semibold text-gray-700"><?= (int) $r['jumlah_transaksi'] ?></span>
                     <span class="text-xs text-gray-400 ml-1">transaksi</span>
                 </td>
                 <td class="px-5 py-4 text-center">
+                    <button onclick="openDetail(<?= htmlspecialchars(json_encode([
+                        'name' => $r['name'],
+                        'email' => $r['email'],
+                        'role' => $r['role'],
+                        'jumlah_transaksi' => (int)$r['jumlah_transaksi'],
+                        'created_at' => !empty($r['created_at']) ? date('d M Y H:i', strtotime($r['created_at'])) : '-',
+                        'register_ip' => $r['register_ip'] ?? '-',
+                        'last_active_at' => !empty($r['last_active_at']) ? date('d M Y H:i', strtotime($r['last_active_at'])) : '-',
+                        'last_ip' => $r['last_ip'] ?? '-',
+                        'is_online' => $isOnline
+                    ]), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">Detail</button>
                     <?php if($r['id'] != $this->auth->id()){ ?>
                         <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['email']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['role']), ENT_QUOTES) ?>)" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg mr-1 transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                         <form method="POST" class="inline" data-confirm="Hapus user ini?">
@@ -240,6 +313,17 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                 <span class="text-gray-500"><?= (int) $r['jumlah_transaksi'] ?> transaksi</span>
             </div>
             <div class="flex gap-2 pt-3 border-t border-gray-100">
+                <button onclick="openDetail(<?= htmlspecialchars(json_encode([
+                    'name' => $r['name'],
+                    'email' => $r['email'],
+                    'role' => $r['role'],
+                    'jumlah_transaksi' => (int)$r['jumlah_transaksi'],
+                    'created_at' => !empty($r['created_at']) ? date('d M Y H:i', strtotime($r['created_at'])) : '-',
+                    'register_ip' => $r['register_ip'] ?? '-',
+                    'last_active_at' => !empty($r['last_active_at']) ? date('d M Y H:i', strtotime($r['last_active_at'])) : '-',
+                    'last_ip' => $r['last_ip'] ?? '-',
+                    'is_online' => !empty($r['last_active_at']) && strtotime($r['last_active_at']) > (time() - 300)
+                ]), ENT_QUOTES) ?>)" class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">Detail</button>
                 <?php if($r['id'] != $this->auth->id()): ?>
                     <button onclick="openEdit(<?= $r['id'] ?>, <?= htmlspecialchars(json_encode($r['name']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['email']), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($r['role']), ENT_QUOTES) ?>)" class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg transition cursor-pointer" style="background:#FFF8E1; color:#F57F17">Edit</button>
                     <form method="POST" class="flex-1" data-confirm="Hapus user ini?">
@@ -288,10 +372,47 @@ function openEdit(id, nama, email, role) {
     document.getElementById('edit-title').textContent = nama;
     openModal('edit');
 }
+function openDetail(user) {
+    document.getElementById('detail-name').textContent = user.name;
+    document.getElementById('detail-email').textContent = user.email;
+    
+    var avatar = document.getElementById('detail-avatar');
+    avatar.textContent = user.name.charAt(0).toUpperCase();
+    avatar.style.background = user.role === 'admin' ? '#1565C0' : '#42B549';
+    
+    var roleBadge = document.getElementById('detail-role');
+    if (user.role === 'admin') {
+        roleBadge.textContent = 'ADMIN';
+        roleBadge.style.background = '#E3F2FD';
+        roleBadge.style.color = '#1565C0';
+    } else {
+        roleBadge.textContent = 'CUSTOMER';
+        roleBadge.style.background = '#E8F5E9';
+        roleBadge.style.color = '#2E7D32';
+    }
+    
+    var statusEl = document.getElementById('detail-status');
+    if (user.is_online) {
+        statusEl.className = 'inline-flex items-center gap-1 text-xs font-semibold text-green-700';
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>Online';
+    } else {
+        statusEl.className = 'text-xs text-gray-400';
+        statusEl.textContent = 'Offline';
+    }
+    
+    document.getElementById('detail-transaksi').textContent = user.jumlah_transaksi;
+    document.getElementById('detail-registered').textContent = user.created_at;
+    document.getElementById('detail-register-ip').textContent = user.register_ip;
+    document.getElementById('detail-last-active').textContent = user.last_active_at;
+    document.getElementById('detail-last-ip').textContent = user.last_ip;
+    
+    openModal('detail');
+}
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeModal('tambah');
         closeModal('edit');
+        closeModal('detail');
     }
 });
 
