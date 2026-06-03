@@ -209,8 +209,23 @@
     $base = '?' . (empty($query_params) ? '' : http_build_query($query_params) . '&');
     ?>
     <div class="border-t border-gray-100 px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto">
-        <div class="text-xs text-gray-500 dark:text-gray-400">
-            Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span>Menampilkan <?= $paging['offset'] + 1 ?>–<?= min($paging['offset'] + $paging['per_page'], $paging['total']) ?> dari <?= $paging['total'] ?> aktivitas</span>
+            <span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>
+            <div class="flex items-center gap-1.5">
+                <span>Tampilkan:</span>
+                <select onchange="location.href = this.value" class="px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300 outline-none cursor-pointer focus:ring-1 focus:ring-green-500">
+                    <?php foreach ([10, 50, 100] as $l): 
+                        $params = $_GET;
+                        $params['limit'] = $l;
+                        $params['page'] = 1; // reset page when changing limit
+                        $url = '?' . http_build_query($params);
+                        $isSelected = ($paging['per_page'] === $l) ? 'selected' : '';
+                    ?>
+                        <option value="<?= $url ?>" <?= $isSelected ?>><?= $l ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
         </div>
         <div class="flex items-center gap-4">
             <?php if ($page > 1): ?>

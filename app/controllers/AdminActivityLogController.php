@@ -45,7 +45,10 @@ class AdminActivityLogController extends BaseController
         $total_filtered = $this->activityModel->countAll($filters);
         
         $page = max(1, (int) ($_GET['page'] ?? 1));
-        $per_page = 10;
+        $per_page = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+        if (!in_array($per_page, [10, 50, 100])) {
+            $per_page = 10;
+        }
         $total_pages = max(1, (int) ceil($total_filtered / $per_page));
         $page = min($page, $total_pages);
         $offset = ($page - 1) * $per_page;

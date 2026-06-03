@@ -189,10 +189,16 @@ function format_tanggal(?string $date): string
 // PAGINATION
 // ============================================================
 
-function paginate(Database $db, string $count_sql, array $params = [], int $per_page = 12): array
+function paginate(Database $db, string $count_sql, array $params = [], int $default_per_page = 12): array
 {
     $row   = $db->fetchOne($count_sql, $params);
     $total = $row ? (int) reset($row) : 0;
+
+    // Check dynamic limit parameter
+    $per_page = isset($_GET['limit']) ? (int)$_GET['limit'] : $default_per_page;
+    if (!in_array($per_page, [10, 50, 100])) {
+        $per_page = $default_per_page;
+    }
 
     $page        = max(1, (int) ($_GET['page'] ?? 1));
     $total_pages = max(1, (int) ceil($total / $per_page));
@@ -211,7 +217,7 @@ function paginate(Database $db, string $count_sql, array $params = [], int $per_
 
 function pagination_render(array $paging): string
 {
-    if ($paging['total_pages'] <= 1) return '';
+    if ($paging['total_pages'] <= 1 && (!isset($_GET['limit']) || !in_array((int)$_GET['limit'], [10, 50, 100]))) return '';
 
     $page        = $paging['page'];
     $total_pages = $paging['total_pages'];
@@ -226,7 +232,30 @@ function pagination_render(array $paging): string
     $dots_cls = 'px-2 py-2 text-gray-400 text-sm';
 
     $html = '<div class="border-t border-gray-100 pt-4 pb-4 px-4 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">';
-    $html .= '<p class="text-xs text-gray-400 order-2 sm:order-1">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
+    
+    // Group pagination status and limit dropdown on the left
+    $html .= '<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 order-2 sm:order-1">';
+    $html .= '<p class="text-xs text-gray-400">Menampilkan ' . (($paging['offset']) + 1) . '-' . min($paging['offset'] + $paging['per_page'], $paging['total']) . ' dari ' . $paging['total'] . '</p>';
+    
+    // Render limit dropdown on admin pages only
+    if (strpos($_SERVER['REQUEST_URI'], '/admin-') !== false) {
+        $html .= '<span class="hidden sm:inline text-gray-300 dark:text-gray-700">|</span>';
+        $html .= '<div class="flex items-center gap-1.5">';
+        $html .= '<span class="text-xs text-gray-400">Tampilkan:</span>';
+        $html .= '<select onchange="location.href = this.value" class="px-2 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300 outline-none cursor-pointer focus:ring-1 focus:ring-green-500">';
+        foreach ([10, 50, 100] as $l) {
+            $params = $_GET;
+            $params['limit'] = $l;
+            $params['page'] = 1;
+            $url = '?' . http_build_query($params);
+            $isSelected = ($paging['per_page'] === $l) ? 'selected' : '';
+            $html .= '<option value="' . $url . '" ' . $isSelected . '>' . $l . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+    }
+    $html .= '</div>';
+    
     $html .= '<div class="flex items-center justify-center gap-1 order-1 sm:order-2">';
 
     // Prev arrow — always rendered for consistent width

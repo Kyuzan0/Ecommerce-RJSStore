@@ -35,7 +35,10 @@ class AdminTransaksiController extends BaseController
             $filter_status !== '' ? $filter_status : null
         );
 
-        $per_page = 10;
+        $per_page = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+        if (!in_array($per_page, [10, 50, 100])) {
+            $per_page = 10;
+        }
         $page = max(1, (int) ($_GET['page'] ?? 1));
         $total_pages = max(1, (int) ceil($total / $per_page));
         $page = min($page, $total_pages);

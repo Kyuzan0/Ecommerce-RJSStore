@@ -92,7 +92,10 @@ class AdminLaporanController extends BaseController
         }
 
         // 8. Transaction detail table with pagination
-        $perPage = 15;
+        $perPage = isset($_GET['limit']) ? (int)$_GET['limit'] : 15;
+        if (!in_array($perPage, [10, 50, 100])) {
+            $perPage = 15;
+        }
         $countSql = "SELECT COUNT(*) AS total FROM transaksi t JOIN users u ON t.user_id = u.id JOIN produk p ON t.produk_id = p.id WHERE 1=1";
         $countParams = [];
 
