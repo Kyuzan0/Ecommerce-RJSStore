@@ -99,11 +99,7 @@ class ActivityLog extends BaseModel
             $params[] = $filters['action'];
         }
 
-        // IP filter
-        if (!empty($filters['ip'])) {
-            $whereClause[] = "a.ip_address = ?";
-            $params[] = $filters['ip'];
-        }
+
 
         // Date filter
         if (!empty($filters['date'])) {
@@ -185,14 +181,7 @@ class ActivityLog extends BaseModel
         return array_column($rows, 'action');
     }
 
-    /**
-     * Get distinct client IP addresses for filtering.
-     */
-    public function getDistinctIps(): array
-    {
-        $rows = $this->db->fetchAll("SELECT DISTINCT ip_address FROM activity_log WHERE ip_address IS NOT NULL AND ip_address != '' ORDER BY ip_address ASC LIMIT 30");
-        return array_column($rows, 'ip_address');
-    }
+
 
     /**
      * Get dashboard summary stats for activity logs.

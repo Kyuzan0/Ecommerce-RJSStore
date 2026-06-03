@@ -1,8 +1,11 @@
-<!-- Page Header: Title, Stats, and Filters (All merged in 1 row, no cards) -->
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
-    <!-- Title & Simple Stats -->
+<style>
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+<!-- Page Header: Title & Simple Stats -->
+<div class="flex flex-row items-center justify-between gap-3 mb-5">
     <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex-shrink-0">Log Aktivitas</h1>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white flex-shrink-0">Log Aktivitas</h1>
         <div class="hidden sm:flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 border-l border-gray-200 dark:border-gray-700 pl-3">
             <span>Total Log: <strong class="text-gray-700 dark:text-gray-300"><?= number_format($summary_stats['total']) ?></strong></span>
             <span class="text-gray-350 dark:text-gray-700">•</span>
@@ -13,62 +16,130 @@
             <span>Failed: <strong class="text-rose-600 dark:text-rose-455"><?= number_format($summary_stats['failed_login']) ?></strong></span>
         </div>
     </div>
-    
-    <!-- Search & Advanced Filter Form (Borderless, flat, and 1 row) -->
-    <form method="GET" action="<?= url('/admin-activity-log') ?>" class="flex flex-row flex-wrap items-center gap-2 lg:justify-end w-full lg:w-auto">
-        <!-- Search Global -->
-        <div class="relative w-44 sm:w-56">
-            <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Cari user, IP, aksi..." class="w-full pl-8 pr-7 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition dark:text-gray-200">
-            <div class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+</div>
+
+<!-- Search & Advanced Filter Form (Borderless, transparent) -->
+<form method="GET" action="<?= url('/admin-activity-log') ?>" class="w-full mb-6">
+    <!-- Desktop Filters (lg and up) -->
+    <div class="hidden lg:flex flex-row items-end gap-3 w-full">
+        <!-- Search Global (Desktop) -->
+        <div class="relative flex-1 min-w-0 max-w-xs">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 truncate">
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Cari</span>
+            </label>
+            <div class="relative w-full">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <input type="text" name="search" value="<?= e($filters['search']) ?>" placeholder="Cari user, aksi, detail..." class="w-full pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition dark:text-gray-200">
+                <?php if ($filters['search'] !== ''): ?>
+                    <a href="<?= url('/admin-activity-log') . '?' . http_build_query(array_merge($filters, ['search' => ''])) ?>" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-650">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </a>
+                <?php endif; ?>
             </div>
-            <?php if ($filters['search'] !== ''): ?>
-                <a href="<?= url('/admin-activity-log') . '?' . http_build_query(array_merge($filters, ['search' => ''])) ?>" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-650">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </a>
-            <?php endif; ?>
         </div>
-        
-        <!-- Role -->
-        <select name="role" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-            <option value="">Role: Semua</option>
+
+        <!-- Role select -->
+        <div class="relative w-44 shrink-0">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 truncate">
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span>Role</span>
+            </label>
+            <select name="role" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 cursor-pointer transition">
+                <option value="">Role</option>
+                <option value="admin" <?= $filters['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
+                <option value="customer" <?= $filters['role'] === 'customer' ? 'selected' : '' ?>>Customer</option>
+                <option value="system" <?= $filters['role'] === 'system' ? 'selected' : '' ?>>System</option>
+            </select>
+        </div>
+
+        <!-- Aksi select -->
+        <div class="relative w-48 shrink-0">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 truncate">
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                <span>Aksi</span>
+            </label>
+            <select name="action" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 cursor-pointer transition">
+                <option value="">Aksi</option>
+                <?php foreach ($distinct_actions as $act): ?>
+                    <option value="<?= e($act) ?>" <?= $filters['action'] === $act ? 'selected' : '' ?>><?= e($act) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Tanggal select -->
+        <div class="relative w-44 shrink-0">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 truncate">
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Tanggal</span>
+            </label>
+            <select name="date" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 cursor-pointer transition">
+                <option value="">Tanggal</option>
+                <option value="today" <?= $filters['date'] === 'today' ? 'selected' : '' ?>>Hari Ini</option>
+                <option value="week" <?= $filters['date'] === 'week' ? 'selected' : '' ?>>7 Hari Terakhir</option>
+                <option value="month" <?= $filters['date'] === 'month' ? 'selected' : '' ?>>30 Hari Terakhir</option>
+            </select>
+        </div>
+
+        <!-- Reset Filter Button -->
+        <?php if (array_filter($filters) !== []): ?>
+            <div class="pb-2.5">
+                <a href="<?= url('/admin-activity-log') ?>" class="text-sm font-semibold text-red-500 hover:text-red-700 hover:underline">
+                    Reset
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Mobile Filters (below lg) - Single Scrollable Row -->
+    <div class="flex lg:hidden flex-row items-center gap-2 overflow-x-auto scrollbar-none w-full py-1 pr-4">
+        <!-- Search Trigger & Input Container -->
+        <div class="relative flex items-center shrink-0">
+            <button type="button" id="mobile-search-btn" class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 flex items-center justify-center shrink-0 shadow-sm focus:ring-1 focus:ring-green-500">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </button>
+            <div id="mobile-search-wrapper" class="<?= ($filters['search'] !== '') ? 'flex' : 'hidden' ?> absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 z-30 items-center border border-gray-250 dark:border-gray-650 rounded-xl pl-2.5 pr-1 py-1 w-48 shadow-lg">
+                <input type="text" name="search" id="mobile-search-input" value="<?= e($filters['search']) ?>" placeholder="Cari..." class="w-full bg-transparent text-xs outline-none text-gray-800 dark:text-gray-200 pl-1 pr-5">
+                <button type="button" id="mobile-search-close" class="absolute right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Role select -->
+        <select name="role" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300 outline-none cursor-pointer shrink-0 focus:ring-2 focus:ring-green-200 focus:border-green-400">
+            <option value="">Role</option>
             <option value="admin" <?= $filters['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
             <option value="customer" <?= $filters['role'] === 'customer' ? 'selected' : '' ?>>Customer</option>
             <option value="system" <?= $filters['role'] === 'system' ? 'selected' : '' ?>>System</option>
         </select>
-        
-        <!-- Aksi (Action) -->
-        <select name="action" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[120px]">
-            <option value="">Aksi: Semua</option>
+
+        <!-- Aksi select -->
+        <select name="action" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300 outline-none cursor-pointer shrink-0 max-w-[110px] focus:ring-2 focus:ring-green-200 focus:border-green-400">
+            <option value="">Aksi</option>
             <?php foreach ($distinct_actions as $act): ?>
                 <option value="<?= e($act) ?>" <?= $filters['action'] === $act ? 'selected' : '' ?>><?= e($act) ?></option>
             <?php endforeach; ?>
         </select>
-        
-        <!-- Tanggal (Date) -->
-        <select name="date" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
-            <option value="">Tanggal: Semua</option>
+
+        <!-- Tanggal select -->
+        <select name="date" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-[11px] font-semibold text-gray-700 dark:text-gray-300 outline-none cursor-pointer shrink-0 focus:ring-2 focus:ring-green-200 focus:border-green-400">
+            <option value="">Tanggal</option>
             <option value="today" <?= $filters['date'] === 'today' ? 'selected' : '' ?>>Hari Ini</option>
             <option value="week" <?= $filters['date'] === 'week' ? 'selected' : '' ?>>7 Hari Terakhir</option>
             <option value="month" <?= $filters['date'] === 'month' ? 'selected' : '' ?>>30 Hari Terakhir</option>
         </select>
-        
-        <!-- IP -->
-        <select name="ip" onchange="this.form.submit()" class="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer max-w-[120px]">
-            <option value="">IP: Semua</option>
-            <?php foreach ($distinct_ips as $ip_addr): ?>
-                <option value="<?= e($ip_addr) ?>" <?= $filters['ip'] === $ip_addr ? 'selected' : '' ?>><?= e($ip_addr) ?></option>
-            <?php endforeach; ?>
-        </select>
 
         <!-- Reset Filter Button -->
         <?php if (array_filter($filters) !== []): ?>
-            <a href="<?= url('/admin-activity-log') ?>" class="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline px-1">
+            <a href="<?= url('/admin-activity-log') ?>" class="text-[11px] font-bold text-red-500 hover:text-red-700 hover:underline px-1 shrink-0">
                 Reset
             </a>
         <?php endif; ?>
-    </form>
-</div>
+    </div>
+</form>
 
 <!-- Security Status Bar (Flat, borderless) -->
 <div class="mb-2 p-4 rounded-xl flex items-center justify-between gap-3 transition-colors <?php echo $summary_stats['failed_login'] > 0 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'; ?>">
@@ -347,4 +418,65 @@ document.addEventListener('keydown', function(e) {
         closeLogModal();
     }
 });
+
+// Mobile search expand & sync behavior
+(function() {
+    var mobileSearchBtn = document.getElementById('mobile-search-btn');
+    var mobileSearchWrapper = document.getElementById('mobile-search-wrapper');
+    var mobileSearchInput = document.getElementById('mobile-search-input');
+    var mobileSearchClose = document.getElementById('mobile-search-close');
+    var form = document.querySelector('form[action*="admin-activity-log"]');
+
+    if (mobileSearchBtn && mobileSearchWrapper && mobileSearchInput) {
+        mobileSearchBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileSearchWrapper.classList.remove('hidden');
+            mobileSearchWrapper.classList.add('flex');
+            mobileSearchInput.focus();
+        });
+        
+        mobileSearchClose.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileSearchInput.value = '';
+            mobileSearchWrapper.classList.remove('flex');
+            mobileSearchWrapper.classList.add('hidden');
+            
+            // Clear the search value immediately
+            var dInput = document.querySelector('input[name="search"]');
+            if (dInput) dInput.value = '';
+            mobileSearchInput.form.submit();
+        });
+        
+        mobileSearchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                mobileSearchInput.form.submit();
+            }
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!mobileSearchWrapper.contains(e.target) && e.target !== mobileSearchBtn) {
+                if (mobileSearchInput.value === '') {
+                    mobileSearchWrapper.classList.remove('flex');
+                    mobileSearchWrapper.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function() {
+            var isDesktop = window.innerWidth >= 1024;
+            var dInput = document.querySelector('input[name="search"]');
+            if (dInput && mobileSearchInput) {
+                if (isDesktop) {
+                    mobileSearchInput.disabled = true;
+                } else {
+                    dInput.disabled = true;
+                    mobileSearchInput.name = 'search'; // Send mobile search value as 'search' parameter
+                }
+            }
+        });
+    }
+})();
 </script>

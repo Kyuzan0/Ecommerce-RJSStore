@@ -21,7 +21,6 @@ class AdminActivityLogController extends BaseController
             'role'   => isset($_GET['role']) ? trim($_GET['role']) : '',
             'action' => isset($_GET['action']) ? trim($_GET['action']) : '',
             'date'   => isset($_GET['date']) ? trim($_GET['date']) : '',
-            'ip'     => isset($_GET['ip']) ? trim($_GET['ip']) : '',
         ];
 
         // Validate role filter
@@ -37,7 +36,6 @@ class AdminActivityLogController extends BaseController
         // 2. Fetch metadata & filter options
         $role_counts = $this->activityModel->getRoleCounts();
         $distinct_actions = $this->activityModel->getDistinctActions();
-        $distinct_ips = $this->activityModel->getDistinctIps();
         $summary_stats = $this->activityModel->getSummaryStats();
         $activity_trend = $this->activityModel->getActivityTrend();
 
@@ -75,7 +73,6 @@ class AdminActivityLogController extends BaseController
             'current_role'     => $filters['role'],
             'role_counts'      => $role_counts,
             'distinct_actions' => $distinct_actions,
-            'distinct_ips'     => $distinct_ips,
             'summary_stats'    => $summary_stats,
             'activity_trend'   => $activity_trend,
         ], 'admin');
