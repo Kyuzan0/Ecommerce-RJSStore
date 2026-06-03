@@ -221,7 +221,7 @@ $q_param = $search !== '' ? '&q=' . urlencode($search) : '';
                     <?php endif; ?>
                 </td>
                 <td class="px-5 py-3 text-center text-sm text-gray-500 font-medium"><?= $paging['offset'] + $i + 1 ?></td>
-                <td class="px-5 py-4">
+                <td class="px-5 py-3">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:<?= $r['role']=='admin' ? '#1565C0' : '#42B549' ?>">
                             <?= strtoupper(substr(e($r['name']),0,1)) ?>
