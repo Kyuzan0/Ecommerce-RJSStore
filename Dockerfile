@@ -5,7 +5,12 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     curl \
+    tzdata \
     && docker-php-ext-install pdo pdo_mysql mysqli
+
+# Set timezone
+ENV TZ=Asia/Jakarta
+RUN echo "date.timezone=Asia/Jakarta" > /usr/local/etc/php/conf.d/timezone.ini
 
 # Copy nginx config
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf

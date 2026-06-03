@@ -3,6 +3,8 @@
  * RJSStore MVC — Front Controller
  */
 
+date_default_timezone_set('Asia/Jakarta');
+
 // Define base path (project root)
 // __DIR__ always resolves to this file's physical directory (public/),
 // so dirname(__DIR__) is always the project root — even when loaded
