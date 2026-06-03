@@ -15,34 +15,64 @@ class AdminActivityLogController extends BaseController
 
     public function index()
     {
-        $current_role = isset($_GET['role']) ? trim($_GET['role']) : '';
-        if (!in_array($current_role, ['admin', 'customer', 'system'])) {
-            $current_role = '';
+        // 1. Gather filters
+        $filters = [
+            'search' => isset($_GET['search']) ? trim($_GET['search']) : '',
+            'role'   => isset($_GET['role']) ? trim($_GET['role']) : '',
+            'action' => isset($_GET['action']) ? trim($_GET['action']) : '',
+            'date'   => isset($_GET['date']) ? trim($_GET['date']) : '',
+            'ip'     => isset($_GET['ip']) ? trim($_GET['ip']) : '',
+        ];
+
+        // Validate role filter
+        if (!in_array($filters['role'], ['admin', 'customer', 'system'])) {
+            $filters['role'] = '';
+        }
+        
+        // Validate date filter
+        if (!in_array($filters['date'], ['today', 'week', 'month'])) {
+            $filters['date'] = '';
         }
 
-        // Get filter counts for UI
+        // 2. Fetch metadata & filter options
         $role_counts = $this->activityModel->getRoleCounts();
+        $distinct_actions = $this->activityModel->getDistinctActions();
+        $distinct_ips = $this->activityModel->getDistinctIps();
+        $summary_stats = $this->activityModel->getSummaryStats();
 
-        // Build query for pagination count
-        $countQuery = "SELECT COUNT(*) AS c FROM activity_log a";
-        $countParams = [];
-        if ($current_role === 'system') {
-            $countQuery .= " WHERE a.user_id = 0";
-        } elseif ($current_role !== '') {
-            $countQuery .= " JOIN users u ON a.user_id = u.id WHERE u.role = ?";
-            $countParams[] = $current_role;
-        }
+        // 3. Paginate
+        $total_filtered = $this->activityModel->countAll($filters);
+        
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $per_page = 30;
+        $total_pages = max(1, (int) ceil($total_filtered / $per_page));
+        $page = min($page, $total_pages);
+        $offset = ($page - 1) * $per_page;
 
-        $paging = paginate($this->db, $countQuery, $countParams, 30);
-        $logs = $this->activityModel->getRecent($paging['limit'], $paging['offset'], $current_role);
+        $paging = [
+            'page'        => $page,
+            'per_page'    => $per_page,
+            'total'       => $total_filtered,
+            'total_pages' => $total_pages,
+            'offset'      => $offset,
+            'limit'       => $per_page,
+        ];
 
+        // 4. Fetch records
+        $logs = $this->activityModel->getRecent($paging['limit'], $paging['offset'], $filters);
+
+        // 5. Render view
         $this->view('admin/activity_log/index', [
-            'logs'         => $logs,
-            'paging'       => $paging,
-            'active_page'  => 'activity_log',
-            'page_title'   => 'Activity Log',
-            'current_role' => $current_role,
-            'role_counts'  => $role_counts,
+            'logs'             => $logs,
+            'paging'           => $paging,
+            'active_page'      => 'activity_log',
+            'page_title'       => 'Activity Log',
+            'filters'          => $filters,
+            'current_role'     => $filters['role'],
+            'role_counts'      => $role_counts,
+            'distinct_actions' => $distinct_actions,
+            'distinct_ips'     => $distinct_ips,
+            'summary_stats'    => $summary_stats,
         ], 'admin');
     }
 }
